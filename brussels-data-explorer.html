@@ -501,6 +501,47 @@
     font-weight: 600;
   }
 
+  /* LAYER OPACITY CONTROL */
+  .layer-opacity-control {
+    position: absolute;
+    top: 58px;
+    left: 12px;
+    z-index: 1000;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: var(--mono);
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-dim);
+  }
+  .layer-opacity-control label { display: block; margin-bottom: 4px; }
+  .layer-opacity-control input[type=range] {
+    width: 140px;
+    display: block;
+    accent-color: var(--accent2);
+  }
+
+  /* RESET BUTTON (what-if sliders) */
+  .reset-btn {
+    margin-top: 10px;
+    width: 100%;
+    padding: 6px 10px;
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid var(--accent2);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .reset-btn:hover { background: rgba(74,157,232,0.15); }
+
   .lang-btn {
     margin-left: 12px;
     font-family: var(--mono);
@@ -576,7 +617,7 @@
 
 <header>
   <div class="logo">BXL<span>·</span>DataMap <span>/ Sociaal-economische Analyse</span></div>
-  <div class="header-info" id="header-info">59 wijken · 39 indicatoren · Brussel</div>
+  <div class="header-info" id="header-info">19 gemeenten · 9 indicatoren · Brussel</div>
   <a class="lang-btn" href="brussels-data-explorer-en.html">EN</a>
 </header>
 
@@ -585,11 +626,11 @@
   <div class="year-section">
     <div class="section-label">Tijdreeks</div>
     <div class="year-row">
-      <div class="year-display" id="year-display">2023</div>
+      <div class="year-display" id="year-display">2024</div>
       <div class="year-slider-wrap">
-        <input type="range" id="year-slider" min="2005" max="2025" value="2023" step="1"
+        <input type="range" id="year-slider" min="2000" max="2024" value="2024" step="1"
           oninput="onYearChange(parseInt(this.value))">
-        <div class="year-range"><span>2005</span><span>2025</span></div>
+        <div class="year-range"><span>2000</span><span>2024</span></div>
       </div>
       <button class="play-btn" id="play-btn" onclick="togglePlay()" title="Afspelen">&#9654;</button>
     </div>
@@ -600,11 +641,11 @@
   </div>
   <div class="panel-section">
     <div class="section-label">Onafhankelijke variabelen <span style="color:var(--accent2)">&#9679;</span></div>
-    <div class="section-label" style="margin-bottom:6px;font-size:8px">Klik op kaart om wijk te selecteren, sleep slider om impact te zien</div>
+    <div class="section-label" style="margin-bottom:6px;font-size:8px">Klik op kaart om gemeente te selecteren, sleep slider om impact te zien</div>
     <div id="ind-vars"></div>
   </div>
   <div class="slider-wrap" id="slider-panel">
-    <div class="no-selection">Klik op een wijk op de kaart</div>
+    <div class="no-selection">Klik op een gemeente op de kaart</div>
   </div>
 </div>
 
@@ -614,6 +655,11 @@
     <button class="basemap-btn active" onclick="setBasemap('satellite')">Satelliet</button>
     <button class="basemap-btn" onclick="setBasemap('heatisland')">Hitte-eiland</button>
     <button class="basemap-btn" onclick="setBasemap('dark')">Donker</button>
+  </div>
+  <div class="layer-opacity-control" id="layer-opacity-control">
+    <label for="layer-opacity">Transparantie gemeenten</label>
+    <input type="range" id="layer-opacity" min="0" max="100" value="100"
+           oninput="onLayerOpacityChange(this.value)">
   </div>
 </div>
 
@@ -643,7 +689,7 @@
     <div class="scatter-label" id="scatter-label"></div>
   </div>
   <div class="stats-bar" id="stats-bar">
-    <div class="stats-row"><span>n wijken</span><span id="st-n">—</span></div>
+    <div class="stats-row"><span>n gemeenten</span><span id="st-n">—</span></div>
     <div class="stats-row"><span>Model</span><span id="st-model">Lineair</span></div>
     <div class="stats-row"><span>R²</span><span id="st-r2">—</span></div>
     <div class="stats-row"><span>RMSE</span><span id="st-rmse">—</span></div>
@@ -663,18 +709,19 @@ function toggleRightPanel() {
 }
 
 let GEOJSON = null;
-let DATA = null;      // { neighborhoods, metadata, allYears }
-let DISTRICTS = [];   // rebuilt per year: [{ lau2, naam, ...indicators }]
+let DATA = null;      // { communes, metadata, allYears }
+let DISTRICTS = [];   // rebuilt per year: [{ niscode, naam, ...indicators }]
 
 const VARIABELEN = {};
 
-let currentYear = 2023;
-let depVar = "werkloosheidsgraad";
-let indVars = ["mediaan_inkomen", "ocmw_aandeel", "tegemoetkoming"];
+let currentYear = 2024;
+let depVar = "internal_balance_num";
+let indVars = ["internal_in_num", "internal_out_num", "international_balance_num"];
 let selectedDistrict = null;
 let dataOverrides = {};
+let layerOpacityFactor = 1.0;
 let map, geojsonLayer;
-let layerByLau2 = {};
+let layerByNiscode = {};
 let playInterval = null;
 let currentBasemap = 'satellite';
 let basemapLayer = null;
@@ -682,31 +729,19 @@ let heatIslandLayer = null;
 let modelType = 'linear';
 let currentTree = null;
 
-const reversedVars = ["werkloosheidsgraad", "ocmw_aandeel", "ondoordringbaar", "pm25", "no2",
-                      "tegemoetkoming", "geluid_ln", "geluid_lden", "bevolkdicht"];
+const reversedVars = [];
 
 const VAR_GROUPS = [
-  { id: 'bevolking', label: 'Bevolking', vars: [
-      'totale_bevolking','bevolkdicht','oppervlakte','aantal_mannen','aantal_vrouwen',
-      'geslachtsverhouding','aandeel_65_79','aandeel_80plus','senioriteitscoeff',
-      'alleenwonenden_65plus','aandeel_fransen','aandeel_eu14','aandeel_nieuwe_eu',
-      'aandeel_turken','aandeel_latijns_amerika','aandeel_noord_afrika',
-      'aandeel_sub_sahara','totaal_vreemdelingen','gemeentelijke_verkozenen'
+  { id: 'population',    label: 'Bevolking',              vars: ['total_population'] },
+  { id: 'internal',      label: 'Interne migratie',       vars: [
+      'internal_in_num','internal_in_pct',
+      'internal_out_num','internal_out_pct',
+      'internal_balance_num','internal_balance_pct'
   ]},
-  { id: 'milieu', label: 'Milieu', vars: [
-      'ondoordringbaar','groene_nabijheid','vegetatiegraad','bedekkingsgraad_veg',
-      'pm25','no2','geluid_lden','geluid_ln'
-  ]},
-  { id: 'sociaal_eco', label: 'Sociaal-economisch', vars: [
-      'ocmw_aandeel','sociale_woningen','tegemoetkoming','mediaan_inkomen',
-      'mediaan_app_prijs','werkloosheidsgraad','aantal_verkopen_app'
-  ]},
-  { id: 'kwetsbaarheid', label: 'Hittekwetsbaarheid', vars: [
-      'kwetsbaarheid_totaal','kwetsbaarheid_sociaal_eco','kwetsbaarheid_demografisch',
-      'kwetsbaarheid_milieu','kwetsbaarheid_wonen'
+  { id: 'international', label: 'Internationale migratie', vars: [
+      'international_balance_num','international_balance_pct'
   ]},
 ];
-const heatVulnVars = new Set(VAR_GROUPS.find(g => g.id === 'kwetsbaarheid').vars);
 
 // =====================================================================
 // FORMAT
@@ -715,14 +750,10 @@ function formatValue(key, val) {
   if (val === null || val === undefined) return "n.b.";
   const v = VARIABELEN[key];
   if (!v) return String(val);
-  if (v.unit === "€") return "€" + Math.round(val).toLocaleString("nl-BE");
-  if (v.unit === "%" || v.unit === "/100 huish.") return val.toFixed(1) + (v.unit === "%" ? "%" : " " + v.unit);
-  if (v.unit === "inw/km²") return Math.round(val).toLocaleString("nl-BE") + " inw/km²";
+  // Migration percent values are stored as decimal fractions (0.0626 = 6.26%)
+  if (v.unit === "%") return (val * 100).toFixed(2) + "%";
   if (v.unit === "inwoners") return Math.round(val).toLocaleString("nl-BE");
-  if (v.unit === "µg/m³") return val.toFixed(1) + " µg/m³";
-  if (v.unit === "dB(A)") return val.toFixed(1) + " dB(A)";
-  if (v.unit === "personen" || v.unit === "aantal") return Math.round(val).toLocaleString("nl-BE");
-  if (v.unit === "km²") return (Math.round(val * 100) / 100).toLocaleString("nl-BE") + " km²";
+  if (v.unit === "personen") return Math.round(val).toLocaleString("nl-BE");
   return String(Math.round(val * 10) / 10);
 }
 
@@ -731,17 +762,14 @@ function formatValue(key, val) {
 // =====================================================================
 function rebuildDistrictsForYear(year) {
   DISTRICTS = [];
-  for (const [lau2Str, nb] of Object.entries(DATA.neighborhoods)) {
-    const lau2 = parseInt(lau2Str, 10);
-    const entry = { lau2, naam: nb.name };
+  for (const [niscode, c] of Object.entries(DATA.communes)) {
+    const entry = { niscode, naam: c.name };
 
     for (const key of Object.keys(VARIABELEN)) {
-      const ts = nb.timeseries[key] || {};
-      // Use exact year, or fall back to nearest available year
+      const ts = c.timeseries[key] || {};
       if (ts[year] !== undefined) {
         entry[key] = ts[year];
       } else {
-        // Find closest year with data
         const availableYears = Object.keys(ts).map(Number).sort((a,b) => Math.abs(a - year) - Math.abs(b - year));
         if (availableYears.length > 0) {
           entry[key] = ts[availableYears[0]];
@@ -779,7 +807,7 @@ function linearRegCoeffs(xs, ys) {
 }
 
 function getDistrictData(d) {
-  const overrides = dataOverrides[d.lau2] || {};
+  const overrides = dataOverrides[d.niscode] || {};
   return { ...d, ...overrides };
 }
 
@@ -1081,7 +1109,7 @@ function setBasemap(name) {
 }
 
 function initMap() {
-  map = L.map('map', { center: [50.845, 4.365], zoom: 13 });
+  map = L.map('map', { center: [50.845, 4.365], zoom: 12 });
   basemapLayer = BASEMAPS.satellite();
   basemapLayer.addTo(map);
 
@@ -1091,23 +1119,23 @@ function initMap() {
   geojsonLayer = L.geoJSON(GEOJSON, {
     style: feature => styleFeature(feature, min, max, reversed),
     onEachFeature: (feature, layer) => {
-      const lau2 = feature.properties.lau2;
-      layerByLau2[lau2] = layer;
+      const niscode = feature.properties.niscode;
+      layerByNiscode[niscode] = layer;
       updateTooltip(layer, feature);
 
       layer.on('mouseover', e => {
-        if (feature.properties.hasData) e.target.setStyle({ weight: 2.5, fillOpacity: 0.65 });
+        if (feature.properties.hasData) e.target.setStyle({ weight: 2.5, fillOpacity: 0.65 * layerOpacityFactor });
       });
       layer.on('mouseout', e => {
-        if (!selectedDistrict || selectedDistrict !== lau2) {
+        if (!selectedDistrict || selectedDistrict !== niscode) {
           const { min, max } = getDepRange();
           const rev = reversedVars.includes(depVar);
           e.target.setStyle(styleFeature(feature, min, max, rev));
-          if (selectedDistrict && layerByLau2[selectedDistrict])
-            layerByLau2[selectedDistrict].setStyle({ weight: 3, fillOpacity: 0.7, color: '#e8c84a' });
+          if (selectedDistrict && layerByNiscode[selectedDistrict])
+            layerByNiscode[selectedDistrict].setStyle({ weight: 3, fillOpacity: 0.7 * layerOpacityFactor, color: '#e8c84a' });
         }
       });
-      layer.on('click', () => { if (feature.properties.hasData) selectDistrict(lau2); });
+      layer.on('click', () => { if (feature.properties.hasData) selectDistrict(niscode); });
     }
   }).addTo(map);
 
@@ -1116,33 +1144,33 @@ function initMap() {
 
 function styleFeature(feature, min, max, reversed) {
   if (!feature.properties.hasData) {
-    return { fillColor: '#1a1b26', fillOpacity: 0.15, color: 'rgba(255,255,255,0.2)', weight: 0.5, opacity: 0.4 };
+    return { fillColor: '#1a1b26', fillOpacity: 0.15 * layerOpacityFactor, color: 'rgba(255,255,255,0.2)', weight: 0.5, opacity: 0.4 };
   }
-  const district = findDistrict(feature.properties.lau2);
+  const district = findDistrict(feature.properties.niscode);
   const val = district ? getDistrictData(district)[depVar] : null;
-  if (val == null) return { fillColor: '#1a1b26', fillOpacity: 0.15, color: 'rgba(255,255,255,0.2)', weight: 0.5, opacity: 0.4 };
-  const fo = heatVulnVars.has(depVar) ? 0.35 : 0.5;
+  if (val == null) return { fillColor: '#1a1b26', fillOpacity: 0.15 * layerOpacityFactor, color: 'rgba(255,255,255,0.2)', weight: 0.5, opacity: 0.4 };
+  const fo = 0.5 * layerOpacityFactor;
   return { fillColor: colorScale(val, min, max, reversed, depVar), fillOpacity: fo, color: 'rgba(255,255,255,0.4)', weight: 1.2, opacity: 0.8 };
 }
 
 function updateTooltip(layer, feature) {
   const v = VARIABELEN[depVar];
   if (feature.properties.hasData) {
-    const district = findDistrict(feature.properties.lau2);
+    const district = findDistrict(feature.properties.niscode);
     const val = district ? getDistrictData(district)[depVar] : null;
     layer.bindTooltip(
-      `<div class="custom-tooltip"><strong>${feature.properties.naam || feature.properties.nameNl}</strong><br>${v.label}: ${val != null ? formatValue(depVar, val) : 'n.b.'}<br><span style="color:#6b7194">${currentYear}</span></div>`,
+      `<div class="custom-tooltip"><strong>${feature.properties.naam || feature.properties.nameDut}</strong><br>${v.label}: ${val != null ? formatValue(depVar, val) : 'n.b.'}<br><span style="color:#6b7194">${currentYear}</span></div>`,
       { sticky: true, opacity: 0.95 }
     );
   } else {
     layer.bindTooltip(
-      `<div class="custom-tooltip"><strong>${feature.properties.nameNl || feature.properties.nameFr}</strong><br><span style="color:#6b7194">Geen data</span></div>`,
+      `<div class="custom-tooltip"><strong>${feature.properties.nameDut || feature.properties.nameFr}</strong><br><span style="color:#6b7194">Geen data</span></div>`,
       { sticky: true, opacity: 0.95 }
     );
   }
 }
 
-function findDistrict(lau2) { return DISTRICTS.find(d => d.lau2 === lau2); }
+function findDistrict(niscode) { return DISTRICTS.find(d => d.niscode === niscode); }
 
 function updateMapColors() {
   const { min, max } = getDepRange();
@@ -1151,19 +1179,19 @@ function updateMapColors() {
   geojsonLayer.eachLayer(layer => {
     const props = layer.feature.properties;
     if (!props.hasData) return;
-    const district = findDistrict(props.lau2);
+    const district = findDistrict(props.niscode);
     const val = district ? getDistrictData(district)[depVar] : null;
     if (val == null) {
-      layer.setStyle({ fillColor: '#1a1b26', fillOpacity: 0.25 });
+      layer.setStyle({ fillColor: '#1a1b26', fillOpacity: 0.25 * layerOpacityFactor });
     } else {
-      const fo = heatVulnVars.has(depVar) ? 0.45 : 0.75;
+      const fo = 0.75 * layerOpacityFactor;
       layer.setStyle({ fillColor: colorScale(val, min, max, reversed, depVar), fillOpacity: fo, color: '#2a2d3e', weight: 1 });
     }
     updateTooltip(layer, layer.feature);
   });
 
-  if (selectedDistrict && layerByLau2[selectedDistrict])
-    layerByLau2[selectedDistrict].setStyle({ weight: 3, fillOpacity: 0.7, color: '#e8c84a' });
+  if (selectedDistrict && layerByNiscode[selectedDistrict])
+    layerByNiscode[selectedDistrict].setStyle({ weight: 3, fillOpacity: 0.7 * layerOpacityFactor, color: '#e8c84a' });
 
   updateLegend();
 }
@@ -1203,7 +1231,7 @@ function onYearChange(year) {
   updateCorrelation();
   updateSliderPanel();
   document.getElementById('st-year').textContent = year;
-  document.getElementById('header-info').textContent = `59 wijken · 39 indicatoren · ${year}`;
+  document.getElementById('header-info').textContent = `19 gemeenten · 9 indicatoren · ${year}`;
 }
 
 function togglePlay() {
@@ -1256,7 +1284,7 @@ function buildGroupedVarButtons(containerEl, mode) {
     groupEl.dataset.groupId = group.id;
 
     const header = document.createElement('div');
-    header.className = 'var-group-header' + (group.id === 'kwetsbaarheid' ? ' heat' : '');
+    header.className = 'var-group-header';
     header.innerHTML = `<span>${group.label}</span><span class="arrow">▼</span>`;
     header.onclick = () => groupEl.classList.toggle('collapsed');
 
@@ -1316,11 +1344,11 @@ function buildVarButtons() {
 // =====================================================================
 // SELECT DISTRICT
 // =====================================================================
-function selectDistrict(lau2) {
-  selectedDistrict = lau2;
+function selectDistrict(niscode) {
+  selectedDistrict = niscode;
   updateMapColors();
-  if (layerByLau2[lau2]) {
-    layerByLau2[lau2].bringToFront();
+  if (layerByNiscode[niscode]) {
+    layerByNiscode[niscode].bringToFront();
   }
   updateSliderPanel();
 }
@@ -1328,7 +1356,7 @@ function selectDistrict(lau2) {
 function updateSliderPanel() {
   const panel = document.getElementById('slider-panel');
   if (!selectedDistrict) {
-    panel.innerHTML = '<div class="no-selection">Klik op een wijk op de kaart</div>';
+    panel.innerHTML = '<div class="no-selection">Klik op een gemeente op de kaart</div>';
     return;
   }
 
@@ -1337,7 +1365,7 @@ function updateSliderPanel() {
   const data = getDistrictData(district);
 
   let html = `<div class="selected-wijk">${district.naam}</div>`;
-  html += `<div class="selected-gemeente">Code: ${district.lau2} · Jaar: ${currentYear}</div>`;
+  html += `<div class="selected-gemeente">Code: ${district.niscode} · Jaar: ${currentYear}</div>`;
 
   indVars.forEach(iv => {
     if (iv === depVar) return;
@@ -1355,7 +1383,7 @@ function updateSliderPanel() {
         </div>
         <input type="range" min="${v.min}" max="${v.max}" step="${v.step}"
           value="${currentVal}"
-          oninput="onSlider(${district.lau2},'${iv}',this.value)">
+          oninput="onSlider('${district.niscode}','${iv}',this.value)">
       </div>`;
   });
 
@@ -1377,21 +1405,39 @@ function updateSliderPanel() {
     html += `<div class="no-data-hint">Geen data beschikbaar voor ${depV.label} in ${currentYear}</div>`;
   }
 
+  const hasOverrides = dataOverrides[selectedDistrict] && Object.keys(dataOverrides[selectedDistrict]).length > 0;
+  if (hasOverrides) {
+    html += `<button class="reset-btn" onclick="resetOverrides()">↺ Reset naar werkelijke waarden</button>`;
+  }
+
   panel.innerHTML = html;
 }
 
-function onSlider(lau2, varKey, rawVal) {
+function resetOverrides() {
+  if (selectedDistrict == null) return;
+  delete dataOverrides[selectedDistrict];
+  updateSliderPanel();
+  updateMapColors();
+  updateScatter();
+}
+
+function onLayerOpacityChange(v) {
+  layerOpacityFactor = parseFloat(v) / 100;
+  updateMapColors();
+}
+
+function onSlider(niscode, varKey, rawVal) {
   const val = parseFloat(rawVal);
-  if (!dataOverrides[lau2]) dataOverrides[lau2] = {};
-  dataOverrides[lau2][varKey] = val;
+  if (!dataOverrides[niscode]) dataOverrides[niscode] = {};
+  dataOverrides[niscode][varKey] = val;
   const el = document.getElementById(`sv-${varKey}`);
   if (el) el.textContent = formatValue(varKey, val);
 
   // Update the predicted dep var value in overrides so the map color reflects it
-  const district = findDistrict(lau2);
+  const district = findDistrict(niscode);
   if (district) {
     const predicted = predictValue(district, depVar, indVars);
-    dataOverrides[lau2][depVar] = predicted;
+    dataOverrides[niscode][depVar] = predicted;
   }
 
   updateSliderPanel();
@@ -1444,7 +1490,7 @@ function updateCorrelation() {
 
     // Compute model predictions for each data point
     const predictions = validData.map(d => {
-      const fakeDist = { lau2: d.lau2, naam: '', ...d };
+      const fakeDist = { niscode: d.niscode, naam: '', ...d };
       switch (modelType) {
         case 'polynomial': return multiPolyPredict(fakeDist, depVar, indVars);
         case 'tree': return currentTree ? treePredictSingle(currentTree, d) : d[depVar];
@@ -1493,7 +1539,7 @@ function updateScatter() {
   if (!xVar || !yVar) return;
 
   const allData = DISTRICTS.map(d => getDistrictData(d));
-  const pairs = allData.map(d => ({ x: d[xVar], y: d[yVar], lau2: d.lau2, naam: d.naam || '' })).filter(p => p.x != null && p.y != null);
+  const pairs = allData.map(d => ({ x: d[xVar], y: d[yVar], niscode: d.niscode, naam: d.naam || '' })).filter(p => p.x != null && p.y != null);
   if (pairs.length < 3) return;
 
   const xs = pairs.map(p => p.x), ys = pairs.map(p => p.y);
@@ -1576,7 +1622,7 @@ function updateScatter() {
 
   // Dots
   pairs.forEach(p => {
-    const sel = selectedDistrict && p.lau2 === selectedDistrict;
+    const sel = selectedDistrict && p.niscode === selectedDistrict;
     ctx.beginPath();
     ctx.arc(px(p.x), py(p.y), sel ? 5 : 3, 0, Math.PI*2);
     ctx.fillStyle = sel ? '#e8c84a' : 'rgba(74,157,232,0.65)';
@@ -1682,7 +1728,7 @@ async function loadData() {
   buildVarButtons();
   updateCorrelation();
   document.getElementById('st-year').textContent = currentYear;
-  document.getElementById('header-info').textContent = `59 wijken · ${varKeys.length} indicatoren · ${currentYear}`;
+  document.getElementById('header-info').textContent = `19 gemeenten · ${varKeys.length} indicatoren · ${currentYear}`;
 }
 
 loadData().catch(err => {
