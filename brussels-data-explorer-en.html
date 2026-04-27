@@ -617,7 +617,7 @@
 
 <header>
   <div class="logo">BXL<span>·</span>DataMap <span>/ Socio-economic Analysis</span></div>
-  <div class="header-info" id="header-info">19 communes · 9 indicators · Brussels</div>
+  <div class="header-info" id="header-info">19 communes · 24 indicators · Brussels</div>
   <a class="lang-btn" href="brussels-data-explorer.html">NL</a>
 </header>
 
@@ -742,6 +742,13 @@ const VAR_GROUPS = [
   ]},
   { id: 'international', label: 'International migration', vars: [
       'international_balance_num','international_balance_pct'
+  ]},
+  { id: 'age', label: 'Age distribution', vars: [
+      'age_pct_0_17','age_count_0_17',
+      'age_pct_under3','age_pct_3_5','age_pct_6_11',
+      'age_count_12_17','age_pct_18_24',
+      'age_pct_18_64','age_count_18_64','age_pct_30_44','age_pct_45_64',
+      'age_pct_65plus','age_pct_65_79','age_pct_80plus','age_count_65plus'
   ]},
 ];
 
@@ -1228,7 +1235,7 @@ function onYearChange(year) {
   updateCorrelation();
   updateSliderPanel();
   document.getElementById('st-year').textContent = year;
-  document.getElementById('header-info').textContent = `19 communes · 9 indicators · ${year}`;
+  document.getElementById('header-info').textContent = `19 communes · ${Object.keys(VARIABELEN).length} indicators · ${year}`;
 }
 
 function togglePlay() {

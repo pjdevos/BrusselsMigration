@@ -285,9 +285,172 @@ function mergeData(geojson, data) {
 }
 
 // =====================================================================
+// 3. Excel (age distribution.xlsx) → age time series per commune
+// =====================================================================
+
+const AGE_BANDS = [
+  { start: 2,   key: 'age_pct_65plus',    label: 'Aandeel 65+',               labelEn: 'Share 65+',       unit: '%',        div100: true,  yearRow: 2 },
+  { start: 28,  key: 'age_pct_under3',    label: 'Aandeel jonger dan 3 jaar',  labelEn: 'Share under 3',   unit: '%',        div100: true,  yearRow: 2 },
+  { start: 54,  key: 'age_pct_0_17',      label: 'Aandeel 0-17 jarigen',       labelEn: 'Share 0-17',      unit: '%',        div100: true,  yearRow: 2 },
+  { start: 80,  key: 'age_count_12_17',   label: 'Aantal 12-17 jarigen',       labelEn: 'Number 12-17',    unit: 'personen', div100: false, yearRow: 2 },
+  { start: 106, key: 'age_pct_18_24',     label: 'Aandeel 18-24 jarigen',      labelEn: 'Share 18-24',     unit: '%',        div100: true,  yearRow: 2 },
+  // col 132 skipped: source data contains non-age values despite label
+  { start: 158, key: 'age_pct_18_64',     label: 'Aandeel 18-64 jarigen',      labelEn: 'Share 18-64',     unit: '%',        div100: true,  yearRow: 2 },
+  { start: 184, key: 'age_pct_30_44',     label: 'Aandeel 30-44 jarigen',      labelEn: 'Share 30-44',     unit: '%',        div100: true,  yearRow: 2 },
+  { start: 210, key: 'age_pct_3_5',       label: 'Aandeel 3-5 jarigen',        labelEn: 'Share 3-5',       unit: '%',        div100: true,  yearRow: 2 },
+  { start: 236, key: 'age_pct_45_64',     label: 'Aandeel 45-64 jarigen',      labelEn: 'Share 45-64',     unit: '%',        div100: true,  yearRow: 2 },
+  { start: 262, key: 'age_pct_6_11',      label: 'Aandeel 6-11 jarigen',       labelEn: 'Share 6-11',      unit: '%',        div100: true,  yearRow: 2 },
+  { start: 288, key: 'age_pct_65_79',     label: 'Aandeel 65-79 jarigen',      labelEn: 'Share 65-79',     unit: '%',        div100: true,  yearRow: 2 },
+  { start: 314, key: 'age_pct_80plus',    label: 'Aandeel 80 jaar en ouder',   labelEn: 'Share 80+',       unit: '%',        div100: true,  yearRow: 2 },
+  { start: 340, key: 'age_count_0_17',    label: 'Aantal 0-17 jarigen',        labelEn: 'Number 0-17',     unit: 'personen', div100: false, yearRow: 1 },
+  { start: 366, key: 'age_count_18_64',   label: 'Aantal 18-64 jarigen',       labelEn: 'Number 18-64',    unit: 'personen', div100: false, yearRow: 1 },
+  { start: 392, key: 'age_count_65plus',  label: 'Aantal 65 jaar en ouder',    labelEn: 'Number 65+',      unit: 'personen', div100: false, yearRow: 1 },
+];
+
+function convertAgeExcel() {
+  console.log("\nParsing age distribution.xlsx...");
+  const xlsxFile = join(ROOT, "age distribution.xlsx");
+  const wb = XLSX.readFile(xlsxFile);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  function cell(r, c) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    const cl = ws[addr];
+    return cl ? cl.v : null;
+  }
+
+  // Build colMap from band definitions (26 years: 2000–2025)
+  const colMap = [];
+  for (const band of AGE_BANDS) {
+    for (let i = 0; i < 26; i++) {
+      const col = band.start + i;
+      const year = cell(band.yearRow, col);
+      if (typeof year !== 'number') continue;
+      colMap.push({ col, key: band.key, year, div100: band.div100 });
+    }
+  }
+  console.log(`  ${colMap.length} (col, key, year) entries`);
+
+  const communes = {};
+
+  // Commune rows start at 7; skip header rows (rows 0-6)
+  for (let r = 7; r <= 25; r++) {
+    const rawCode = cell(r, 0);
+    if (rawCode === null || rawCode === undefined) continue;
+    const niscode = String(rawCode).trim().padStart(5, '0');
+    if (!/^\d{5}$/.test(niscode)) continue;
+    if (!niscode.startsWith('21')) continue;
+
+    const timeseries = {};
+    const latest = {};
+    for (const band of AGE_BANDS) timeseries[band.key] = {};
+
+    for (const { col, key, year, div100 } of colMap) {
+      const raw = cell(r, col);
+      if (raw === null || raw === undefined) continue;
+      const val = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(',', '.'));
+      if (isNaN(val)) continue;
+      timeseries[key][year] = div100 ? Math.round(val / 100 * 1e6) / 1e6 : val;
+    }
+
+    for (const band of AGE_BANDS) {
+      const sortedYears = Object.keys(timeseries[band.key]).map(Number).sort((a, b) => b - a);
+      if (sortedYears.length > 0) {
+        latest[band.key] = timeseries[band.key][sortedYears[0]];
+      }
+    }
+
+    communes[niscode] = { timeseries, latest };
+  }
+
+  console.log(`  Read ${Object.keys(communes).length} communes`);
+
+  // Metadata: min/max/step per indicator
+  const metadata = {};
+  const allYearsSet = new Set();
+
+  for (const band of AGE_BANDS) {
+    const allValues = [];
+    const yearsWithData = new Set();
+
+    for (const c of Object.values(communes)) {
+      const ts = c.timeseries[band.key] || {};
+      for (const [yr, val] of Object.entries(ts)) {
+        allValues.push(val);
+        yearsWithData.add(Number(yr));
+        allYearsSet.add(Number(yr));
+      }
+    }
+
+    if (allValues.length === 0) continue;
+
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    const range_ = max - min;
+    let step;
+    if (range_ > 10000) step = 100;
+    else if (range_ > 1000) step = 50;
+    else if (range_ > 100) step = 5;
+    else if (range_ > 10) step = 0.5;
+    else if (range_ > 1) step = 0.1;
+    else step = 0.001;
+
+    const sortedYears = [...yearsWithData].sort((a, b) => a - b);
+
+    metadata[band.key] = {
+      label: band.label,
+      labelEn: band.labelEn,
+      unit: band.unit,
+      years: sortedYears,
+      latestYear: sortedYears[sortedYears.length - 1],
+      min: Math.floor(min * 1000) / 1000,
+      max: Math.ceil(max * 1000) / 1000,
+      step,
+      count: Object.keys(communes).length
+    };
+  }
+
+  const allYears = [...allYearsSet].sort((a, b) => a - b);
+  console.log(`  Age year range: ${allYears[0]}–${allYears[allYears.length - 1]}`);
+  console.log(`  Age indicators: ${Object.keys(metadata).length}`);
+
+  return { communes, metadata, allYears };
+}
+
+// =====================================================================
+// 4. Merge age data into migration dataset
+// =====================================================================
+function mergeAgeData(migData, ageData) {
+  console.log("\nMerging age data...");
+  let merged = 0;
+
+  for (const [niscode, mig] of Object.entries(migData.communes)) {
+    const age = ageData.communes[niscode];
+    if (!age) continue;
+    for (const [key, ts] of Object.entries(age.timeseries)) {
+      mig.timeseries[key] = ts;
+    }
+    Object.assign(mig.latest, age.latest);
+    merged++;
+  }
+
+  Object.assign(migData.metadata, ageData.metadata);
+
+  const yearSet = new Set(migData.allYears);
+  for (const yr of ageData.allYears) yearSet.add(yr);
+  migData.allYears = [...yearSet].sort((a, b) => a - b);
+
+  console.log(`  Merged age data for ${merged} communes`);
+}
+
+// =====================================================================
 // RUN
 // =====================================================================
 const geojson = await convertSHP();
 const data = convertExcel();
+const ageData = convertAgeExcel();
+mergeAgeData(data, ageData);
+writeFileSync(join(ROOT, "data", "brussels-data.json"), JSON.stringify(data));
+console.log(`  Updated brussels-data.json: ${Object.keys(data.communes).length} communes, ${Object.keys(data.metadata).length} indicators`);
 mergeData(geojson, data);
 console.log("\nDone!");

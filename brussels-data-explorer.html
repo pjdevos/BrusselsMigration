@@ -617,7 +617,7 @@
 
 <header>
   <div class="logo">BXL<span>·</span>DataMap <span>/ Sociaal-economische Analyse</span></div>
-  <div class="header-info" id="header-info">19 gemeenten · 9 indicatoren · Brussel</div>
+  <div class="header-info" id="header-info">19 gemeenten · 24 indicatoren · Brussel</div>
   <a class="lang-btn" href="brussels-data-explorer-en.html">EN</a>
 </header>
 
@@ -740,6 +740,13 @@ const VAR_GROUPS = [
   ]},
   { id: 'international', label: 'Internationale migratie', vars: [
       'international_balance_num','international_balance_pct'
+  ]},
+  { id: 'leeftijd', label: 'Leeftijdsverdeling', vars: [
+      'age_pct_0_17','age_count_0_17',
+      'age_pct_under3','age_pct_3_5','age_pct_6_11',
+      'age_count_12_17','age_pct_18_24',
+      'age_pct_18_64','age_count_18_64','age_pct_30_44','age_pct_45_64',
+      'age_pct_65plus','age_pct_65_79','age_pct_80plus','age_count_65plus'
   ]},
 ];
 
@@ -1231,7 +1238,7 @@ function onYearChange(year) {
   updateCorrelation();
   updateSliderPanel();
   document.getElementById('st-year').textContent = year;
-  document.getElementById('header-info').textContent = `19 gemeenten · 9 indicatoren · ${year}`;
+  document.getElementById('header-info').textContent = `19 gemeenten · ${Object.keys(VARIABELEN).length} indicatoren · ${year}`;
 }
 
 function togglePlay() {
