@@ -418,29 +418,222 @@ function convertAgeExcel() {
 }
 
 // =====================================================================
-// 4. Merge age data into migration dataset
+// 4. Generic merge helper — adds any extra dataset into the main one
 // =====================================================================
-function mergeAgeData(migData, ageData) {
-  console.log("\nMerging age data...");
+function mergeDataset(main, extra, label) {
+  console.log(`\nMerging ${label}...`);
   let merged = 0;
-
-  for (const [niscode, mig] of Object.entries(migData.communes)) {
-    const age = ageData.communes[niscode];
-    if (!age) continue;
-    for (const [key, ts] of Object.entries(age.timeseries)) {
-      mig.timeseries[key] = ts;
+  for (const [niscode, mainC] of Object.entries(main.communes)) {
+    const extraC = extra.communes[niscode];
+    if (!extraC) continue;
+    for (const [key, ts] of Object.entries(extraC.timeseries)) {
+      mainC.timeseries[key] = ts;
     }
-    Object.assign(mig.latest, age.latest);
+    Object.assign(mainC.latest, extraC.latest);
     merged++;
   }
+  Object.assign(main.metadata, extra.metadata);
+  const yearSet = new Set(main.allYears);
+  for (const yr of extra.allYears) yearSet.add(yr);
+  main.allYears = [...yearSet].sort((a, b) => a - b);
+  console.log(`  Merged ${label} for ${merged} communes`);
+}
 
-  Object.assign(migData.metadata, ageData.metadata);
+// =====================================================================
+// 5. Excel (house_quality.xlsx) → static housing indicators
+// =====================================================================
 
-  const yearSet = new Set(migData.allYears);
-  for (const yr of ageData.allYears) yearSet.add(yr);
-  migData.allYears = [...yearSet].sort((a, b) => a - b);
+const HOUSE_QUALITY_COLS = [
+  // Construction year (aggregate periods)
+  { col: 2,  key: 'hq_build_pre1900',    label: 'Bouw vóór 1900',           labelEn: 'Built pre-1900',       unit: '%' },
+  { col: 6,  key: 'hq_build_1900_1940',  label: 'Bouw 1900–1940',           labelEn: 'Built 1900–1940',      unit: '%' },
+  { col: 9,  key: 'hq_build_1941_1960',  label: 'Bouw 1941–1960',           labelEn: 'Built 1941–1960',      unit: '%' },
+  { col: 13, key: 'hq_build_1961_1990',  label: 'Bouw 1961–1990',           labelEn: 'Built 1961–1990',      unit: '%' },
+  { col: 16, key: 'hq_build_1991_2010',  label: 'Bouw 1991–2010',           labelEn: 'Built 1991–2010',      unit: '%' },
+  { col: 19, key: 'hq_build_post2011',   label: 'Bouw 2011 en later',       labelEn: 'Built 2011+',          unit: '%' },
+  // Renovation (cumulative share)
+  { col: 22, key: 'hq_renov_by1982',     label: 'Gerenoveerd t.e.m. 1981',  labelEn: 'Renovated by 1981',    unit: '%' },
+  { col: 23, key: 'hq_renov_by1992',     label: 'Gerenoveerd t.e.m. 1991',  labelEn: 'Renovated by 1991',    unit: '%' },
+  { col: 24, key: 'hq_renov_by2002',     label: 'Gerenoveerd t.e.m. 2001',  labelEn: 'Renovated by 2001',    unit: '%' },
+  { col: 25, key: 'hq_renov_by2012',     label: 'Gerenoveerd t.e.m. 2011',  labelEn: 'Renovated by 2011',    unit: '%' },
+  { col: 26, key: 'hq_renov_by2022',     label: 'Gerenoveerd t.e.m. 2021',  labelEn: 'Renovated by 2021',    unit: '%' },
+  // Quality
+  { col: 29, key: 'hq_qual_luxurious',   label: 'Luxueuze kwaliteit',       labelEn: 'Luxurious quality',    unit: '%' },
+  { col: 30, key: 'hq_qual_normal',      label: 'Normale kwaliteit',        labelEn: 'Normal quality',       unit: '%' },
+  { col: 31, key: 'hq_qual_basic',       label: 'Eenvoudige kwaliteit',     labelEn: 'Basic quality',        unit: '%' },
+  // Construction type
+  { col: 34, key: 'hq_type_closed',      label: 'Gesloten bebouwing',       labelEn: 'Closed type',          unit: '%' },
+  { col: 35, key: 'hq_type_halfopen',    label: 'Halfopen bebouwing',       labelEn: 'Half-open type',       unit: '%' },
+  { col: 36, key: 'hq_type_open',        label: 'Open bebouwing',           labelEn: 'Open type',            unit: '%' },
+];
 
-  console.log(`  Merged age data for ${merged} communes`);
+const STATIC_YEAR = 2024;
+
+function convertHouseQuality() {
+  console.log("\nParsing house_quality.xlsx...");
+  const xlsxFile = join(ROOT, "house_quality.xlsx");
+  const wb = XLSX.readFile(xlsxFile);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  function cell(r, c) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    const cl = ws[addr];
+    return cl ? cl.v : null;
+  }
+
+  const communes = {};
+
+  for (let r = 2; r <= 20; r++) {
+    const rawCode = cell(r, 0);
+    if (rawCode === null || rawCode === undefined) continue;
+    const niscode = String(rawCode).trim().padStart(5, '0');
+    if (!niscode.startsWith('21')) continue;
+
+    const timeseries = {};
+    const latest = {};
+    for (const c of HOUSE_QUALITY_COLS) timeseries[c.key] = {};
+
+    for (const { col, key } of HOUSE_QUALITY_COLS) {
+      const raw = cell(r, col);
+      if (raw === null || raw === undefined) continue;
+      const val = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(',', '.'));
+      if (isNaN(val)) continue;
+      const stored = Math.round(val / 100 * 1e6) / 1e6;
+      timeseries[key][STATIC_YEAR] = stored;
+      latest[key] = stored;
+    }
+
+    communes[niscode] = { timeseries, latest };
+  }
+
+  console.log(`  Read ${Object.keys(communes).length} communes`);
+
+  const metadata = {};
+  for (const c of HOUSE_QUALITY_COLS) {
+    const vals = Object.values(communes).map(co => co.latest[c.key]).filter(v => v != null);
+    if (vals.length === 0) continue;
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    const range_ = max - min;
+    const step = range_ > 0.1 ? 0.001 : 0.0001;
+    metadata[c.key] = {
+      label: c.label, labelEn: c.labelEn, unit: c.unit,
+      years: [STATIC_YEAR], latestYear: STATIC_YEAR,
+      min: Math.floor(min * 1000) / 1000,
+      max: Math.ceil(max * 1000) / 1000,
+      step, count: Object.keys(communes).length
+    };
+  }
+
+  console.log(`  Housing quality indicators: ${Object.keys(metadata).length}`);
+  return { communes, metadata, allYears: [STATIC_YEAR] };
+}
+
+// =====================================================================
+// 6. Excel (families.xlsx) → family structure time series
+// =====================================================================
+
+const FAMILY_BANDS = [
+  { start: 2,   key: 'fam_single_parent',     label: 'Aandeel alleenstaande ouders',            labelEn: 'Share single parents',           unit: '%' },
+  { start: 27,  key: 'fam_alone_under30',      label: 'Aandeel alleenwonenden jonger dan 30',    labelEn: 'Share living alone <30',         unit: '%' },
+  { start: 52,  key: 'fam_alone_18_29',        label: 'Alleenwonenden 18-29 (% van leeftijdsgroep)', labelEn: 'Living alone 18-29 (% of group)', unit: '%' },
+  { start: 77,  key: 'fam_alone_65plus_pct',   label: 'Alleenwonenden 65+ (% van 65+)',          labelEn: 'Living alone 65+ (% of 65+)',    unit: '%' },
+  { start: 102, key: 'fam_alone_65plus_hh',    label: 'Alleenwonenden 65+ (% huishoudens)',      labelEn: 'Lone 65+ households (%)',        unit: '%' },
+  { start: 127, key: 'fam_couple_children',    label: 'Koppels met kinderen',                   labelEn: 'Couples with children',          unit: '%' },
+  { start: 152, key: 'fam_couple_no_children', label: 'Koppels zonder kinderen',                labelEn: 'Couples without children',       unit: '%' },
+];
+
+function convertFamilies() {
+  console.log("\nParsing families.xlsx...");
+  const xlsxFile = join(ROOT, "families.xlsx");
+  const wb = XLSX.readFile(xlsxFile);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  function cell(r, c) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    const cl = ws[addr];
+    return cl ? cl.v : null;
+  }
+
+  // Build colMap (25 years: 2001–2025, year in row 2)
+  const colMap = [];
+  for (const band of FAMILY_BANDS) {
+    for (let i = 0; i < 25; i++) {
+      const col = band.start + i;
+      const year = cell(2, col);
+      if (typeof year !== 'number') continue;
+      colMap.push({ col, key: band.key, year });
+    }
+  }
+  console.log(`  ${colMap.length} (col, key, year) entries`);
+
+  const communes = {};
+
+  for (let r = 7; r <= 25; r++) {
+    const rawCode = cell(r, 0);
+    if (rawCode === null || rawCode === undefined) continue;
+    const niscode = String(rawCode).trim().padStart(5, '0');
+    if (!/^\d{5}$/.test(niscode)) continue;
+    if (!niscode.startsWith('21')) continue;
+
+    const timeseries = {};
+    const latest = {};
+    for (const band of FAMILY_BANDS) timeseries[band.key] = {};
+
+    for (const { col, key, year } of colMap) {
+      const raw = cell(r, col);
+      if (raw === null || raw === undefined) continue;
+      const val = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(',', '.'));
+      if (isNaN(val)) continue;
+      timeseries[key][year] = Math.round(val / 100 * 1e6) / 1e6;
+    }
+
+    for (const band of FAMILY_BANDS) {
+      const sortedYears = Object.keys(timeseries[band.key]).map(Number).sort((a, b) => b - a);
+      if (sortedYears.length > 0) latest[band.key] = timeseries[band.key][sortedYears[0]];
+    }
+
+    communes[niscode] = { timeseries, latest };
+  }
+
+  console.log(`  Read ${Object.keys(communes).length} communes`);
+
+  const metadata = {};
+  const allYearsSet = new Set();
+
+  for (const band of FAMILY_BANDS) {
+    const allValues = [];
+    const yearsWithData = new Set();
+
+    for (const c of Object.values(communes)) {
+      const ts = c.timeseries[band.key] || {};
+      for (const [yr, val] of Object.entries(ts)) {
+        allValues.push(val);
+        yearsWithData.add(Number(yr));
+        allYearsSet.add(Number(yr));
+      }
+    }
+
+    if (allValues.length === 0) continue;
+
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    const sortedYears = [...yearsWithData].sort((a, b) => a - b);
+
+    metadata[band.key] = {
+      label: band.label, labelEn: band.labelEn, unit: band.unit,
+      years: sortedYears, latestYear: sortedYears[sortedYears.length - 1],
+      min: Math.floor(min * 1000) / 1000,
+      max: Math.ceil(max * 1000) / 1000,
+      step: 0.001, count: Object.keys(communes).length
+    };
+  }
+
+  const allYears = [...allYearsSet].sort((a, b) => a - b);
+  console.log(`  Family year range: ${allYears[0]}–${allYears[allYears.length - 1]}`);
+  console.log(`  Family indicators: ${Object.keys(metadata).length}`);
+
+  return { communes, metadata, allYears };
 }
 
 // =====================================================================
@@ -448,9 +641,10 @@ function mergeAgeData(migData, ageData) {
 // =====================================================================
 const geojson = await convertSHP();
 const data = convertExcel();
-const ageData = convertAgeExcel();
-mergeAgeData(data, ageData);
+mergeDataset(data, convertAgeExcel(),       'age data');
+mergeDataset(data, convertHouseQuality(),   'housing quality');
+mergeDataset(data, convertFamilies(),       'family data');
 writeFileSync(join(ROOT, "data", "brussels-data.json"), JSON.stringify(data));
-console.log(`  Updated brussels-data.json: ${Object.keys(data.communes).length} communes, ${Object.keys(data.metadata).length} indicators`);
+console.log(`  brussels-data.json: ${Object.keys(data.communes).length} communes, ${Object.keys(data.metadata).length} indicators`);
 mergeData(geojson, data);
 console.log("\nDone!");
