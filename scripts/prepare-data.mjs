@@ -637,7 +637,104 @@ function convertFamilies() {
 }
 
 // =====================================================================
-// 7. Excel (share of Belgians per commune.xlsx) → nationality time series
+// 7. Excel (migratieachtergrond.xlsx) → migration background (static 2021)
+// =====================================================================
+
+// No NIS codes in source — match by Dutch commune name (case-insensitive, trimmed)
+const NISCODE_BY_NAME_DUT = {
+  "anderlecht":                "21001",
+  "oudergem":                  "21002",
+  "sint-agatha-berchem":       "21003",
+  "brussel":                   "21004",
+  "etterbeek":                 "21005",
+  "evere":                     "21006",
+  "vorst":                     "21007",
+  "ganshoren":                 "21008",
+  "elsene":                    "21009",
+  "jette":                     "21010",
+  "koekelberg":                "21011",
+  "sint-jans-molenbeek":       "21012",
+  "sint-gillis":               "21013",
+  "sint-joost-ten-node":       "21014",
+  "schaarbeek":                "21015",
+  "ukkel":                     "21016",
+  "watermaal-bosvoorde":       "21017",
+  "sint-lambrechts-woluwe":    "21018",
+  "sint-pieters-woluwe":       "21019",
+};
+
+const MIGBG_YEAR = 2021;
+
+const MIGBG_COLS = [
+  { col: 1, key: 'migbg_total',         label: 'Migratie-achtergrond',             labelEn: 'Migration background',                  unit: '%' },
+  { col: 2, key: 'migbg_belgian_with',  label: 'Belgen met migratieachtergrond',   labelEn: 'Belgians with migration background',    unit: '%' },
+  { col: 3, key: 'migbg_belgian_without', label: 'Belgen zonder migratieachtergrond', labelEn: 'Belgians without migration background', unit: '%' },
+];
+
+function convertMigBg() {
+  console.log("\nParsing migratieachtergrond.xlsx...");
+  const xlsxFile = join(ROOT, "migratieachtergrond.xlsx");
+  const wb = XLSX.readFile(xlsxFile);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+
+  function cell(r, c) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    const cl = ws[addr];
+    return cl ? cl.v : null;
+  }
+
+  const communes = {};
+  let unmatched = [];
+
+  for (let r = 1; r <= range.e.r; r++) {
+    const rawName = cell(r, 0);
+    if (rawName === null || rawName === undefined) continue;
+    const key = String(rawName).trim().toLowerCase();
+    const niscode = NISCODE_BY_NAME_DUT[key];
+    if (!niscode) { unmatched.push(String(rawName).trim()); continue; }
+
+    const timeseries = {};
+    const latest = {};
+    for (const c of MIGBG_COLS) timeseries[c.key] = {};
+
+    for (const { col, key: varKey } of MIGBG_COLS) {
+      const val = cell(r, col);
+      if (val === null || val === undefined) continue;
+      const num = typeof val === 'number' ? val : parseFloat(String(val).replace(',', '.'));
+      if (isNaN(num)) continue;
+      // Values are already fractions (0.889 = 88.9%)
+      timeseries[varKey][MIGBG_YEAR] = num;
+      latest[varKey] = num;
+    }
+
+    communes[niscode] = { timeseries, latest };
+  }
+
+  console.log(`  Read ${Object.keys(communes).length} communes`);
+  if (unmatched.length) console.warn(`  Unmatched names: ${unmatched.join(', ')}`);
+
+  const metadata = {};
+  for (const c of MIGBG_COLS) {
+    const vals = Object.values(communes).map(co => co.latest[c.key]).filter(v => v != null);
+    if (vals.length === 0) continue;
+    const min = Math.min(...vals);
+    const max = Math.max(...vals);
+    metadata[c.key] = {
+      label: c.label, labelEn: c.labelEn, unit: c.unit,
+      years: [MIGBG_YEAR], latestYear: MIGBG_YEAR,
+      min: Math.floor(min * 1000) / 1000,
+      max: Math.ceil(max * 1000) / 1000,
+      step: 0.001, count: Object.keys(communes).length
+    };
+  }
+
+  console.log(`  Migration background indicators: ${Object.keys(metadata).length}`);
+  return { communes, metadata, allYears: [MIGBG_YEAR] };
+}
+
+// =====================================================================
+// 8. Excel (share of Belgians per commune.xlsx) → nationality time series
 // =====================================================================
 
 const NATIONALITY_BANDS = [
@@ -747,6 +844,7 @@ const data = convertExcel();
 mergeDataset(data, convertAgeExcel(),        'age data');
 mergeDataset(data, convertHouseQuality(),    'housing quality');
 mergeDataset(data, convertFamilies(),        'family data');
+mergeDataset(data, convertMigBg(),           'migration background');
 mergeDataset(data, convertNationality(),     'nationality data');
 writeFileSync(join(ROOT, "data", "brussels-data.json"), JSON.stringify(data));
 console.log(`  brussels-data.json: ${Object.keys(data.communes).length} communes, ${Object.keys(data.metadata).length} indicators`);
