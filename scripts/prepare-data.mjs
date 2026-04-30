@@ -637,13 +637,117 @@ function convertFamilies() {
 }
 
 // =====================================================================
+// 7. Excel (share of Belgians per commune.xlsx) → nationality time series
+// =====================================================================
+
+const NATIONALITY_BANDS = [
+  { start: 2,  key: 'nat_eu14_pct',    label: 'Aandeel EU14-onderdanen',  labelEn: 'Share EU14 nationals',  unit: '%' },
+  { start: 28, key: 'nat_belgian_pct', label: 'Aandeel Belgen',           labelEn: 'Share Belgians',        unit: '%' },
+];
+
+function convertNationality() {
+  console.log("\nParsing share of Belgians per commune.xlsx...");
+  const xlsxFile = join(ROOT, "share of Belgians per commune.xlsx");
+  const wb = XLSX.readFile(xlsxFile);
+  const ws = wb.Sheets[wb.SheetNames[0]];
+
+  function cell(r, c) {
+    const addr = XLSX.utils.encode_cell({ r, c });
+    const cl = ws[addr];
+    return cl ? cl.v : null;
+  }
+
+  // Build colMap (26 years: 2000–2025, year in row 2)
+  const colMap = [];
+  for (const band of NATIONALITY_BANDS) {
+    for (let i = 0; i < 26; i++) {
+      const col = band.start + i;
+      const year = cell(2, col);
+      if (typeof year !== 'number') continue;
+      colMap.push({ col, key: band.key, year });
+    }
+  }
+  console.log(`  ${colMap.length} (col, key, year) entries`);
+
+  const communes = {};
+
+  // Data rows 3–21 (19 communes, no region total row)
+  for (let r = 3; r <= 21; r++) {
+    const rawCode = cell(r, 0);
+    if (rawCode === null || rawCode === undefined) continue;
+    const niscode = String(rawCode).trim().padStart(5, '0');
+    if (!/^\d{5}$/.test(niscode)) continue;
+    if (!niscode.startsWith('21')) continue;
+
+    const timeseries = {};
+    const latest = {};
+    for (const band of NATIONALITY_BANDS) timeseries[band.key] = {};
+
+    for (const { col, key, year } of colMap) {
+      const raw = cell(r, col);
+      if (raw === null || raw === undefined) continue;
+      const val = typeof raw === 'number' ? raw : parseFloat(String(raw).replace(',', '.'));
+      if (isNaN(val)) continue;
+      timeseries[key][year] = Math.round(val / 100 * 1e6) / 1e6;
+    }
+
+    for (const band of NATIONALITY_BANDS) {
+      const sortedYears = Object.keys(timeseries[band.key]).map(Number).sort((a, b) => b - a);
+      if (sortedYears.length > 0) latest[band.key] = timeseries[band.key][sortedYears[0]];
+    }
+
+    communes[niscode] = { timeseries, latest };
+  }
+
+  console.log(`  Read ${Object.keys(communes).length} communes`);
+
+  const metadata = {};
+  const allYearsSet = new Set();
+
+  for (const band of NATIONALITY_BANDS) {
+    const allValues = [];
+    const yearsWithData = new Set();
+
+    for (const c of Object.values(communes)) {
+      const ts = c.timeseries[band.key] || {};
+      for (const [yr, val] of Object.entries(ts)) {
+        allValues.push(val);
+        yearsWithData.add(Number(yr));
+        allYearsSet.add(Number(yr));
+      }
+    }
+
+    if (allValues.length === 0) continue;
+
+    const min = Math.min(...allValues);
+    const max = Math.max(...allValues);
+    const sortedYears = [...yearsWithData].sort((a, b) => a - b);
+
+    metadata[band.key] = {
+      label: band.label, labelEn: band.labelEn, unit: band.unit,
+      years: sortedYears, latestYear: sortedYears[sortedYears.length - 1],
+      min: Math.floor(min * 1000) / 1000,
+      max: Math.ceil(max * 1000) / 1000,
+      step: 0.001, count: Object.keys(communes).length
+    };
+  }
+
+  const allYears = [...allYearsSet].sort((a, b) => a - b);
+  console.log(`  Nationality year range: ${allYears[0]}–${allYears[allYears.length - 1]}`);
+  console.log(`  Nationality indicators: ${Object.keys(metadata).length}`);
+
+  return { communes, metadata, allYears };
+}
+
+// =====================================================================
 // RUN
 // =====================================================================
 const geojson = await convertSHP();
 const data = convertExcel();
-mergeDataset(data, convertAgeExcel(),       'age data');
-mergeDataset(data, convertHouseQuality(),   'housing quality');
-mergeDataset(data, convertFamilies(),       'family data');
+mergeDataset(data, convertAgeExcel(),        'age data');
+mergeDataset(data, convertHouseQuality(),    'housing quality');
+mergeDataset(data, convertFamilies(),        'family data');
+mergeDataset(data, convertNationality(),     'nationality data');
 writeFileSync(join(ROOT, "data", "brussels-data.json"), JSON.stringify(data));
 console.log(`  brussels-data.json: ${Object.keys(data.communes).length} communes, ${Object.keys(data.metadata).length} indicators`);
 mergeData(geojson, data);
