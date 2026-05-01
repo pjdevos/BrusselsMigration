@@ -32,13 +32,13 @@
     height: 100vh;
     display: grid;
     grid-template-rows: 52px 1fr;
-    grid-template-columns: 340px 1fr 0px;
+    grid-template-columns: 300px 1fr 280px;
     overflow: hidden;
     transition: grid-template-columns 0.3s ease;
   }
 
-  body.right-open {
-    grid-template-columns: 340px 1fr 320px;
+  body.right-closed {
+    grid-template-columns: 300px 1fr 0px;
   }
 
   header {
@@ -305,14 +305,14 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
     transition: opacity 0.3s ease;
   }
 
-  body.right-open .right-panel {
-    opacity: 1;
-    pointer-events: auto;
+  body.right-closed .right-panel {
+    opacity: 0;
+    pointer-events: none;
   }
 
   .right-scroll {
@@ -329,7 +329,7 @@
   .right-toggle {
     position: absolute;
     top: 50%;
-    right: 0;
+    right: 280px;
     transform: translateY(-50%);
     z-index: 1000;
     background: var(--surface);
@@ -352,8 +352,8 @@
     border-color: var(--accent2);
   }
 
-  body.right-open .right-toggle {
-    right: 320px;
+  body.right-closed .right-toggle {
+    right: 0;
   }
 
   .corr-matrix { padding: 16px; }
@@ -611,6 +611,51 @@
     outline: none;
   }
   .model-selector select:focus { border-color: var(--accent); }
+
+  /* VAR MODE TABS */
+  .var-mode-tabs {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 10px;
+  }
+  .var-mode-tab {
+    flex: 1;
+    padding: 6px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text-dim);
+    font-family: var(--mono);
+    font-size: 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+    text-align: center;
+  }
+  .var-mode-tab:hover { color: var(--text); }
+  .var-mode-tab[data-mode="dep"].active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(232,200,74,0.08);
+  }
+  .var-mode-tab[data-mode="ind"].active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(74,157,232,0.08);
+  }
+
+  /* COMPACT STATS BAR */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 12px;
+  }
+  .stats-item {
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+  .stats-item .sk { color: var(--text-dim); display: block; font-size: 9px; }
+  .stats-item .sv { color: var(--text); font-weight: 600; }
 </style>
 </head>
 <body>
@@ -618,6 +663,7 @@
 <header>
   <div class="logo">BXL<span>·</span>DataMap <span>/ Socio-economic Analysis</span></div>
   <div class="header-info" id="header-info">19 communes · 24 indicators · Brussels</div>
+  <a class="lang-btn" href="brussels-policy.html" style="margin-right:6px;background:rgba(74,157,232,0.1);border-color:rgba(74,157,232,0.4);color:#4a9de8">Policy View</a>
   <a class="lang-btn" href="brussels-data-explorer.html">NL</a>
 </header>
 
@@ -636,13 +682,12 @@
     </div>
   </div>
   <div class="panel-section">
-    <div class="section-label">Dependent variable <span style="color:var(--accent)">&#9679;</span></div>
-    <div id="dep-vars"></div>
-  </div>
-  <div class="panel-section">
-    <div class="section-label">Independent variables <span style="color:var(--accent2)">&#9679;</span></div>
-    <div class="section-label" style="margin-bottom:6px;font-size:8px">Click on map to select commune, drag slider to see impact</div>
-    <div id="ind-vars"></div>
+    <div class="section-label" style="margin-bottom:8px">Variables</div>
+    <div class="var-mode-tabs">
+      <button class="var-mode-tab active" data-mode="dep" onclick="setVarMode('dep')">&#9679; Dependent</button>
+      <button class="var-mode-tab" data-mode="ind" onclick="setVarMode('ind')">&#9679; Independent</button>
+    </div>
+    <div id="var-container"></div>
   </div>
   <div class="slider-wrap" id="slider-panel">
     <div class="no-selection">Click on a commune on the map</div>
@@ -668,15 +713,9 @@
 
 <!-- RIGHT PANEL -->
 <div class="right-panel">
-  <div class="panel-section">
-    <div class="section-label">Correlation matrix</div>
-  </div>
-  <div class="right-scroll">
-    <div class="corr-matrix" id="corr-matrix-wrap"></div>
-  </div>
-  <div class="scatter-wrap">
-    <div class="section-label" style="margin-bottom:8px">Scatter plot</div>
-    <div class="model-selector">
+  <div class="panel-section" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+    <div class="section-label" style="margin-bottom:0">Analysis</div>
+    <div class="model-selector" style="margin-bottom:0;flex:1;max-width:160px">
       <select id="model-select" onchange="setModel(this.value)">
         <option value="linear">Linear</option>
         <option value="polynomial">Polynomial (deg 2)</option>
@@ -684,17 +723,25 @@
         <option value="knn">k-NN (k=7)</option>
       </select>
     </div>
-    <canvas id="scatter" width="288" height="180" style="cursor:crosshair"></canvas>
+  </div>
+  <div class="right-scroll">
+    <div class="corr-matrix" id="corr-matrix-wrap"></div>
+  </div>
+  <div class="scatter-wrap">
+    <div class="section-label" style="margin-bottom:8px">Scatter plot</div>
+    <canvas id="scatter" width="248" height="160" style="cursor:crosshair"></canvas>
     <div id="scatter-tooltip" style="display:none;position:absolute;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:3px 7px;font-family:var(--mono);font-size:9px;color:var(--text);pointer-events:none;white-space:nowrap;z-index:10;"></div>
     <div class="scatter-label" id="scatter-label"></div>
   </div>
   <div class="stats-bar" id="stats-bar">
-    <div class="stats-row"><span>n communes</span><span id="st-n">—</span></div>
-    <div class="stats-row"><span>Model</span><span id="st-model">Linear</span></div>
-    <div class="stats-row"><span>R²</span><span id="st-r2">—</span></div>
-    <div class="stats-row"><span>RMSE</span><span id="st-rmse">—</span></div>
-    <div class="stats-row"><span>Pearson r</span><span id="st-r">—</span></div>
-    <div class="stats-row"><span>Year</span><span id="st-year">—</span></div>
+    <div class="stats-grid">
+      <div class="stats-item"><span class="sk">communes</span><span class="sv" id="st-n">—</span></div>
+      <div class="stats-item"><span class="sk">model</span><span class="sv" id="st-model">Linear</span></div>
+      <div class="stats-item"><span class="sk">R²</span><span class="sv" id="st-r2">—</span></div>
+      <div class="stats-item"><span class="sk">RMSE</span><span class="sv" id="st-rmse">—</span></div>
+      <div class="stats-item"><span class="sk">Pearson r</span><span class="sv" id="st-r">—</span></div>
+      <div class="stats-item"><span class="sk">year</span><span class="sv" id="st-year">—</span></div>
+    </div>
   </div>
 </div>
 
@@ -703,7 +750,7 @@
 // DATA
 // =====================================================================
 function toggleRightPanel() {
-  document.body.classList.toggle('right-open');
+  document.body.classList.toggle('right-closed');
   // Invalidate map size after transition
   setTimeout(() => { if (map) map.invalidateSize(); }, 350);
 }
@@ -728,6 +775,7 @@ let basemapLayer = null;
 let heatIslandLayer = null;
 let modelType = 'linear';
 let currentTree = null;
+let varSelectorMode = 'dep';
 
 const reversedVars = [];
 
@@ -1326,7 +1374,8 @@ function buildGroupedVarButtons(containerEl, mode) {
         btn.onclick = () => {
           depVar = key;
           indVars = indVars.filter(k => k !== key);
-          buildVarButtons();
+          // Auto-switch to independent tab so user can immediately pick predictors
+          setVarMode('ind');
           updateMapColors();
           updateCorrelation();
           updateSliderPanel();
@@ -1356,9 +1405,16 @@ function buildGroupedVarButtons(containerEl, mode) {
   });
 }
 
+function setVarMode(mode) {
+  varSelectorMode = mode;
+  document.querySelectorAll('.var-mode-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.mode === mode);
+  });
+  buildVarButtons();
+}
+
 function buildVarButtons() {
-  buildGroupedVarButtons(document.getElementById('dep-vars'), 'dep');
-  buildGroupedVarButtons(document.getElementById('ind-vars'), 'ind');
+  buildGroupedVarButtons(document.getElementById('var-container'), varSelectorMode);
   if (modelType === 'tree') rebuildTree();
 }
 

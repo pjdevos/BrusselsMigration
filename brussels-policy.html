@@ -1,0 +1,2708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Brussels PolicyTwin</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+html { font-size: clamp(13px, 1.05vw, 48px); }
+
+:root {
+  --bg:          #070b13;
+  --surface:     #0d1320;
+  --surface2:    #131b2e;
+  --surface3:    #1a2440;
+  --border:      #1e2d47;
+  --border2:     #253656;
+  --accent:      #3ac0f9;
+  --accent-glow: rgba(58,192,249,0.18);
+  --accent-soft: rgba(58,192,249,0.08);
+  --text:        #edf2ff;
+  --text-sub:    #b0c4e0;
+  --text-dim:    #7090b8;
+  --sans:        'Montserrat', sans-serif;
+  --crit:        #f95c7a;
+  --elev:        #f97c3a;
+  --mod:         #f9c93a;
+  --ok:          #3af9a0;
+  --panel-w:     clamp(300px, 23vw, 2300px);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  height: 100vh;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  grid-template-columns: var(--panel-w) 1fr var(--panel-w);
+  overflow: hidden;
+}
+
+/* ── HEADER ── */
+header {
+  grid-column: 1 / -1;
+  background: var(--surface);
+  border-bottom: 2px solid var(--accent);
+  display: flex;
+  align-items: center;
+  padding: 0 1.5rem;
+  gap: 1rem;
+  min-height: 3.75rem;
+  position: relative;
+}
+header::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, var(--accent) 0%, transparent 60%);
+  opacity: 0.4;
+}
+.logo {
+  font-size: 1.35rem; font-weight: 800;
+  color: var(--text); letter-spacing: 0.04em; text-transform: uppercase;
+}
+.logo .logo-accent { color: var(--accent); }
+.logo .logo-sub { font-weight: 400; font-size: 0.8rem; color: var(--text-sub); letter-spacing: 0.06em; }
+.policy-badge {
+  background: var(--accent); color: #070b13;
+  font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.14em; padding: 0.28rem 0.7rem;
+  border-radius: 2rem; text-transform: uppercase;
+}
+.header-links { margin-left: auto; display: flex; align-items: center; gap: 0.625rem; }
+.header-link {
+  font-size: 0.78rem; font-weight: 600; color: var(--text-sub);
+  text-decoration: none; padding: 0.4rem 1rem;
+  border: 1px solid var(--border2); border-radius: 0.3rem;
+  transition: all 0.15s; letter-spacing: 0.04em;
+}
+.header-link:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.fari-logo { height: 2rem; width: auto; opacity: 0.92; flex-shrink: 0; margin-right: 0.75rem; transform: translateY(-3px); }
+.src-info-btn {
+  width: 1.25rem; height: 1.25rem; border-radius: 50%;
+  background: none; border: 1px solid var(--accent);
+  color: var(--accent); font-size: 0.7rem; font-weight: 700;
+  line-height: 1; padding: 0;
+  cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+  transition: all 0.15s; flex-shrink: 0;
+}
+.src-info-btn:hover { color: #070b13; border-color: var(--accent); background: var(--accent); }
+.src-entry { padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+.src-entry:last-child { border-bottom: none; padding-bottom: 0; }
+.src-entry-hdr { display: flex; align-items: baseline; justify-content: space-between; gap: 0.75rem; margin-bottom: 0.25rem; }
+.src-institution { font-size: 0.84rem; font-weight: 700; color: var(--text); }
+.src-url { font-size: 0.72rem; color: var(--accent2); text-decoration: none; white-space: nowrap; flex-shrink: 0; }
+.src-url:hover { text-decoration: underline; }
+.src-tags { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.55rem; }
+.src-tag { font-size: 0.68rem; color: var(--text-sub); background: var(--bg); border: 1px solid var(--border); border-radius: 0.25rem; padding: 0.18rem 0.45rem; line-height: 1.4; white-space: nowrap; }
+
+/* ── SCROLLBARS ── */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ── LEFT PANEL ── */
+.left-panel {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.left-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  display: flex; flex-direction: column;
+  min-height: 0;
+}
+.panel-section {
+  padding: 1.1rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.section-label {
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 0.75rem;
+}
+.welcome-text {
+  font-size: 0.9rem; font-weight: 400;
+  color: var(--text-sub); line-height: 1.7;
+}
+.welcome-text strong { color: var(--text); font-weight: 600; }
+
+/* ── CHALLENGE GRID ── */
+.challenge-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  gap: 0.4rem; padding: 0.6rem 1rem;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.ch-tile {
+  display: flex; align-items: center; justify-content: center;
+  aspect-ratio: 1; background: var(--surface2);
+  border: 1px solid var(--border);
+  border-bottom: 3px solid transparent;
+  border-radius: 0.375rem; cursor: pointer; font: inherit;
+  transition: background 0.12s, border-bottom-color 0.12s;
+}
+.ch-tile:hover { background: var(--surface3); border-bottom-color: var(--ch-color, var(--accent)); }
+.ch-tile.active { border-bottom-color: var(--ch-color, var(--accent)); background: var(--ch-bg, var(--accent-soft)); }
+.ch-icon { font-size: clamp(1.1rem, 1.5vw, 2.5rem); line-height: 1; pointer-events: none; color: var(--ch-color); }
+
+/* ── CHALLENGE TOOLTIP ── */
+.ch-global-tooltip {
+  position: fixed; z-index: 9999;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--ch-color, var(--accent));
+  border-radius: 0 0.5rem 0.5rem 0;
+  padding: 0.6rem 0.9rem;
+  pointer-events: none;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.5);
+  min-width: 11rem; max-width: 16rem;
+}
+.ch-tt-label { font-size: 0.82rem; font-weight: 700; display: block; margin-bottom: 0.2rem; }
+.ch-tt-desc  { font-size: 0.7rem; color: var(--text-sub); display: block; line-height: 1.4; }
+
+/* ── RANKING ── */
+.ranking-section { display: none; }
+.ranking-list { display: flex; flex-direction: column; gap: 3px; }
+.ranking-item {
+  display: flex; align-items: center; gap: 0.6rem;
+  padding: 0.55rem 0.625rem; border-radius: 0.4rem;
+  cursor: pointer; transition: background 0.12s;
+  border: 1px solid transparent;
+}
+.ranking-item:hover { background: var(--surface2); }
+.ranking-item.selected { background: var(--accent-soft); border-color: rgba(58,192,249,0.3); }
+.rank-num { font-size: 0.85rem; font-weight: 700; color: var(--text-dim); min-width: 1.5rem; text-align: center; }
+.rank-num.urgent { color: var(--crit); }
+.rank-name { flex: 1; font-size: 0.88rem; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rank-val  { font-size: 0.82rem; font-weight: 500; color: var(--text-sub); }
+.rank-arrow { font-size: 0.9rem; min-width: 1rem; text-align: center; }
+.arr-worse  { color: var(--crit); }
+.arr-better { color: var(--ok); }
+.arr-stable { color: var(--text-dim); }
+
+/* ── YEAR SLIDER ── */
+.year-section {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--border);
+  background: var(--surface2); flex-shrink: 0;
+}
+.year-row { display: flex; align-items: center; gap: 0.75rem; }
+.year-display {
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--accent); min-width: 3.5rem; letter-spacing: -0.02em;
+}
+.year-slider-wrap { flex: 1; display: flex; flex-direction: column; gap: 0.3rem; }
+.year-range-labels {
+  display: flex; justify-content: space-between;
+  font-size: 0.76rem; font-weight: 500; color: var(--text-dim);
+}
+input[type=range]#year-slider {
+  width: 100%; accent-color: var(--accent);
+  height: 4px; cursor: pointer;
+}
+
+/* ── RIGHT PANEL ── */
+.right-panel {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+
+/* ── TAB BAR ── */
+.tab-bar {
+  display: flex; gap: 0; flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface2);
+}
+.tab-btn {
+  flex: 1; padding: 0.75rem 0.5rem;
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 700;
+  color: var(--text-dim); background: transparent;
+  border: none; border-bottom: 2px solid transparent;
+  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
+  transition: color 0.12s, border-color 0.12s;
+}
+.tab-btn:hover  { color: var(--text); }
+.tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ── TAB PANES ── */
+.tab-pane { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+
+/* ── NO SELECTION ── */
+.no-selection {
+  padding: 2rem 1.25rem; color: var(--text-dim);
+  font-size: 0.88rem; line-height: 1.7; text-align: center;
+}
+
+/* ── DISTRICT DETAIL ── */
+.detail-header {
+  padding: 1rem 1.25rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+.detail-commune-name {
+  font-size: 1.1rem; font-weight: 800; color: var(--text);
+  letter-spacing: 0.01em; margin-bottom: 0.35rem;
+}
+.status-badge {
+  display: inline-block; font-size: 0.68rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 0.22rem 0.65rem; border-radius: 2rem;
+}
+.status-crit { background: rgba(249,92,122,0.18); color: var(--crit); }
+.status-elev { background: rgba(249,124,58,0.18);  color: var(--elev); }
+.status-mod  { background: rgba(249,201,58,0.18);  color: var(--mod);  }
+.status-ok   { background: rgba(58,249,160,0.18);  color: var(--ok);   }
+
+/* ── KPI ROW ── */
+.kpi-section { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.kpi-row { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.25rem; }
+.kpi-value { font-size: 1.8rem; font-weight: 800; color: var(--text); letter-spacing: -0.02em; }
+.kpi-unit  { font-size: 0.8rem; color: var(--text-dim); font-weight: 500; }
+.kpi-label { font-size: 0.75rem; color: var(--text-sub); margin-bottom: 0.5rem; }
+.kpi-vs-city {
+  display: flex; align-items: center; gap: 0.5rem;
+  font-size: 0.78rem; color: var(--text-sub);
+}
+.kpi-city-val { color: var(--text); font-weight: 600; }
+.kpi-sentence { font-size: 0.8rem; color: var(--text-sub); line-height: 1.55; margin-top: 0.4rem; }
+
+/* ── SPARKLINE ── */
+.spark-section { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.spark-label { font-size: 0.7rem; color: var(--text-dim); margin-bottom: 0.4rem; }
+.sparkline-canvas { width: 100%; height: clamp(36px, 4vw, 72px); display: block; cursor: crosshair; }
+#spark-tooltip {
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translateX(-50%) translateY(-100%);
+  background: rgba(13,19,32,0.97);
+  border: 1px solid var(--border2);
+  border-left-width: 3px;
+  border-radius: 0 0.35rem 0.35rem 0;
+  padding: 0.28rem 0.6rem;
+  font-size: 0.72rem; font-family: var(--mono);
+  white-space: nowrap;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.55);
+  display: none;
+  margin-top: -6px;
+}
+#spark-tooltip .sp-year { color: var(--text-dim); font-weight: 500; }
+#spark-tooltip .sp-val  { color: var(--text); font-weight: 700; margin-left: 0.4rem; }
+#spark-tooltip .sp-hint { color: var(--accent); font-size: 0.62rem; margin-left: 0.35rem; opacity: 0.7; }
+#cmp-slot-tooltip {
+  position: fixed; pointer-events: none; z-index: 9999;
+  transform: translateX(-50%) translateY(calc(-100% - 9px));
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  border-bottom: 2px solid var(--accent);
+  border-radius: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem; font-weight: 600; font-family: var(--sans);
+  color: var(--text); letter-spacing: 0.02em;
+  white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.65);
+  display: none;
+}
+#cmp-slot-tooltip::after {
+  content: '';
+  position: absolute; top: 100%; left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--border2);
+}
+
+/* ── DRIVERS ── */
+.drivers-section { padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.driver-item { margin-bottom: 0.75rem; }
+.driver-item:last-child { margin-bottom: 0; }
+.driver-head {
+  display: flex; justify-content: space-between; align-items: baseline;
+  margin-bottom: 0.3rem;
+}
+.driver-name-wrap { display: flex; flex-direction: column; gap: 0.08rem; flex: 1; min-width: 0; }
+.driver-name { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.driver-sub  { font-size: 0.66rem; color: var(--text-dim); font-weight: 400; line-height: 1.35; }
+.driver-head { align-items: flex-start; }
+.driver-corr { font-size: 0.68rem; color: var(--text-dim); white-space: nowrap; padding-top: 0.1rem; }
+.driver-bar-wrap { height: 5px; background: var(--surface3); border-radius: 3px; overflow: hidden; margin-top: 0.4rem; }
+.driver-bar { height: 100%; border-radius: 3px; transition: width 0.3s; }
+.driver-val { font-size: 0.72rem; color: var(--text-sub); margin-top: 0.25rem; }
+
+/* ── WHAT-IF ── */
+.whatif-section { padding: 0.9rem 1.25rem; flex-shrink: 0; }
+.whatif-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem; }
+.whatif-info-btn {
+  background: none; border: 1px solid var(--border2); border-radius: 50%;
+  width: 1.4rem; height: 1.4rem; cursor: pointer;
+  font-size: 0.72rem; color: var(--text-dim);
+  display: flex; align-items: center; justify-content: center;
+}
+.whatif-info-btn:hover { color: var(--accent); border-color: var(--accent); }
+.whatif-item { margin-bottom: 0.9rem; }
+.whatif-item:last-of-type { margin-bottom: 0.75rem; }
+.whatif-row { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.2rem; }
+.whatif-name-wrap { display: flex; flex-direction: column; gap: 0.08rem; flex: 1; min-width: 0; }
+.whatif-var  { font-size: 0.78rem; font-weight: 600; color: var(--text); }
+.whatif-sub  { font-size: 0.66rem; color: var(--text-dim); font-weight: 400; line-height: 1.35; }
+.whatif-vals { font-size: 0.72rem; color: var(--text-sub); white-space: nowrap; padding-top: 0.1rem; }
+input[type=range].whatif-slider {
+  width: 100%; accent-color: var(--accent); height: 4px; cursor: pointer; margin: 0.15rem 0;
+}
+.whatif-ref { font-size: 0.68rem; color: var(--text-dim); text-align: right; }
+.whatif-result {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  border-radius: 0.375rem; padding: 0.75rem 0.9rem;
+  font-size: 0.8rem; color: var(--text-sub); line-height: 1.6;
+  margin-top: 0.5rem;
+}
+.whatif-result strong { color: var(--text); }
+.whatif-result .impact-pos { color: var(--ok); font-weight: 700; }
+.whatif-result .impact-neg { color: var(--crit); font-weight: 700; }
+
+/* ── MODEL INFO MODAL ── */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(7,11,19,0.82);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  background: var(--surface2); border: 1px solid var(--border2);
+  border-radius: 0.75rem; padding: 1.5rem;
+  max-width: 28rem; width: 90%; position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+  max-height: 82vh; overflow-y: auto;
+}
+.modal-close {
+  position: absolute; top: 0.75rem; right: 0.9rem;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 1.3rem; cursor: pointer; line-height: 1;
+}
+.modal-close:hover { color: var(--text); }
+.modal h3 { font-size: 0.95rem; color: var(--accent); margin-bottom: 0.75rem; letter-spacing: 0.04em; }
+.modal p  { font-size: 0.82rem; color: var(--text-sub); line-height: 1.65; margin-bottom: 0.6rem; }
+.modal p:last-child { margin-bottom: 0; }
+.modal strong { color: var(--text); }
+
+/* ── COMPARE TAB ── */
+.compare-hint {
+  padding: 1rem 1.25rem; font-size: 0.84rem;
+  color: var(--text-sub); line-height: 1.6;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.compare-hint strong { color: var(--text); font-weight: 700; }
+.compare-slots-row {
+  display: flex; gap: 0.5rem; padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border); flex-shrink: 0;
+}
+.compare-slot {
+  flex: 1; min-width: 0; border: 1px dashed var(--border2); border-radius: 0.4rem;
+  padding: 0.55rem 0.75rem; font-size: 0.8rem; font-weight: 600;
+  color: var(--text-dim); display: flex; align-items: center;
+  justify-content: space-between; gap: 0.3rem; cursor: default;
+  min-height: 2.5rem;
+}
+.compare-slot-name {
+  flex: 1; min-width: 0; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.compare-slot:hover { background: var(--surface2); }
+.compare-slot.filled-a { border-style: solid; border-color: #f9c93a; background: rgba(249,201,58,0.08); color: #f9c93a; }
+.compare-slot.filled-b { border-style: solid; border-color: #c84ae8; background: rgba(200,74,232,0.06); color: #c84ae8; }
+.compare-slot.filled-c { border-style: solid; border-color: #4ae8a0; background: rgba(74,232,160,0.06); color: #4ae8a0; }
+.compare-slot-x {
+  background: none; border: none; color: inherit;
+  cursor: pointer; font-size: 0.9rem; line-height: 1; padding: 0 0.1rem;
+  opacity: 0.6;
+}
+.compare-slot-x:hover { opacity: 1; }
+/* ── COMPARE CARDS ── */
+.compare-table-wrap { padding: 0 0 8px; flex: 1; overflow-y: auto; overflow-x: hidden; }
+.cmp-group-hdr {
+  padding: 0.45rem 1.25rem;
+  font-size: 0.63rem; font-weight: 700; letter-spacing: 0.12em;
+  text-transform: uppercase; color: var(--text-dim);
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; z-index: 2;
+  transition: color 0.1s;
+}
+.cmp-group-hdr:hover { color: var(--text-sub); }
+.cmp-chevron { font-size: 0.55rem; transition: transform 0.15s; display: inline-block; }
+.cmp-group-hdr.collapsed .cmp-chevron { transform: rotate(-90deg); }
+.cmp-group-body { }
+.cmp-group-body.collapsed { display: none; }
+.cmp-card {
+  padding: 0.45rem 1.25rem 0.5rem;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.1s;
+}
+.cmp-card:hover { background: var(--surface2); }
+.cmp-card-title {
+  font-size: 0.74rem; color: var(--text); font-weight: 600;
+  margin-bottom: 0.3rem; line-height: 1.35;
+}
+.cmp-card-row {
+  display: flex; align-items: center; gap: 0.45rem;
+  padding: 0.1rem 0;
+}
+.cmp-pin { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.cmp-pin-a { background: #f9c93a; }
+.cmp-pin-b { background: #c84ae8; }
+.cmp-pin-c { background: #4ae8a0; }
+.cmp-dist-name {
+  font-size: 0.7rem; color: var(--text-sub); flex: 1;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.cmp-dist-val {
+  font-size: 0.75rem; color: var(--text); font-weight: 600;
+  font-family: 'IBM Plex Mono', monospace; white-space: nowrap; flex-shrink: 0;
+}
+.cmp-tl { font-size: 0.8rem; flex-shrink: 0; }
+.tl-red  { color: var(--crit); }
+.tl-yel  { color: var(--mod); }
+.tl-grn  { color: var(--ok); }
+.tl-na   { color: var(--text-dim); }
+
+/* ── MAP ── */
+#map { width: 100%; height: 100%; z-index: 0; }
+
+/* ── LEGEND ── */
+.map-legend {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 0.4rem;
+  padding: 0.75rem 1rem;
+  font-family: var(--sans); font-size: 0.72rem;
+  min-width: 180px;
+}
+.legend-title {
+  font-weight: 700; color: var(--text);
+  margin-bottom: 0.6rem; letter-spacing: 0.04em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.legend-bar {
+  height: 8px; border-radius: 3px;
+  margin: 0.5rem 0 0.3rem;
+}
+.legend-labels {
+  display: flex; justify-content: space-between;
+  color: var(--text-dim); gap: 0.5rem;
+}
+.legend-labels span { white-space: nowrap; }
+.legend-dir {
+  display: flex; justify-content: space-between;
+  font-size: 0.65rem; margin-top: 0.4rem; gap: 0.5rem;
+}
+.legend-dir .dir-worse  { color: #f95c7a; white-space: nowrap; }
+.legend-dir .dir-better { color: #3af9a0; white-space: nowrap; }
+
+/* ── LEAFLET TOOLTIP (dark theme) ── */
+.leaflet-tooltip-dark {
+  background: rgba(13,19,32,0.96);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 0.5rem 0.85rem;
+  border-radius: 0 0.4rem 0.4rem 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+  pointer-events: none;
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+.leaflet-tooltip-dark::before { display: none; }
+.leaflet-interactive:focus { outline: none !important; }
+
+/* ── DIGITAL TWIN ── */
+.map-area { position: relative; overflow: hidden; }
+#map, #maplibre-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+#maplibre-container { display: none; z-index: 2; }
+.dt-toggle {
+  font-size: 0.78rem; font-weight: 700; padding: 0.38rem 1rem;
+  border: 1px solid var(--border2); border-radius: 0.3rem;
+  background: none; color: var(--text-sub); cursor: pointer;
+  letter-spacing: 0.05em; transition: all 0.18s; font-family: var(--sans);
+  display: flex; align-items: center; gap: 0.42rem;
+}
+.dt-toggle .dt-icon { font-size: 0.9rem; line-height: 1; }
+.dt-toggle:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.dt-toggle.active { background: var(--accent); color: #070b13; border-color: var(--accent); }
+/* Simulate pane */
+#pane-simulate { flex-direction: column; overflow-y: auto; gap: 0; }
+.sim-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sim-header-title { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
+.sim-header-sub { font-size: 0.75rem; color: var(--text-sub); line-height: 1.5; }
+.sim-section { padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.sim-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
+.sim-commune-sel {
+  width: 100%; padding: 0.42rem 0.65rem; background: var(--surface2);
+  border: 1px solid var(--border2); border-radius: 0.3rem; color: var(--text);
+  font-size: 0.8rem; font-family: var(--sans); cursor: pointer;
+}
+.sim-int-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0; }
+.sim-int-row input[type=checkbox] { accent-color: var(--accent); width: 0.9rem; height: 0.9rem; flex-shrink: 0; cursor: pointer; }
+.sim-int-label { font-size: 0.78rem; color: var(--text-sub); flex: 1; line-height: 1.35; }
+.sim-int-label.on { color: var(--text); }
+.sim-dots { display: flex; gap: 0.22rem; flex-shrink: 0; }
+.sim-dot { width: 0.52rem; height: 0.52rem; border-radius: 50%; background: var(--border2); cursor: pointer; transition: background 0.12s; }
+.sim-dot.on { background: var(--accent); }
+.sim-horizon-row { display: flex; gap: 0.45rem; flex-wrap: wrap; }
+.sim-hz-btn {
+  font-size: 0.74rem; font-weight: 600; padding: 0.28rem 0.65rem;
+  border-radius: 0.25rem; border: 1px solid var(--border2);
+  background: none; color: var(--text-sub); cursor: pointer;
+  font-family: var(--sans); transition: all 0.12s;
+}
+.sim-hz-btn.active { background: var(--accent); color: #070b13; border-color: var(--accent); }
+.sim-run { padding: 0.75rem 1.25rem 0; flex-shrink: 0; }
+.sim-run-btn {
+  width: 100%; padding: 0.58rem; background: var(--accent); color: #070b13;
+  border: none; border-radius: 0.3rem; font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.06em; cursor: pointer; font-family: var(--sans); transition: opacity 0.15s;
+}
+.sim-run-btn:hover { opacity: 0.85; }
+.sim-chart-area { padding: 0.85rem 1.25rem 0; flex-shrink: 0; }
+.sim-canvas { display: block; width: 100%; height: 155px; border-radius: 0.3rem; background: var(--surface2); }
+.sim-leg { display: flex; gap: 0.85rem; margin-top: 0.45rem; flex-wrap: wrap; }
+.sim-leg-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; color: var(--text-sub); }
+.sim-leg-line { width: 1.1rem; height: 2px; border-radius: 1px; flex-shrink: 0; }
+.sim-summary { padding: 0.7rem 1.25rem 1rem; font-size: 0.78rem; color: var(--text-sub); line-height: 1.65; border-top: 1px solid var(--border); }
+.sim-summary strong { color: var(--text); }
+/* MapLibre attribution override for dark theme */
+.maplibregl-ctrl-attrib { background: rgba(7,11,19,0.7) !important; color: var(--text-dim) !important; font-size: 0.62rem !important; }
+.maplibregl-ctrl-attrib a { color: var(--accent) !important; }
+.maplibregl-ctrl-bottom-right { bottom: 2.5rem !important; }
+
+</style>
+<link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+</head>
+<body>
+
+<header>
+  <img src="data:image/png;base64,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" alt="FARI" class="fari-logo">
+  <div class="logo">
+    Brussels <span class="logo-accent">PolicyTwin</span>
+  </div>
+  <div class="header-links">
+    <button class="src-info-btn" onclick="showSourcesInfo()" title="Data sources">ⓘ</button>
+    <button class="dt-toggle" id="dt-toggle-btn" onclick="toggleDigitalTwin()" title="Toggle Digital Twin mode">
+      <span class="dt-icon">⬡</span> Digital Twin
+    </button>
+  </div>
+</header>
+
+<div class="left-panel">
+  <div class="left-scroll">
+    <div class="panel-section">
+      <div class="section-label">Select a Challenge</div>
+      <div class="welcome-text">Choose a topic to see which communes need attention and why.</div>
+    </div>
+    <div class="challenge-grid" id="challenge-grid"></div>
+    <div class="ranking-section panel-section" id="ranking-section">
+      <div class="section-label" id="ranking-label">Most affected</div>
+      <div class="ranking-list" id="ranking-list"></div>
+    </div>
+  </div>
+  <div class="year-section">
+    <div class="section-label">Reference Year</div>
+    <div class="year-row">
+      <span class="year-display" id="year-display">2024</span>
+      <div class="year-slider-wrap">
+        <input type="range" id="year-slider" min="2000" max="2025" value="2024"
+               oninput="onYearChange(+this.value)">
+        <div class="year-range-labels">
+          <span id="yr-min">2000</span><span id="yr-max">2025</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="map-area">
+<div id="map"></div>
+<div id="maplibre-container"></div>
+</div>
+
+<div class="right-panel">
+  <div class="tab-bar">
+    <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">District</button>
+    <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare</button>
+    <button class="tab-btn" id="btn-simulate" onclick="switchTab('simulate')" style="display:none">Simulate</button>
+  </div>
+  <!-- District tab -->
+  <div class="tab-pane" id="pane-district">
+    <div id="district-content">
+      <div class="no-selection">Select a challenge, then click a commune on the map or in the ranking list.</div>
+    </div>
+  </div>
+  <!-- Compare tab -->
+  <div class="tab-pane" id="pane-compare" style="display:none">
+    <div class="compare-hint">
+      Click the map to pin up to <strong>three communes</strong> (A, B, C) — then open any group to compare side by side.
+    </div>
+    <div class="compare-slots-row" id="compare-slots-row"></div>
+    <div class="compare-table-wrap" id="compare-table-wrap">
+      <div class="no-selection">Pin two districts to compare.</div>
+    </div>
+  </div>
+  <!-- Simulate tab -->
+  <div class="tab-pane" id="pane-simulate" style="display:none">
+    <!-- built by renderSimPanel() -->
+  </div>
+</div>
+
+<!-- Challenge hover tooltip -->
+<div class="ch-global-tooltip" id="ch-global-tooltip" style="display:none">
+  <span class="ch-tt-label" id="ch-tt-label"></span>
+  <span class="ch-tt-desc"  id="ch-tt-desc"></span>
+</div>
+
+<!-- Model info modal -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModelInfo()" style="display:none">
+  <div class="modal" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeModelInfo()">×</button>
+    <div id="modal-content"></div>
+  </div>
+</div>
+
+
+<script>
+// =====================================================================
+// CHALLENGE DEFINITIONS
+// =====================================================================
+const CHALLENGES = [
+  {
+    id: 'leaving', icon: '↓', label: 'People leaving',
+    desc: 'More residents are leaving than arriving',
+    kpiLabel: 'Net resident change per year',
+    color: '#e84a6a', rgb: '232,74,106',
+    primaryVar: 'internal_balance_pct', worseIsLower: true,
+    statusLabels: ['Critical','Elevated','Moderate','OK'],
+    drivers: ['hq_qual_basic','hq_build_pre1900','fam_couple_children'],
+    driverLabels: ['Poor housing quality','Very old buildings (pre-1900)','Families with children'],
+    driverReasons: [
+      'Improving housing quality reduces the main reason residents cite for leaving',
+      'Renovating pre-1900 buildings removes a key push factor for families',
+      'More families with roots in the commune signals stronger commitment to stay',
+    ],
+  },
+  {
+    id: 'housing', icon: '⌂', label: 'Housing decline',
+    desc: 'Buildings are old or in poor condition',
+    kpiLabel: 'Share of housing in basic or poor condition',
+    color: '#e87a2a', rgb: '232,122,42',
+    primaryVar: 'hq_qual_basic', worseIsLower: false,
+    statusLabels: ['Critical','Elevated','Moderate','OK'],
+    drivers: ['hq_build_pre1900','hq_renov_by2022','internal_balance_pct'],
+    driverLabels: ['Very old buildings (pre-1900)','Recently renovated homes','Net population change'],
+    driverReasons: [
+      'Older buildings are the primary source of deteriorated housing stock',
+      'Renovation directly converts poor-quality units into standard housing',
+      'Population growth creates demand and incentive to maintain housing quality',
+    ],
+  },
+  {
+    id: 'aging', icon: '⬡', label: 'Aging & isolation',
+    desc: 'Many elderly residents, often living alone',
+    kpiLabel: 'Share of residents aged 65 or older',
+    color: '#4a9de8', rgb: '74,157,232',
+    primaryVar: 'age_pct_65plus', worseIsLower: false,
+    statusLabels: ['Critical','Elevated','Moderate','OK'],
+    drivers: ['fam_alone_65plus_pct','age_pct_80plus','internal_out_pct'],
+    driverLabels: ['Elderly living alone','Residents aged 80+','Residents moving away'],
+    driverReasons: [
+      'Reducing isolation among the elderly is the primary policy lever for this challenge',
+      'The oldest residents drive the concentration of high-care-need elderly people',
+      'Retaining younger residents slows the relative ageing of the commune',
+    ],
+  },
+  {
+    id: 'families', icon: '◎', label: 'Family flight',
+    desc: 'Families with children are moving away',
+    kpiLabel: 'Share of residents who moved to another commune',
+    color: '#4ae89a', rgb: '74,232,154',
+    primaryVar: 'internal_out_pct', worseIsLower: false,
+    statusLabels: ['Critical','Elevated','Moderate','OK'],
+    drivers: ['hq_qual_basic','hq_build_pre1900','fam_couple_children'],
+    driverLabels: ['Poor housing quality','Very old buildings (pre-1900)','Families with children'],
+    driverReasons: [
+      'Poor housing is the top reason families move to neighbouring communes',
+      'Old building stock is directly associated with higher family departure rates',
+      'A higher share of families signals lower flight risk and stronger neighbourhood ties',
+    ],
+  },
+  {
+    id: 'newcomers', icon: '→', label: 'International arrivals',
+    desc: 'High net immigration from abroad',
+    kpiLabel: 'Net international arrivals (people per year)',
+    color: '#c84ae8', rgb: '200,74,232',
+    primaryVar: 'international_balance_num', worseIsLower: false,
+    statusLabels: ['Very high','High','Moderate','Low'],
+    drivers: ['migbg_total','nat_belgian_pct','hq_qual_basic'],
+    driverLabels: ['Residents with migration background','Belgian nationals','Poor housing quality'],
+    driverReasons: [
+      'Existing communities are the strongest predictor of continued international settlement',
+      'A lower Belgian share correlates with higher international arrival rates',
+      'Affordable lower-quality housing draws recent international arrivals to this commune',
+    ],
+  },
+  {
+    id: 'population', icon: '◉', label: 'Population size',
+    desc: 'Residents & long-term trend',
+    kpiLabel: 'Total registered residents',
+    color: '#3ac0f9', rgb: '58,192,249',
+    primaryVar: 'total_population', worseIsLower: true,
+    statusLabels: ['Declining','Shrinking','Stable','Growing'],
+    drivers: ['internal_balance_pct','fam_couple_children','avg_net_income'],
+    driverLabels: ['Net population change','Families with children','Average household income'],
+    driverReasons: [
+      'Net internal migration is the primary short-term driver of population change',
+      'Families with children contribute to natural growth and long-term residential stability',
+      'Higher incomes attract and retain residents, especially working-age adults',
+    ],
+  },
+  {
+    id: 'property', icon: '⌘', label: 'Property wealth',
+    desc: 'Average property tax per household',
+    kpiLabel: 'Average annual property tax per dwelling',
+    color: '#e8c84a', rgb: '232,200,74',
+    primaryVar: 'pri_avg_dwelling', worseIsLower: true,
+    statusLabels: ['Very low','Low','Moderate','High'],
+    drivers: ['avg_net_income','rc_pct_high','hq_qual_basic'],
+    driverLabels: ['Average household income','High-value properties','Poor housing quality'],
+    driverReasons: [
+      'Wealthier residents own higher-value properties, raising the property tax base',
+      'More high-value dwellings directly lifts the average property tax per dwelling',
+      'Poor housing stock suppresses cadastral values and depresses tax revenues',
+    ],
+  },
+  {
+    id: 'income', icon: '€', label: 'Income levels',
+    desc: 'Average declared income & tax base',
+    kpiLabel: 'Average net income per tax declaration',
+    color: '#4ae8c8', rgb: '74,232,200',
+    primaryVar: 'avg_net_income', worseIsLower: true,
+    statusLabels: ['Very low','Low','Moderate','High'],
+    drivers: ['zero_income_rate','pri_avg_dwelling','nat_belgian_pct'],
+    driverLabels: ['Households with no income','Annual property tax','Belgian nationals'],
+    driverReasons: [
+      'Every reduction in zero-income households raises the commune-wide income average',
+      'Higher property wealth correlates with higher-income residents in those properties',
+      'Belgian nationals on average declare higher taxable incomes in Brussels communes',
+    ],
+  },
+  {
+    id: 'construction', icon: '⚒', label: 'Construction activity',
+    desc: 'New housing & renovation permits',
+    kpiLabel: 'New residential dwellings permitted per year',
+    color: '#f97c3a', rgb: '249,124,58',
+    primaryVar: 'bp_res_new_dwellings', worseIsLower: true,
+    statusLabels: ['Stagnant','Low activity','Moderate','Active'],
+    drivers: ['re_apt_median','total_population','avg_net_income'],
+    driverLabels: ['Median apartment price','Total residents','Average household income'],
+    driverReasons: [
+      'Higher apartment prices improve developer returns, making new construction viable',
+      'A larger population base creates housing demand that developers respond to',
+      'Higher household incomes generate demand for new homes that triggers supply',
+    ],
+  },
+  {
+    id: 'real_estate', icon: '◇', label: 'Real estate market',
+    desc: 'Apartment prices & market volume',
+    kpiLabel: 'Median apartment sale price',
+    color: '#a78bfa', rgb: '167,139,250',
+    primaryVar: 're_apt_median', worseIsLower: true,
+    statusLabels: ['Disinvested','Below average','Above average','Premium'],
+    drivers: ['avg_net_income','pri_avg_dwelling','bp_res_new_dwellings'],
+    driverLabels: ['Average household income','Annual property tax','New housing permits'],
+    driverReasons: [
+      'Purchasing power directly determines what buyers are willing and able to pay',
+      'A stronger property wealth base signals an established market with sustained demand',
+      'New supply moderates price growth; low construction sustains upward price pressure',
+    ],
+  },
+];
+
+// =====================================================================
+// COMPARE INDICATORS
+// =====================================================================
+const COMPARE_INDICATORS = [
+  // group: population
+  { varKey: 'internal_balance_pct',      label: 'Net resident movement',                  worseIsLower: true,  group: 'population'    },
+  { varKey: 'internal_out_pct',          label: 'Residents moving away',                  worseIsLower: false, group: 'population'    },
+  { varKey: 'total_population',          label: 'Total residents',                         worseIsLower: true,  group: 'population'    },
+  { varKey: 'international_balance_num', label: 'Net international arrivals',             worseIsLower: false, group: 'population'    },
+  // group: demographics
+  { varKey: 'age_pct_65plus',            label: 'Elderly residents (65+)',                worseIsLower: false, group: 'demographics'  },
+  { varKey: 'fam_couple_children',       label: 'Families with children',                 worseIsLower: true,  group: 'demographics'  },
+  { varKey: 'migbg_total',               label: 'Residents with migration background',    worseIsLower: false, group: 'demographics'  },
+  { varKey: 'nat_belgian_pct',           label: 'Belgian nationals',                      worseIsLower: true,  group: 'demographics'  },
+  // group: income
+  { varKey: 'avg_net_income',            label: 'Average net income',                     worseIsLower: true,  group: 'income'        },
+  { varKey: 'zero_income_rate',          label: 'Households with no income',              worseIsLower: false, group: 'income'        },
+  { varKey: 'tax_per_resident',          label: 'Income tax per resident',                worseIsLower: true,  group: 'income'        },
+  { varKey: 'pri_avg_dwelling',          label: 'Annual property tax per dwelling',       worseIsLower: true,  group: 'income'        },
+  // group: housing
+  { varKey: 'hq_qual_basic',             label: 'Housing in poor condition',              worseIsLower: false, group: 'housing'       },
+  { varKey: 'rc_pct_high',               label: 'High cadastral income (≥ €2,000)',      worseIsLower: false, group: 'housing'       },
+  { varKey: 'rc_pct_low',                label: 'Low cadastral income (< €600)',          worseIsLower: false, group: 'housing'       },
+  // group: construction
+  { varKey: 'bp_res_new_dwellings',      label: 'New residential permits',                worseIsLower: true,  group: 'construction'  },
+  { varKey: 'bp_res_renovations',        label: 'Renovation permits',                     worseIsLower: true,  group: 'construction'  },
+  { varKey: 'bp_nonres_new',             label: 'Non-residential new permits',            worseIsLower: true,  group: 'construction'  },
+  // group: realestate
+  { varKey: 're_apt_median',             label: 'Median apartment price',                 worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_house_median',           label: 'Median house price (all)',               worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_terraced_median',        label: 'Median terraced house price',            worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_detached_median',        label: 'Median detached house price',            worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_apt_transactions',       label: 'Apartment sales per year',               worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_terraced_transactions',  label: 'Terraced house sales per year',          worseIsLower: true,  group: 'realestate'    },
+  { varKey: 're_detached_transactions',  label: 'Detached house sales per year',          worseIsLower: true,  group: 'realestate'    },
+];
+
+const CMP_GROUPS = [
+  { key: 'population',   label: 'Population & Movement' },
+  { key: 'demographics', label: 'Demographics'          },
+  { key: 'income',       label: 'Income & Tax'          },
+  { key: 'housing',      label: 'Housing Quality'       },
+  { key: 'construction', label: 'Construction'          },
+  { key: 'realestate',   label: 'Real Estate Market'    },
+];
+let cmpGroupCollapsed = Object.fromEntries(CMP_GROUPS.map(g => [g.key, true]));
+
+// =====================================================================
+// STATE
+// =====================================================================
+let GEOJSON = null;
+let DATA    = null;
+let VARIABELEN = {};
+let DISTRICTS  = [];
+
+let currentYear      = 2024;
+let activeChallenge  = null;
+let selectedDistrict = null;
+let compareSlots     = [null, null, null];
+let currentTab       = 'district';
+let whatIfOverrides  = {};
+let activeDrivers    = [];
+
+let map, geojsonLayer, basemapLayer, highlightGroup;
+let layerByNiscode = {};
+let currentBasemap = 'dark';
+
+// =====================================================================
+// FORMATTING HELPERS
+// =====================================================================
+function fmtVal(varKey, val) {
+  if (val == null || !Number.isFinite(val)) return '—';
+  const v = VARIABELEN[varKey];
+  const unit = v ? v.unit : '';
+  if (unit === '%')       return (val * 100).toFixed(1) + '%';
+  if (unit === '€')       return '€' + Math.round(val).toLocaleString('en');
+  if (unit === 'inwoners')  return Math.round(val).toLocaleString('en') + ' residents';
+  if (unit === 'personen')  return (val < 0 ? '−' : '') + Math.abs(Math.round(val)).toLocaleString('en') + ' people';
+  if (unit === 'units')     return Math.round(val).toLocaleString('en') + ' dwellings';
+  if (unit === 'm²')        return Math.round(val).toLocaleString('en') + ' m²';
+  if (unit === '€/ha')      return Math.round(val).toLocaleString('en') + ' €/ha';
+  return Number.isInteger(val) ? val.toLocaleString('en') : val.toFixed(2);
+}
+
+function fmtDelta(varKey, delta) {
+  if (!Number.isFinite(delta) || delta === 0) return '—';
+  const v    = VARIABELEN[varKey];
+  const unit = v ? v.unit : '';
+  const sign = delta > 0 ? '+' : '−';
+  const abs  = Math.abs(delta);
+  if (unit === '%')        return sign + (abs * 100).toFixed(1) + ' pp';
+  if (unit === '€')        return sign + '€' + Math.round(abs).toLocaleString('en');
+  if (unit === 'inwoners') return sign + Math.round(abs).toLocaleString('en') + ' residents';
+  if (unit === 'personen') return sign + Math.round(abs).toLocaleString('en') + ' people';
+  if (unit === 'units')    return sign + Math.round(abs).toLocaleString('en') + ' dwellings';
+  return sign + Math.round(abs).toLocaleString('en');
+}
+
+function getKpiSentence(varKey, val) {
+  if (val == null) return '';
+  const p = v => (Math.abs(v) * 100).toFixed(1);
+  const n = v => Math.round(Math.abs(v)).toLocaleString('en');
+  const sentences = {
+    internal_balance_pct:      () => val < 0 ? `On net, <strong>${p(val)}%</strong> more residents left than arrived last year.` : `On net, <strong>${p(val)}%</strong> more residents arrived than left.`,
+    internal_out_pct:          () => `<strong>${p(val)}%</strong> of residents moved to another commune last year.`,
+    internal_in_pct:           () => `<strong>${p(val)}%</strong> of residents arrived from another commune.`,
+    international_balance_num: () => val > 0 ? `Net <strong>${n(val)} people</strong> arrived from abroad last year.` : `Net <strong>${n(val)} people</strong> left to abroad.`,
+    age_pct_65plus:            () => `<strong>${p(val)}%</strong> of residents are 65 or older.`,
+    age_pct_80plus:            () => `<strong>${p(val)}%</strong> of residents are 80 or older.`,
+    total_population:          () => `<strong>${n(val)}</strong> registered residents.`,
+    hq_qual_basic:             () => `<strong>${p(val)}%</strong> of dwellings are in basic or poor condition.`,
+    fam_alone_65plus_pct:      () => `<strong>${p(val)}%</strong> of residents aged 65+ live alone.`,
+    fam_couple_children:       () => `<strong>${p(val)}%</strong> of households are couples with children.`,
+    avg_net_income:            () => `Average declared net income: <strong>€${n(val)}</strong> per tax declaration.`,
+    pri_avg_dwelling:          () => `Average annual property tax: <strong>€${n(val)}</strong> per dwelling.`,
+    re_apt_median:             () => `Median apartment sale price: <strong>€${n(val)}</strong>.`,
+    re_house_median:           () => `Median house sale price: <strong>€${n(val)}</strong>.`,
+    re_terraced_median:        () => `Median terraced/semi-det. price: <strong>€${n(val)}</strong>.`,
+    re_detached_median:        () => `Median detached house price: <strong>€${n(val)}</strong>.`,
+    bp_res_new_dwellings:      () => `<strong>${n(val)}</strong> new residential dwellings permitted last year.`,
+  };
+  return (sentences[varKey] ? sentences[varKey]() : '') ;
+}
+
+function getRelativeLabel(niscode, varKey) {
+  const sorted = DISTRICTS.filter(d => d[varKey] != null).sort((a,b) => b[varKey] - a[varKey]);
+  const rank = sorted.findIndex(d => d.niscode === niscode);
+  const total = sorted.length;
+  if (rank < 0 || total === 0) return '';
+  const pct = rank / (total - 1);
+  if (pct <= 0.1)  return 'Top 10%';
+  if (pct <= 0.25) return 'Top 25%';
+  if (pct <= 0.5)  return 'Above average';
+  if (pct <= 0.75) return 'Below average';
+  if (pct <= 0.9)  return 'Bottom 25%';
+  return 'Bottom 10%';
+}
+
+// =====================================================================
+// COLOR SCALE  (t=0→navy, t=1→red)  — kept for reference
+// =====================================================================
+function colorScale(val, min, max, reversed) {
+  let t = (val - min) / (max - min || 1);
+  if (reversed) t = 1 - t;
+  t = Math.max(0, Math.min(1, t));
+  const stops = [[15,25,90],[40,80,150],[240,235,130],[220,100,30],[190,40,20]];
+  const s = (stops.length - 1) * t;
+  const i = Math.floor(s), f = s - i;
+  const c1 = stops[Math.min(i, stops.length-1)];
+  const c2 = stops[Math.min(i+1, stops.length-1)];
+  return `rgb(${Math.round(c1[0]+(c2[0]-c1[0])*f)},${Math.round(c1[1]+(c2[1]-c1[1])*f)},${Math.round(c1[2]+(c2[2]-c1[2])*f)})`;
+}
+
+// =====================================================================
+// PER-CHALLENGE COLOR SCALE
+// t=0 → dark background (best), t=1 → challenge color (worst)
+// =====================================================================
+function colorScaleCh(val, min, max, worseIsLower, rgb) {
+  let t = (val - min) / (max - min || 1);
+  if (worseIsLower) t = 1 - t;   // flip: low value = worst
+  t = Math.max(0, Math.min(1, t));
+  t = Math.pow(t, 0.75);          // slight gamma boost for mid-range visibility
+  const [cr, cg, cb] = rgb.split(',').map(Number);
+  const bgR = 13, bgG = 19, bgB = 32;
+  return `rgb(${Math.round(bgR+(cr-bgR)*t)},${Math.round(bgG+(cg-bgG)*t)},${Math.round(bgB+(cb-bgB)*t)})`;
+}
+
+// =====================================================================
+// DATA HELPERS
+// =====================================================================
+function getChallengeRange(varKey) {
+  const vals = DISTRICTS.map(d => d[varKey]).filter(v => v != null);
+  return { min: Math.min(...vals), max: Math.max(...vals) };
+}
+
+function getCityAvg(varKey) {
+  const vals = DISTRICTS.map(d => d[varKey]).filter(v => v != null);
+  return vals.length ? vals.reduce((a,b) => a+b, 0) / vals.length : null;
+}
+
+function getDistrictVal(niscode, varKey, year) {
+  const ts = DATA.communes[niscode]?.timeseries?.[varKey] || {};
+  if (ts[year] !== undefined) return ts[year];
+  const years = Object.keys(ts).map(Number).sort((a,b) => Math.abs(a-year) - Math.abs(b-year));
+  return years.length ? ts[years[0]] : null;
+}
+
+function getLastNYears(niscode, varKey, n) {
+  const ts = DATA.communes[niscode]?.timeseries?.[varKey] || {};
+  return Object.keys(ts).map(Number).sort((a,b) => a-b)
+    .slice(-n).map(y => [y, ts[y]]);
+}
+
+function findDistrict(niscode) {
+  return DISTRICTS.find(d => d.niscode === niscode);
+}
+
+// =====================================================================
+// TREND
+// =====================================================================
+function computeTrend(niscode, varKey, worseIsLower) {
+  const pts = getLastNYears(niscode, varKey, 7);
+  if (pts.length < 3) return { direction: 'stable', verdict: 'stable' };
+  const ys = pts.map(p => p[1]);
+  const nn = ys.length;
+  const mx = (nn-1)/2;
+  const my = ys.reduce((a,b) => a+b, 0) / nn;
+  let num = 0, den = 0;
+  ys.forEach((y, i) => { const dx = i - mx; num += dx*(y-my); den += dx*dx; });
+  const slope = den === 0 ? 0 : num/den;
+  const { min, max } = getChallengeRange(varKey);
+  const threshold = (max - min) * 0.02;
+  let direction;
+  if (Math.abs(slope) < threshold) direction = 'stable';
+  else direction = slope > 0 ? 'up' : 'down';
+
+  const verdictMap = {
+    up:     worseIsLower ? 'better' : 'worse',
+    down:   worseIsLower ? 'worse'  : 'better',
+    stable: 'stable',
+  };
+  return { direction, verdict: verdictMap[direction] };
+}
+
+// =====================================================================
+// STATUS
+// =====================================================================
+function getStatusInfo(niscode, varKey, worseIsLower, statusLabels) {
+  const sorted = DISTRICTS
+    .filter(d => d[varKey] != null)
+    .sort((a,b) => worseIsLower ? a[varKey]-b[varKey] : b[varKey]-a[varKey]);
+  const rank = sorted.findIndex(d => d.niscode === niscode);
+  if (rank < 0) return { label: '—', cls: 'status-ok', idx: 3 };
+  const pct = rank / (sorted.length - 1 || 1);
+  const idx = pct < 0.25 ? 0 : pct < 0.5 ? 1 : pct < 0.75 ? 2 : 3;
+  const cls = ['status-crit','status-elev','status-mod','status-ok'][idx];
+  return { label: statusLabels[idx] || '—', cls, idx };
+}
+
+// =====================================================================
+// TRAFFIC LIGHT (for compare table)
+// =====================================================================
+function getTrafficLight(niscode, varKey, worseIsLower) {
+  const sorted = DISTRICTS
+    .filter(d => d[varKey] != null)
+    .sort((a,b) => worseIsLower ? a[varKey]-b[varKey] : b[varKey]-a[varKey]);
+  const rank = sorted.findIndex(d => d.niscode === niscode);
+  if (rank < 0) return { dot: '○', cls: 'tl-na' };
+  const pct = rank / (sorted.length - 1 || 1);
+  if (pct < 0.33) return { dot: '●', cls: 'tl-red' };
+  if (pct < 0.67) return { dot: '●', cls: 'tl-yel' };
+  return { dot: '●', cls: 'tl-grn' };
+}
+
+// =====================================================================
+// PLAIN LABELS & DEFINITIONS
+// =====================================================================
+const PLAIN_LABELS = {
+  internal_balance_pct:      'Net migration balance',
+  internal_balance_num:      'Net migration (persons)',
+  internal_in_pct:           'In-migration rate',
+  internal_in_num:           'In-migration (persons)',
+  internal_out_pct:          'Out-migration rate',
+  internal_out_num:          'Out-migration (persons)',
+  international_balance_num: 'Net international arrivals',
+  international_balance_pct: 'Net international balance %',
+  total_population:          'Total population',
+  age_pct_65plus:            'Share aged 65+',
+  age_pct_80plus:            'Share aged 80+',
+  age_pct_0_17:              'Share under 18',
+  age_pct_18_24:             'Share aged 18–24',
+  age_pct_30_44:             'Share aged 30–44',
+  fam_alone_65plus_pct:      'Elderly living alone (% of 65+)',
+  fam_alone_65plus_hh:       'Lone-elderly households (%)',
+  fam_couple_children:       'Couples with children',
+  fam_couple_no_children:    'Couples without children',
+  fam_single_parent:         'Single-parent households',
+  hq_qual_basic:             'Housing in poor condition',
+  hq_qual_normal:            'Normal-quality housing',
+  hq_qual_luxurious:         'Luxurious housing',
+  hq_build_pre1900:          'Built before 1900',
+  hq_build_1900_1940:        'Built 1900–1940',
+  hq_renov_by2022:           'Renovated by 2021',
+  nat_belgian_pct:           'Belgian nationals',
+  nat_eu14_pct:              'EU14 nationals',
+  migbg_total:               'Residents born abroad',
+  avg_net_income:            'Avg net income / declaration',
+  zero_income_rate:          'Zero income rate',
+  avg_prof_income:           'Avg professional income',
+  tax_per_resident:          'Income tax per resident',
+  pri_avg_dwelling:          'Avg property tax / dwelling',
+  pri_avg_parcel:            'Avg property tax / parcel',
+  rc_pct_high:               'High cadastral income (≥ €2,000)',
+  rc_pct_low:                'Low cadastral income (< €600)',
+  bp_res_new_dwellings:      'New dwellings permitted',
+  bp_res_renovations:        'Renovation permits',
+  bp_nonres_new:             'Non-residential new permits',
+  re_apt_median:             'Median apartment sale price',
+  re_apt_p25:                'Apartment price (25th pct.)',
+  re_apt_transactions:       'Apartment transactions per year',
+  re_house_median:           'Median house sale price',
+  re_house_transactions:     'House transactions per year',
+  re_terraced_median:        'Median terraced house price',
+  re_terraced_transactions:  'Terraced house transactions',
+  re_detached_median:        'Median detached house price',
+  re_detached_transactions:  'Detached house transactions',
+};
+
+const DEFINITIONS = {
+  internal_balance_pct:      'Net internal migration as a share of total population. Negative = more people left for other Belgian communes than arrived. Based on National Register data.',
+  internal_out_pct:          'Share of total population who moved to another Belgian commune in a given year.',
+  international_balance_num: 'Net number of people arriving from or leaving to countries outside Belgium. Positive = net gain.',
+  total_population:          'Total number of registered residents at year-end, from the National Register.',
+  age_pct_65plus:            'Share of residents aged 65 or older. Higher values indicate older populations with greater care and mobility needs.',
+  fam_alone_65plus_pct:      'Share of residents aged 65+ who live alone in a single-person household. A proxy for social isolation risk.',
+  fam_couple_children:       'Share of all households that are couples with dependent children. Declining values may indicate family flight.',
+  hq_qual_basic:             'Share of dwellings classified as basic or poor quality in cadastral records (2024 snapshot).',
+  hq_build_pre1900:          'Share of dwellings built before 1900. Highly correlated with structural renovation needs.',
+  hq_renov_by2022:           'Cumulative share of dwellings that had a major renovation recorded by 2021.',
+  nat_belgian_pct:           'Share of registered residents holding Belgian nationality.',
+  migbg_total:               'Share of residents who were born abroad or have at least one foreign-born parent (2021 census).',
+  avg_net_income:            'Average net taxable income per tax declaration filed in this commune. Source: Statbel income tax data.',
+  zero_income_rate:          'Share of tax declarations with zero declared income — a proxy for economic vulnerability.',
+  tax_per_resident:          'Total income taxes collected in the commune, divided by total registered residents.',
+  pri_avg_dwelling:          'Average annual property tax (précompte immobilier / onroerende voorheffing) per dwelling. Source: SPF Finances.',
+  rc_pct_high:               'Share of dwellings with a cadastral income (RC) of €2,000 or more — indicating higher-value property stock.',
+  rc_pct_low:                'Share of dwellings with a cadastral income below €600 — indicating low-value or deteriorated housing.',
+  bp_res_new_dwellings:      'Number of new residential dwelling units granted building permits in a given year. Source: Statbel building permits.',
+  bp_res_renovations:        'Number of residential renovation permits granted. Indicates investment activity.',
+  re_apt_median:             'Median sale price of apartments sold in the commune in a given year — half sold above, half below. Source: Statbel notarial records.',
+  re_apt_transactions:       'Total number of apartment sale transactions recorded in the commune. Low counts may cause statistical suppression.',
+  re_house_median:           'Median sale price of all house types (combined) sold in the commune. Source: Statbel.',
+  re_house_transactions:     'Total number of house sale transactions recorded in a given year.',
+  re_terraced_median:        'Median sale price of terraced and semi-detached houses (2 or 3 facades). Source: Statbel.',
+  re_terraced_transactions:  'Number of terraced/semi-detached house transactions recorded per year.',
+  re_detached_median:        'Median sale price of detached houses (4+ facades). May be suppressed in dense communes with very few transactions.',
+  re_detached_transactions:  'Number of detached house transactions per year. Often low in dense urban communes.',
+};
+
+// =====================================================================
+// DRIVER META — plain names + one-line subtitles for politicians
+// =====================================================================
+const DRIVER_META = {
+  hq_qual_basic:        { name: 'Poor housing quality',              subtitle: 'Share of dwellings rated below standard in cadastral records' },
+  hq_build_pre1900:     { name: 'Very old buildings (pre-1900)',      subtitle: 'Share built before 1900 — highest structural renovation risk' },
+  fam_couple_children:  { name: 'Families with children',            subtitle: 'Share of households that are couples with dependent children' },
+  hq_renov_by2022:      { name: 'Recently renovated homes',           subtitle: 'Share of dwellings with a major renovation recorded by 2021' },
+  internal_balance_pct: { name: 'Net population change',              subtitle: 'More arrivals than departures = positive; losing residents = negative' },
+  fam_alone_65plus_pct: { name: 'Elderly living alone',               subtitle: 'Share of residents 65+ in single-person households — isolation risk' },
+  age_pct_80plus:       { name: 'Residents aged 80+',                 subtitle: 'Share aged 80 or older — highest care and support needs' },
+  internal_out_pct:     { name: 'Residents moving away',              subtitle: 'Share of population who left for another Belgian commune this year' },
+  migbg_total:          { name: 'Residents with migration background', subtitle: 'Born abroad or with at least one foreign-born parent (2021 census)' },
+  nat_belgian_pct:      { name: 'Belgian nationals',                  subtitle: 'Share of registered residents holding Belgian nationality' },
+  avg_net_income:       { name: 'Average household income',           subtitle: 'Average declared net income per tax return — purchasing power proxy' },
+  rc_pct_high:          { name: 'High cadastral income properties',   subtitle: 'Share of dwellings with cadastral income (revenu cadastral) ≥ €2,000 — wealth signal' },
+  zero_income_rate:     { name: 'Households with no income',          subtitle: 'Share of tax returns declaring zero income — economic vulnerability' },
+  pri_avg_dwelling:     { name: 'Annual property tax',                subtitle: 'Average précompte immobilier (property tax) per dwelling per year' },
+  re_apt_median:        { name: 'Median apartment price',             subtitle: 'Half of apartments sold above, half below — market health signal' },
+  total_population:     { name: 'Total residents',                    subtitle: 'Number of registered residents at year-end (National Register)' },
+  bp_res_new_dwellings: { name: 'New housing permits',                subtitle: 'Residential dwelling units granted building permits this year' },
+};
+
+// =====================================================================
+// CORRELATION & DRIVERS
+// =====================================================================
+function computeCorrelation(xKey, yKey) {
+  const pairs = DISTRICTS
+    .filter(d => d[xKey] != null && d[yKey] != null)
+    .map(d => ({ x: d[xKey], y: d[yKey] }));
+  const nn = pairs.length;
+  if (nn < 3) return 0;
+  const mx = pairs.reduce((s,p) => s+p.x, 0) / nn;
+  const my = pairs.reduce((s,p) => s+p.y, 0) / nn;
+  let sumXY = 0, sumX2 = 0, sumY2 = 0;
+  for (const p of pairs) {
+    const dx = p.x-mx, dy = p.y-my;
+    sumXY += dx*dy; sumX2 += dx*dx; sumY2 += dy*dy;
+  }
+  return (sumX2 === 0 || sumY2 === 0) ? 0 : sumXY / Math.sqrt(sumX2 * sumY2);
+}
+
+function getTopDrivers(primaryVar, count=3) {
+  const corrs = [];
+  for (const key of Object.keys(VARIABELEN)) {
+    if (key === primaryVar) continue;
+    const r = computeCorrelation(primaryVar, key);
+    if (Number.isFinite(r)) corrs.push({ key, r, absR: Math.abs(r) });
+  }
+  corrs.sort((a,b) => b.absR - a.absR);
+  return corrs.slice(0, count);
+}
+
+function corrStrength(r) {
+  const a = Math.abs(r);
+  if (a >= 0.7) return 'Strong';
+  if (a >= 0.4) return 'Moderate';
+  if (a >= 0.2) return 'Weak';
+  return 'Very weak';
+}
+
+function computeLinearCoeff(xKey, yKey) {
+  const pairs = DISTRICTS
+    .filter(d => d[xKey] != null && d[yKey] != null)
+    .map(d => ({ x: d[xKey], y: d[yKey] }));
+  if (pairs.length < 3) return 0;
+  const n = pairs.length;
+  const mx = pairs.reduce((s,p) => s+p.x, 0) / n;
+  const my = pairs.reduce((s,p) => s+p.y, 0) / n;
+  let num = 0, den = 0;
+  for (const p of pairs) { const dx = p.x-mx; num += dx*(p.y-my); den += dx*dx; }
+  return den === 0 ? 0 : num/den;
+}
+
+// =====================================================================
+// SPARKLINE
+// =====================================================================
+function drawSparkline(canvas, pts, color, worseIsLower, highlightIdx = -1, currentYr = null) {
+  if (!canvas || pts.length < 2) return;
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.offsetWidth || canvas.parentElement.offsetWidth || 200;
+  const ch = canvas.offsetHeight || 48;
+  canvas.width  = w * dpr;
+  canvas.height = ch * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, w, ch);
+
+  const vals = pts.map(p => p[1]);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const pad = { t: 4, b: 4, l: 2, r: 2 };
+  const iw = w - pad.l - pad.r;
+  const ih = ch - pad.t - pad.b;
+
+  const spx = (i) => pad.l + (i / (pts.length-1)) * iw;
+  const spy = (v) => pad.t + ih - ((v - minV) / range) * ih;
+
+  // Gradient fill
+  const grad = ctx.createLinearGradient(0, pad.t, 0, pad.t+ih);
+  grad.addColorStop(0, color + '44');
+  grad.addColorStop(1, color + '00');
+  ctx.beginPath();
+  ctx.moveTo(spx(0), spy(vals[0]));
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(spx(i), spy(vals[i]));
+  ctx.lineTo(spx(pts.length-1), pad.t+ih);
+  ctx.lineTo(spx(0), pad.t+ih);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Line
+  ctx.beginPath();
+  ctx.moveTo(spx(0), spy(vals[0]));
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(spx(i), spy(vals[i]));
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2;
+  ctx.lineJoin = 'round';
+  ctx.stroke();
+
+  // Current-year dashed marker
+  if (currentYr !== null) {
+    const ci = pts.findIndex(p => p[0] === currentYr);
+    if (ci >= 0) {
+      ctx.save();
+      ctx.setLineDash([2, 3]);
+      ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(spx(ci), pad.t);
+      ctx.lineTo(spx(ci), pad.t + ih);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.restore();
+    }
+  }
+
+  // Endpoint dot
+  const last = vals[vals.length-1];
+  const lastPct = (last - minV) / range;
+  const dotColor = worseIsLower
+    ? (lastPct > 0.5 ? '#3af9a0' : lastPct > 0.25 ? '#f9c93a' : '#f95c7a')
+    : (lastPct < 0.5 ? '#3af9a0' : lastPct < 0.75 ? '#f9c93a' : '#f95c7a');
+  ctx.beginPath();
+  ctx.arc(spx(pts.length-1), spy(last), 3.5, 0, Math.PI*2);
+  ctx.fillStyle = dotColor;
+  ctx.fill();
+
+  // Hover crosshair + dot overlay
+  if (highlightIdx >= 0 && highlightIdx < pts.length) {
+    const hx = spx(highlightIdx), hy = spy(vals[highlightIdx]);
+    // Vertical hairline
+    ctx.save();
+    ctx.strokeStyle = 'rgba(255,255,255,0.45)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(hx, pad.t); ctx.lineTo(hx, pad.t + ih); ctx.stroke();
+    ctx.restore();
+    // Outer glow
+    ctx.beginPath();
+    ctx.arc(hx, hy, 6, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    ctx.fill();
+    // White ring
+    ctx.beginPath();
+    ctx.arc(hx, hy, 4, 0, Math.PI * 2);
+    ctx.fillStyle = '#fff';
+    ctx.fill();
+    // Color fill
+    ctx.beginPath();
+    ctx.arc(hx, hy, 2.5, 0, Math.PI * 2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  }
+}
+
+// =====================================================================
+// SPARKLINE INTERACTION
+// =====================================================================
+function initSparklineInteraction(canvas, pts, color, worseIsLower, varKey) {
+  if (!canvas || pts.length < 2) return;
+  const tt = document.getElementById('spark-tooltip');
+  let hoverIdx = -1;
+
+  function nearestIdx(e) {
+    const rect = canvas.getBoundingClientRect();
+    const iw = canvas.offsetWidth - 4;
+    const mx = Math.max(0, Math.min(canvas.offsetWidth, e.clientX - rect.left));
+    return Math.max(0, Math.min(pts.length - 1, Math.round((mx - 2) / iw * (pts.length - 1))));
+  }
+
+  canvas.addEventListener('mousemove', e => {
+    const idx = nearestIdx(e);
+    hoverIdx = idx;
+    drawSparkline(canvas, pts, color, worseIsLower, idx, currentYear);
+
+    // Position tooltip above the hovered point
+    const rect = canvas.getBoundingClientRect();
+    const iw   = canvas.offsetWidth - 4;
+    const ih   = canvas.offsetHeight - 8;
+    const vals = pts.map(p => p[1]);
+    const minV = Math.min(...vals), maxV = Math.max(...vals);
+    const range = maxV - minV || 1;
+    const ptX = rect.left + 2 + (idx / (pts.length - 1)) * iw;
+    const ptY = rect.top  + 4 + ih - ((vals[idx] - minV) / range) * ih;
+
+    tt.querySelector('.sp-year').textContent = pts[idx][0];
+    tt.querySelector('.sp-val').textContent  = fmtVal(varKey, pts[idx][1]);
+    tt.style.left            = ptX + 'px';
+    tt.style.top             = ptY + 'px';
+    tt.style.borderLeftColor = color;
+    tt.style.display         = 'block';
+  });
+
+  canvas.addEventListener('mouseleave', () => {
+    hoverIdx = -1;
+    drawSparkline(canvas, pts, color, worseIsLower, -1, currentYear);
+    tt.style.display = 'none';
+  });
+
+  canvas.addEventListener('click', e => {
+    const idx  = nearestIdx(e);
+    const year = pts[idx][0];
+    tt.style.display = 'none';
+    const slider = document.getElementById('year-slider');
+    if (slider) slider.value = year;
+    onYearChange(year);
+  });
+}
+
+// =====================================================================
+// CHALLENGE CARDS
+// =====================================================================
+function buildChallengeCards() {
+  const grid = document.getElementById('challenge-grid');
+  grid.innerHTML = '';
+  for (const ch of CHALLENGES) {
+    const btn = document.createElement('button');
+    btn.className = 'ch-tile';
+    btn.id = 'ch-' + ch.id;
+    btn.style.setProperty('--ch-color', ch.color);
+    btn.style.setProperty('--ch-bg', `rgba(${ch.rgb},0.08)`);
+    btn.innerHTML = `<span class="ch-icon">${ch.icon}</span>`;
+    btn.onmouseenter = () => showChTooltip(ch.id, btn);
+    btn.onmouseleave = hideChTooltip;
+    btn.onclick = () => selectChallenge(ch.id);
+    grid.appendChild(btn);
+  }
+}
+
+function showChTooltip(id, el) {
+  const ch = CHALLENGES.find(c => c.id === id);
+  if (!ch) return;
+  const tt = document.getElementById('ch-global-tooltip');
+  document.getElementById('ch-tt-label').textContent = ch.label;
+  document.getElementById('ch-tt-desc').textContent  = ch.desc;
+  tt.style.setProperty('--ch-color', ch.color);
+  const r = el.getBoundingClientRect();
+  tt.style.left = (r.right + 8) + 'px';
+  tt.style.top  = (r.top + r.height/2 - 30) + 'px';
+  tt.style.display = 'block';
+}
+
+function hideChTooltip() {
+  document.getElementById('ch-global-tooltip').style.display = 'none';
+}
+
+function selectChallenge(id) {
+  const ch = CHALLENGES.find(c => c.id === id);
+  if (!ch) return;
+  activeChallenge = ch;
+  whatIfOverrides = {};
+
+  // Update tile active state
+  document.querySelectorAll('.ch-tile').forEach(t => t.classList.remove('active'));
+  const tile = document.getElementById('ch-' + id);
+  if (tile) tile.classList.add('active');
+
+  // Update year slider range to match this challenge's primary variable
+  const varMeta = DATA?.metadata?.[ch.primaryVar];
+  if (varMeta && varMeta.years && varMeta.years.length) {
+    const yrs    = varMeta.years;
+    const yrMin  = yrs[0];
+    const yrMax  = yrs[yrs.length - 1];
+    const slider = document.getElementById('year-slider');
+    slider.min   = yrMin;
+    slider.max   = yrMax;
+    document.getElementById('yr-min').textContent = yrMin;
+    document.getElementById('yr-max').textContent = yrMax;
+    // Clamp currentYear into the valid range for this challenge
+    const clamped = Math.max(yrMin, Math.min(yrMax, currentYear));
+    currentYear = clamped;
+    slider.value = clamped;
+    document.getElementById('year-display').textContent = clamped;
+    rebuildDistrictsForYear(clamped);
+  }
+
+  // Show ranking section with challenge label
+  const rs = document.getElementById('ranking-section');
+  rs.style.display = 'block';
+  document.getElementById('ranking-label').textContent = ch.label + ' — most affected';
+
+  // Update map + ranking
+  updateMapColors();
+  updateLegend();
+  renderRankingList();
+
+  // Re-render selected district if any
+  if (selectedDistrict) renderDetailPanel(selectedDistrict);
+}
+
+// =====================================================================
+// RANKING LIST
+// =====================================================================
+function renderRankingList() {
+  if (!activeChallenge) return;
+  const ch = activeChallenge;
+  const sorted = [...DISTRICTS]
+    .filter(d => d[ch.primaryVar] != null)
+    .sort((a,b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
+  const list = document.getElementById('ranking-list');
+  list.innerHTML = '';
+  sorted.forEach((d, idx) => {
+    const trend = computeTrend(d.niscode, ch.primaryVar, ch.worseIsLower);
+    const arrowMap = { worse: { sym: '↑', cls: 'arr-worse' }, better: { sym: '↓', cls: 'arr-better' }, stable: { sym: '→', cls: 'arr-stable' } };
+    const arr = arrowMap[trend.verdict] || arrowMap.stable;
+    const item = document.createElement('div');
+    item.className = 'ranking-item' + (d.niscode === selectedDistrict ? ' selected' : '');
+    item.dataset.niscode = d.niscode;
+    item.innerHTML = `
+      <span class="rank-num ${idx < 3 ? 'urgent' : ''}">${idx+1}</span>
+      <span class="rank-name">${d.name}</span>
+      <span class="rank-val">${fmtVal(ch.primaryVar, d[ch.primaryVar])}</span>
+      <span class="rank-arrow ${arr.cls}">${arr.sym}</span>`;
+    item.onclick = () => selectDistrict(d.niscode);
+    list.appendChild(item);
+  });
+}
+
+// =====================================================================
+// SELECT DISTRICT
+// =====================================================================
+function selectDistrict(niscode) {
+  if (currentTab === 'compare') {
+    // Compare mode: fill slots
+    if (compareSlots.includes(niscode)) return;
+    const emptyIdx = compareSlots.indexOf(null);
+    if (emptyIdx !== -1) { compareSlots[emptyIdx] = niscode; }
+    else { compareSlots[0] = compareSlots[1]; compareSlots[1] = compareSlots[2]; compareSlots[2] = niscode; }
+    renderCompareSlots();
+    renderCompareTable();
+  } else {
+    selectedDistrict = niscode;
+    renderDetailPanel(niscode);
+    // Update ranking highlight
+    document.querySelectorAll('.ranking-item').forEach(el => {
+      el.classList.toggle('selected', el.dataset.niscode === niscode);
+    });
+  }
+
+  updateMapColors();
+}
+
+// =====================================================================
+// DETAIL PANEL
+// =====================================================================
+function renderDetailPanel(niscode) {
+  const _tt = document.getElementById('spark-tooltip');
+  if (_tt) _tt.style.display = 'none';
+  if (!activeChallenge) {
+    document.getElementById('district-content').innerHTML =
+      '<div class="no-selection">Select a challenge first.</div>';
+    return;
+  }
+  const ch = activeChallenge;
+  const d  = findDistrict(niscode);
+  if (!d) return;
+
+  const val    = d[ch.primaryVar];
+  const avg    = getCityAvg(ch.primaryVar);
+  const status = getStatusInfo(niscode, ch.primaryVar, ch.worseIsLower, ch.statusLabels);
+  const trend  = computeTrend(niscode, ch.primaryVar, ch.worseIsLower);
+  const trendArrow = { worse: '↑', better: '↓', stable: '→' }[trend.verdict];
+  const trendCls   = { worse: 'arr-worse', better: 'arr-better', stable: 'arr-stable' }[trend.verdict];
+  const sparkPts   = getLastNYears(niscode, ch.primaryVar, Infinity);
+  const kpiSentence = getKpiSentence(ch.primaryVar, val);
+  const def = DEFINITIONS[ch.primaryVar] || '';
+
+  const driversHTML = ch.drivers ? buildDriversHTML(niscode, ch) : '';
+  const whatifHTML  = ch.drivers ? buildWhatIfHTML(niscode, ch)  : '';
+
+  document.getElementById('district-content').innerHTML = `
+    <div class="detail-header">
+      <div class="detail-commune-name">${d.name}</div>
+      <span class="status-badge ${status.cls}">${status.label}</span>
+    </div>
+    <div class="kpi-section">
+      <div class="kpi-label">${ch.kpiLabel}</div>
+      <div class="kpi-row">
+        <span class="kpi-value">${fmtVal(ch.primaryVar, val)}</span>
+
+        ${sparkPts.length >= 3 ? `<span class="rank-arrow ${trendCls}" style="font-size:1.2rem">${trendArrow}</span>` : ''}
+      </div>
+      <div class="kpi-vs-city">Brussels avg: <span class="kpi-city-val">${fmtVal(ch.primaryVar, avg)}</span></div>
+      ${kpiSentence ? `<div class="kpi-sentence">${kpiSentence}</div>` : ''}
+      ${def ? `<div class="kpi-sentence" style="font-size:0.73rem;margin-top:0.3rem;color:var(--text-dim)">${def}</div>` : ''}
+    </div>
+    ${sparkPts.length > 1 ? `<div class="spark-section">
+      <div class="spark-label">Trend &nbsp;${sparkPts[0][0]}–${sparkPts[sparkPts.length-1][0]} &nbsp;·&nbsp; <span style="color:var(--accent);opacity:0.8">click to set year</span></div>
+      <canvas class="sparkline-canvas" id="spark-${niscode}"></canvas>
+    </div>` : ''}
+    ${driversHTML}
+    ${whatifHTML}
+  `;
+
+  // Draw sparkline after DOM update
+  requestAnimationFrame(() => {
+    const canvas = document.getElementById('spark-' + niscode);
+    if (canvas && sparkPts.length > 1) {
+      drawSparkline(canvas, sparkPts, ch.color, ch.worseIsLower, -1, currentYear);
+      initSparklineInteraction(canvas, sparkPts, ch.color, ch.worseIsLower, ch.primaryVar);
+    }
+    attachWhatIfListeners(niscode);
+    updateWhatIfResult(niscode);
+  });
+
+  activeDrivers = ch.drivers ? getTopDrivers(ch.primaryVar, ch.drivers.length) : [];
+}
+
+// =====================================================================
+// DRIVERS HTML
+// =====================================================================
+function buildDriversHTML(niscode, ch) {
+  if (!ch.drivers || ch.drivers.length === 0) return '';
+  let html = `<div class="drivers-section">
+    <div class="whatif-header" style="margin-bottom:0.55rem">
+      <span class="section-label" style="margin:0">Key drivers</span>
+      <button class="whatif-info-btn" onclick="showDriversInfo()" title="Why these factors?">ℹ</button>
+    </div>`;
+  ch.drivers.forEach((drvKey, i) => {
+    const dmeta    = DRIVER_META[drvKey];
+    const label    = ch.driverLabels?.[i] || dmeta?.name || PLAIN_LABELS[drvKey] || drvKey;
+    const subtitle = dmeta?.subtitle || '';
+    const val      = findDistrict(niscode)?.[drvKey];
+    const r        = computeCorrelation(ch.primaryVar, drvKey);
+    const { min: dMin, max: dMax } = getChallengeRange(drvKey);
+    const barPct   = val != null ? Math.round(((val - dMin) / (dMax - dMin || 1)) * 100) : 0;
+    const barColor = r > 0 ? '#f97c3a' : '#3ac0f9';
+    const strength = corrStrength(r);
+    const dirWord  = r > 0 ? 'raises' : 'lowers';
+    html += `
+      <div class="driver-item">
+        <div class="driver-head">
+          <div class="driver-name-wrap">
+            <span class="driver-name">${label}</span>
+            ${subtitle ? `<span class="driver-sub">${subtitle}</span>` : ''}
+          </div>
+          <span class="driver-corr">${strength}</span>
+        </div>
+        <div class="driver-bar-wrap">
+          <div class="driver-bar" style="width:${barPct}%;background:${barColor}"></div>
+        </div>
+        <div class="driver-val">${fmtVal(drvKey, val)} · ${getRelativeLabel(niscode, drvKey)}</div>
+      </div>`;
+  });
+  html += '</div>';
+  return html;
+}
+
+// =====================================================================
+// WHAT-IF HTML
+// =====================================================================
+function buildWhatIfHTML(niscode, ch) {
+  if (!ch.drivers || ch.drivers.length === 0) return '';
+  let html = `
+    <div class="whatif-section">
+      <div class="whatif-header">
+        <span class="section-label" style="margin:0">What if?</span>
+        <button class="whatif-info-btn" onclick="showModelInfo()" title="About this model">ℹ</button>
+      </div>`;
+
+  ch.drivers.forEach((drvKey, i) => {
+    const dmeta    = DRIVER_META[drvKey];
+    const label    = ch.driverLabels?.[i] || dmeta?.name || PLAIN_LABELS[drvKey] || drvKey;
+    const subtitle = ch.driverReasons?.[i] || '';
+    const d        = findDistrict(niscode);
+    const val      = d?.[drvKey];
+    const avg      = getCityAvg(drvKey);
+    const meta     = VARIABELEN[drvKey];
+    const step     = meta?.step || 0.001;
+    const curVal   = whatIfOverrides[drvKey] !== undefined ? whatIfOverrides[drvKey] : (val ?? avg ?? 0);
+    const { min: dMin, max: dMax } = getChallengeRange(drvKey);
+
+    html += `
+      <div class="whatif-item">
+        <div class="whatif-row">
+          <div class="whatif-name-wrap">
+            <span class="whatif-var">${label}</span>
+            ${subtitle ? `<span class="whatif-sub">${subtitle}</span>` : ''}
+          </div>
+          <span class="whatif-vals" id="wi-val-${drvKey}">${fmtVal(drvKey, curVal)}</span>
+        </div>
+        <input type="range" class="whatif-slider"
+               id="wi-${drvKey}"
+               data-key="${drvKey}" data-niscode="${niscode}"
+               min="${dMin}" max="${dMax}" step="${step}"
+               value="${curVal}">
+        <div class="whatif-ref">Brussels avg: ${fmtVal(drvKey, avg)}</div>
+      </div>`;
+  });
+
+  html += `<div class="whatif-result" id="whatif-result">Adjust sliders to simulate impact.</div></div>`;
+  return html;
+}
+
+function attachWhatIfListeners(niscode) {
+  document.querySelectorAll('.whatif-slider').forEach(inp => {
+    inp.oninput = () => onWhatIfSlide(inp);
+  });
+}
+
+function onWhatIfSlide(inputEl) {
+  const key     = inputEl.dataset.key;
+  const niscode = inputEl.dataset.niscode;
+  const val     = parseFloat(inputEl.value);
+  whatIfOverrides[key] = val;
+  const display = document.getElementById('wi-val-' + key);
+  if (display) display.textContent = fmtVal(key, val);
+  updateWhatIfResult(niscode);
+}
+
+// =====================================================================
+// MODEL INFO MODAL
+// =====================================================================
+function showModelInfo() {
+  document.getElementById('modal-content').innerHTML = `
+    <h3>About the What-If Model</h3>
+    <p>This tool uses <strong>bivariate linear regression</strong> across the 19 Brussels communes to estimate
+       how changes in each driver variable are associated with changes in the primary indicator.</p>
+    <p>For each driver, a slope coefficient is computed. Moving a slider by Δ units estimates an impact of
+       <strong>slope × Δ</strong> on the primary indicator.</p>
+    <p><strong>Important limitations:</strong> This is a descriptive, cross-sectional model based on 19 data points.
+       It does not establish causation. Real-world interventions involve many interacting factors.</p>
+    <p>Use these estimates as a starting point for discussion, not as precise predictions.</p>`;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function closeModelInfo() {
+  document.getElementById('modal-overlay').style.display = 'none';
+  document.querySelector('#modal-overlay .modal').style.maxWidth = '';
+}
+
+function showSourcesInfo() {
+  document.querySelector('#modal-overlay .modal').style.maxWidth = '34rem';
+  document.getElementById('modal-content').innerHTML = `
+    <h3>Data Sources</h3>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">IBSA Brussels</span>
+        <a class="src-url" href="https://ibsa.brussels" target="_blank" rel="noopener">ibsa.brussels ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Population counts</span>
+        <span class="src-tag">National Register</span>
+        <span class="src-tag">Age groups</span>
+        <span class="src-tag">Family types</span>
+        <span class="src-tag">Internal migration balance</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">Statbel — Statistics Belgium</span>
+        <a class="src-url" href="https://statbel.fgov.be" target="_blank" rel="noopener">statbel.fgov.be ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Migration background (2021 Census)</span>
+        <span class="src-tag">Median real estate prices</span>
+        <span class="src-tag">Transaction volumes per property type</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">SPF Finances / FOD Financiën</span>
+        <a class="src-url" href="https://finances.belgium.be" target="_blank" rel="noopener">finances.belgium.be ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Average net income</span>
+        <span class="src-tag">Tax declarations</span>
+        <span class="src-tag">Zero-income rate</span>
+        <span class="src-tag">Income tax per resident</span>
+        <span class="src-tag">Cadastral income (RC)</span>
+        <span class="src-tag">Property tax (précompte)</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">urban.brussels</span>
+        <a class="src-url" href="https://urban.brussels" target="_blank" rel="noopener">urban.brussels ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Housing quality ratings</span>
+        <span class="src-tag">Construction era</span>
+        <span class="src-tag">Residential building permits</span>
+        <span class="src-tag">Non-residential permits</span>
+        <span class="src-tag">District boundaries (145 wijken)</span>
+      </div>
+    </div>`;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function showDriversInfo() {
+  document.getElementById('modal-content').innerHTML = `
+    <h3>About Key Drivers</h3>
+    <p>These are the variables with the <strong>strongest statistical association</strong> with this challenge
+       across all 19 Brussels communes, measured by Pearson correlation.</p>
+    <p><strong>The bar</strong> shows where this commune sits relative to all others for that variable —
+       a full bar means this commune is at the Brussels maximum.</p>
+    <p style="margin-top:0.5rem">
+      <span style="color:#f97c3a;font-weight:700">■ Orange bar</span> — higher values of this factor
+      tend to coincide with a worse outcome.<br>
+      <span style="color:#3ac0f9;font-weight:700">■ Blue bar</span> — higher values tend to coincide
+      with a better outcome (protective factor).
+    </p>
+    <p><strong>Correlation strength:</strong> Strong (|r| ≥ 0.7) · Moderate (0.4–0.7) · Weak (0.2–0.4).</p>
+    <p style="color:var(--text-dim);font-size:0.8rem">These are cross-sectional associations across
+       19 communes — they indicate co-occurrence, not causation.</p>`;
+  document.getElementById('modal-overlay').style.display = 'flex';
+}
+
+function updateWhatIfResult(niscode) {
+  const resultEl = document.getElementById('whatif-result');
+  if (!resultEl || !activeChallenge) return;
+  const ch = activeChallenge;
+  const d  = findDistrict(niscode);
+  if (!d) return;
+
+  let totalImpact = 0;
+  const parts = [];
+
+  for (const drvKey of (ch.drivers || [])) {
+    const originalVal  = d[drvKey];
+    const overrideVal  = whatIfOverrides[drvKey];
+    if (overrideVal === undefined || originalVal == null) continue;
+    const delta = overrideVal - originalVal;
+    if (Math.abs(delta) < 1e-10) continue;
+    const coeff = computeLinearCoeff(drvKey, ch.primaryVar);
+    const impact = coeff * delta;
+    totalImpact += impact;
+    const label = ch.driverLabels?.[ch.drivers.indexOf(drvKey)] || PLAIN_LABELS[drvKey] || drvKey;
+    parts.push(`${label}: <strong>${fmtDelta(ch.primaryVar, impact)}</strong>`);
+  }
+
+  if (parts.length === 0) {
+    resultEl.innerHTML = 'Adjust sliders to simulate impact.';
+    return;
+  }
+
+  const totalSign = totalImpact > 0 ? 'impact-pos' : 'impact-neg';
+  const totalFmt  = fmtDelta(ch.primaryVar, totalImpact);
+  resultEl.innerHTML = `
+    ${parts.join('<br>')}
+    <hr style="border:none;border-top:1px solid var(--border);margin:0.5rem 0">
+    Estimated net change in <em>${ch.kpiLabel.toLowerCase()}</em>:
+    <span class="${totalSign}">${totalFmt}</span>`;
+}
+
+// =====================================================================
+// COMPARE
+// =====================================================================
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('pane-district').style.display = tab === 'district' ? 'flex' : 'none';
+  document.getElementById('pane-compare').style.display  = tab === 'compare'  ? 'flex' : 'none';
+  document.getElementById('pane-simulate').style.display = tab === 'simulate' ? 'flex' : 'none';
+  document.getElementById('btn-district').classList.toggle('active', tab === 'district');
+  document.getElementById('btn-compare').classList.toggle('active',  tab === 'compare');
+  document.getElementById('btn-simulate').classList.toggle('active', tab === 'simulate');
+  if (tab === 'compare')  { renderCompareSlots(); renderCompareTable(); }
+  if (tab === 'simulate') { renderSimPanel(); }
+  updateMapColors();
+}
+
+function renderCompareSlots() {
+  const row = document.getElementById('compare-slots-row');
+  const labels = ['A','B','C'];
+  const colors = ['#f9c93a', '#c84ae8', '#4ae8a0'];
+  const clses  = ['filled-a','filled-b','filled-c'];
+  row.innerHTML = '';
+  labels.forEach((lbl, idx) => {
+    const nis  = compareSlots[idx];
+    const name = nis ? (findDistrict(nis)?.name || nis) : `District ${lbl}`;
+    const cls  = nis ? clses[idx] : '';
+    const xBtn = nis ? `<button class="compare-slot-x" onclick="clearCompareSlot(${idx})">×</button>` : '';
+    const col  = nis ? colors[idx] : '';
+    row.innerHTML += `<div class="compare-slot ${cls}" style="${nis ? `color:${col}` : ''}"
+      onmouseenter="showCmpTooltip(this,'${name.replace(/'/g,"\\'")}','${col}')"
+      onmouseleave="hideCmpTooltip()">
+      <span class="compare-slot-name">${name}</span>${xBtn}</div>`;
+  });
+}
+
+function showCmpTooltip(el, name, color) {
+  const nameEl = el.querySelector('.compare-slot-name');
+  if (!nameEl || nameEl.scrollWidth <= nameEl.clientWidth) return;
+  const tt = document.getElementById('cmp-slot-tooltip');
+  if (!tt) return;
+  tt.textContent = name;
+  tt.style.borderBottomColor = color;
+  tt.style.setProperty('--tt-arrow', color);
+  const r = el.getBoundingClientRect();
+  tt.style.left = (r.left + r.width / 2) + 'px';
+  tt.style.top  = r.top + 'px';
+  tt.style.display = 'block';
+}
+function hideCmpTooltip() {
+  const tt = document.getElementById('cmp-slot-tooltip');
+  if (tt) tt.style.display = 'none';
+}
+
+function clearCompareSlot(idx) {
+  compareSlots[idx] = null;
+  renderCompareSlots();
+  renderCompareTable();
+  updateMapColors();
+}
+
+function toggleCmpGroup(key) {
+  cmpGroupCollapsed[key] = !cmpGroupCollapsed[key];
+  const hdr  = document.getElementById('cmp-hdr-' + key);
+  const body = document.getElementById('cmp-body-' + key);
+  if (!hdr || !body) return;
+  hdr.classList.toggle('collapsed', cmpGroupCollapsed[key]);
+  body.classList.toggle('collapsed', cmpGroupCollapsed[key]);
+}
+
+function renderCompareTable() {
+  const wrap = document.getElementById('compare-table-wrap');
+  const [nisA, nisB, nisC] = compareSlots;
+  if (!nisA && !nisB && !nisC) { wrap.innerHTML = '<div class="no-selection">Pin two or three communes to compare.</div>'; return; }
+
+  const slots = [
+    nisA ? { nis: nisA, name: findDistrict(nisA)?.name || nisA, pinCls: 'cmp-pin-a' } : null,
+    nisB ? { nis: nisB, name: findDistrict(nisB)?.name || nisB, pinCls: 'cmp-pin-b' } : null,
+    nisC ? { nis: nisC, name: findDistrict(nisC)?.name || nisC, pinCls: 'cmp-pin-c' } : null,
+  ].filter(Boolean);
+
+  // Build grouped cards
+  let html = '';
+  for (const grp of CMP_GROUPS) {
+    const indicators = COMPARE_INDICATORS.filter(i => i.group === grp.key);
+    if (!indicators.length) continue;
+    const collapsed = !!cmpGroupCollapsed[grp.key];
+
+    let cards = '';
+    for (const ind of indicators) {
+      const { varKey, label, worseIsLower } = ind;
+      let rows = '';
+      for (const s of slots) {
+        const val = findDistrict(s.nis)?.[varKey];
+        const tl  = val != null ? getTrafficLight(s.nis, varKey, worseIsLower) : { dot:'○', cls:'tl-na' };
+        rows += `<div class="cmp-card-row">
+          <span class="cmp-pin ${s.pinCls}"></span>
+          <span class="cmp-dist-name">${s.name}</span>
+          <span class="cmp-dist-val">${val != null ? fmtVal(varKey, val) : '—'}</span>
+          <span class="cmp-tl ${tl.cls}">${tl.dot}</span>
+        </div>`;
+      }
+      cards += `<div class="cmp-card">
+        <div class="cmp-card-title">${label}</div>
+        ${rows}
+      </div>`;
+    }
+
+    html += `
+      <div class="cmp-group-hdr${collapsed ? ' collapsed' : ''}" id="cmp-hdr-${grp.key}" onclick="toggleCmpGroup('${grp.key}')">
+        <span>${grp.label}</span>
+        <span class="cmp-chevron">▼</span>
+      </div>
+      <div class="cmp-group-body${collapsed ? ' collapsed' : ''}" id="cmp-body-${grp.key}">
+        ${cards}
+      </div>`;
+  }
+
+  wrap.innerHTML = html;
+}
+
+// =====================================================================
+// MAP
+// =====================================================================
+function setBasemap(name) {
+  currentBasemap = name;
+  if (basemapLayer) map.removeLayer(basemapLayer);
+  const tiles = {
+    dark:      'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  };
+  basemapLayer = L.tileLayer(tiles[name] || tiles.dark, { maxZoom: 19, attribution: '© CartoDB' });
+  basemapLayer.addTo(map);
+  if (geojsonLayer) geojsonLayer.bringToFront();
+  if (highlightGroup) highlightGroup.bringToFront();
+}
+
+function styleFeature(feature) {
+  const niscode = feature.properties.niscode;
+  const d = findDistrict(niscode);
+  if (!d || !activeChallenge) return { color:'#666666', weight:1.5, fillColor:'#131b2e', fillOpacity:0.7, opacity:0.6 };
+  const ch = activeChallenge;
+  const val = d[ch.primaryVar];
+  const { min, max } = getChallengeRange(ch.primaryVar);
+  const fill = val != null ? colorScaleCh(val, min, max, ch.worseIsLower, ch.rgb) : '#131b2e';
+  return {
+    color: '#666666',
+    weight: 1.5,
+    fillColor: fill,
+    fillOpacity: val != null ? 0.82 : 0.3,
+    opacity: 1,
+  };
+}
+
+function getStatusColor(cls) {
+  return { 'status-crit':'#f95c7a','status-elev':'#f97c3a','status-mod':'#f9c93a','status-ok':'#3af9a0' }[cls] || '#b0c4e0';
+}
+
+function updateTooltip(layer, feature) {
+  const niscode = feature.properties.niscode;
+  const name    = feature.properties.naam || feature.properties.nameDut || niscode;
+  const d       = findDistrict(niscode);
+  if (!d || !activeChallenge) { layer.bindTooltip(name); return; }
+  const ch  = activeChallenge;
+  const val = d[ch.primaryVar];
+  const st  = getStatusInfo(niscode, ch.primaryVar, ch.worseIsLower, ch.statusLabels);
+  layer.bindTooltip(`<strong>${name}</strong><br>${fmtVal(ch.primaryVar, val)}<br><span style="color:${getStatusColor(st.cls)}">${st.label}</span>`,
+    { sticky: true, className: 'leaflet-tooltip-dark' });
+}
+
+function updateMapColors() {
+  if (geojsonLayer) {
+    geojsonLayer.eachLayer(layer => {
+      const f = layer.feature;
+      layer.setStyle(styleFeature(f));
+      updateTooltip(layer, f);
+    });
+    updateHighlights();
+  }
+  updateMapLibreColors();
+}
+
+function initMap() {
+  map = L.map('map', { zoomControl: false, attributionControl: false }).setView([50.854, 4.352], 12);
+  setBasemap('dark');
+
+  geojsonLayer = L.geoJSON(GEOJSON, {
+    style: styleFeature,
+    onEachFeature: (feature, layer) => {
+      updateTooltip(layer, feature);
+      const nis = feature.properties.niscode;
+      layerByNiscode[nis] = layer;
+      layer.on('click', () => { selectDistrict(nis); layer.closeTooltip(); });
+    }
+  }).addTo(map);
+
+  highlightGroup = L.layerGroup().addTo(map);
+
+  buildLegend();
+}
+
+// Highlight styles per slot — all dotted, distinguished by color
+const HIGHLIGHT_STYLES = [
+  { color: '#f9c93a', weight: 3.5, dashArray: '2, 11', lineCap: 'round', opacity: 1 }, // A yellow
+  { color: '#c84ae8', weight: 3.5, dashArray: '2, 11', lineCap: 'round', opacity: 1 }, // B purple
+  { color: '#4ae8a0', weight: 3.5, dashArray: '2, 11', lineCap: 'round', opacity: 1 }, // C teal
+];
+
+function updateHighlights() {
+  if (!highlightGroup) return;
+  highlightGroup.clearLayers();
+
+  if (currentTab === 'district' && selectedDistrict) {
+    const layer = layerByNiscode[selectedDistrict];
+    if (layer?.feature) {
+      L.geoJSON(layer.feature, {
+        style: { color: '#ffffff', weight: 2.5, fillOpacity: 0, opacity: 1 }
+      }).addTo(highlightGroup);
+    }
+  } else if (currentTab === 'compare') {
+    // Draw in reverse order so A (solid) ends up on top
+    for (let i = compareSlots.length - 1; i >= 0; i--) {
+      const nis = compareSlots[i];
+      if (!nis) continue;
+      const layer = layerByNiscode[nis];
+      if (!layer?.feature) continue;
+      const s = HIGHLIGHT_STYLES[i];
+      L.geoJSON(layer.feature, {
+        style: { color: s.color, weight: s.weight, dashArray: s.dashArray, lineCap: s.lineCap, fillOpacity: 0, opacity: s.opacity }
+      }).addTo(highlightGroup);
+    }
+  }
+}
+
+function buildLegend() {
+  const Legend = L.Control.extend({
+    onAdd: function() {
+      const div = L.DomUtil.create('div', 'map-legend');
+      div.id = 'map-legend';
+      div.innerHTML = `<div class="legend-title" id="legend-title">Select a challenge</div>
+        <div class="legend-bar" id="leg-bar"></div>
+        <div class="legend-labels"><span id="leg-min">low</span><span id="leg-max">high</span></div>
+        <div class="legend-dir"><span id="leg-dir-lo"></span><span id="leg-dir-hi"></span></div>`;
+      return div;
+    }
+  });
+  new Legend({ position: 'bottomleft' }).addTo(map);
+}
+
+function updateLegend() {
+  if (!activeChallenge) return;
+  const ch = activeChallenge;
+  const { min, max } = getChallengeRange(ch.primaryVar);
+  const title  = document.getElementById('legend-title');
+  const bar    = document.getElementById('leg-bar');
+  const legMin = document.getElementById('leg-min');
+  const legMax = document.getElementById('leg-max');
+  const dirLo  = document.getElementById('leg-dir-lo');
+  const dirHi  = document.getElementById('leg-dir-hi');
+
+  const darkEnd   = 'rgb(13,19,32)';
+  const brightEnd = `rgb(${ch.rgb})`;
+  const grad = ch.worseIsLower
+    ? `linear-gradient(90deg, ${brightEnd}, ${darkEnd})`
+    : `linear-gradient(90deg, ${darkEnd}, ${brightEnd})`;
+
+  if (title)  title.textContent = ch.label;
+  if (bar)    bar.style.background = grad;
+  if (legMin) legMin.textContent = fmtVal(ch.primaryVar, min);
+  if (legMax) legMax.textContent = fmtVal(ch.primaryVar, max);
+
+  if (dirLo && dirHi) {
+    if (ch.worseIsLower) {
+      // min side is worst (red end), max side is best (navy end)
+      dirLo.className = 'dir-worse';  dirLo.textContent = '▼ Worse';
+      dirHi.className = 'dir-better'; dirHi.textContent = 'Better ▲';
+    } else {
+      // min side is best (navy end), max side is worst (red end)
+      dirLo.className = 'dir-better'; dirLo.textContent = '▲ Better';
+      dirHi.className = 'dir-worse';  dirHi.textContent = 'Worse ▼';
+    }
+  }
+}
+
+// =====================================================================
+// YEAR CHANGE
+// =====================================================================
+function onYearChange(year) {
+  currentYear = year;
+  document.getElementById('year-display').textContent = year;
+  rebuildDistrictsForYear(year);
+  updateMapColors();
+  renderRankingList();
+  if (selectedDistrict) renderDetailPanel(selectedDistrict);
+}
+
+function rebuildDistrictsForYear(year) {
+  DISTRICTS = [];
+  for (const [niscode, c] of Object.entries(DATA.communes)) {
+    const entry = { niscode, name: c.name, nameFr: c.nameFr, nameDut: c.nameDut };
+    for (const varKey of Object.keys(DATA.metadata)) {
+      entry[varKey] = getDistrictVal(niscode, varKey, year);
+    }
+    DISTRICTS.push(entry);
+  }
+}
+
+// =====================================================================
+// LOAD DATA
+// =====================================================================
+async function loadData() {
+  const bust = `?v=${Date.now()}`;
+  const combined = await fetch('data/brussels-combined.json' + bust).then(r => r.json());
+  GEOJSON = combined.geojson;
+  DATA    = combined.data;
+
+  // Build VARIABELEN from metadata
+  for (const [key, meta] of Object.entries(DATA.metadata)) {
+    VARIABELEN[key] = {
+      label:      meta.labelEn || meta.label,
+      unit:       meta.unit,
+      years:      meta.years || [],
+      latestYear: meta.latestYear,
+      min:        meta.min,
+      max:        meta.max,
+      step:       meta.step || 0.001,
+    };
+  }
+
+  // Set initial year — selectChallenge will configure slider range per challenge
+  const defMeta = DATA.metadata['internal_balance_pct'];
+  if (defMeta) currentYear = defMeta.latestYear;
+
+  rebuildDistrictsForYear(currentYear);
+  initMap();
+  buildChallengeCards();
+  selectChallenge('leaving');
+}
+
+window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
+
+loadData().catch(err => {
+  console.error('Load error:', err);
+  document.getElementById('map').innerHTML =
+    `<div style="padding:40px;color:#e84a6a;font-family:monospace;font-size:12px">
+      Failed to load data: ${err.message}<br>
+      Make sure the server is running: <code>npm run build</code> then <code>npx serve .</code>
+    </div>`;
+});
+
+
+// =====================================================================
+// DIGITAL TWIN
+// =====================================================================
+var dtMode     = false;
+var mlMap      = null;
+var dtCommune  = null;
+var dtHorizon  = 10;
+var dtSimDone  = false;
+
+var DT_INTERVENTIONS = [
+  { id: 'edu',       label: 'Education & youth services',
+    effects: { internal_balance_pct: 0.20, internal_out_pct: -0.12, fam_couple_children: 0.008 } },
+  { id: 'transport', label: 'Public transport access',
+    effects: { internal_balance_pct: 0.22, internal_out_pct: -0.14 } },
+  { id: 'housing',   label: 'Affordable housing program',
+    effects: { hq_qual_basic: -0.35, pri_avg_dwelling: 22, internal_balance_pct: 0.12 } },
+  { id: 'green',     label: 'Green space & public realm',
+    effects: { internal_balance_pct: 0.10, internal_out_pct: -0.08 } },
+  { id: 'social',    label: 'Social cohesion services',
+    effects: { international_balance_num: 7, internal_balance_pct: 0.07 } },
+];
+
+var dtIntState = {};
+DT_INTERVENTIONS.forEach(iv => { dtIntState[iv.id] = { checked: false, level: 2 }; });
+
+function toggleDigitalTwin() {
+  dtMode = !dtMode;
+  const btn = document.getElementById('dt-toggle-btn');
+  if (btn) btn.classList.toggle('active', dtMode);
+
+  const leafletMap  = document.getElementById('map');
+  const mlContainer = document.getElementById('maplibre-container');
+  const simBtn      = document.getElementById('btn-simulate');
+
+  leafletMap.style.display  = dtMode ? 'none' : '';
+  mlContainer.style.display = dtMode ? 'block' : 'none';
+  if (simBtn) simBtn.style.display = dtMode ? '' : 'none';
+
+  if (!dtMode && currentTab === 'simulate') switchTab('district');
+
+  if (dtMode) {
+    if (!mlMap) {
+      initMapLibre();
+    } else {
+      if (mlMap.isStyleLoaded()) updateMapLibreColors();
+    }
+    switchTab('simulate');
+  }
+}
+
+function initMapLibre() {
+  mlMap = new maplibregl.Map({
+    container: 'maplibre-container',
+    style: 'https://tiles.openfreemap.org/styles/liberty',
+    center: [4.352, 50.851],
+    zoom: 11.2,
+    pitch: 48,
+    bearing: -12,
+    antialias: true,
+    attributionControl: false,
+  });
+
+  mlMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+
+  mlMap.on('load', () => {
+    inject3DBuildings();
+    addCommuneLayer();
+    renderSimPanel();
+  });
+
+  mlMap.on('click', 'communes-fill', e => {
+    if (e.features.length) {
+      dtCommune = e.features[0].properties.niscode;
+      dtSimDone = false;
+      renderSimPanel();
+      if (mlMap.getLayer('communes-highlight')) {
+        mlMap.setFilter('communes-highlight', ['==', ['get', 'niscode'], dtCommune]);
+      }
+    }
+  });
+
+  mlMap.on('mouseenter', 'communes-fill', () => { mlMap.getCanvas().style.cursor = 'pointer'; });
+  mlMap.on('mouseleave', 'communes-fill', () => { mlMap.getCanvas().style.cursor = ''; });
+}
+
+function inject3DBuildings() {
+  const style    = mlMap.getStyle();
+  const srcNames = Object.keys(style.sources || {});
+  const vtSrc    = srcNames.find(s => s === 'openmaptiles')
+                || srcNames.find(s => !['carto','satellite','esri'].includes(s))
+                || srcNames[0];
+  if (!vtSrc) return;
+
+  const insertBefore = style.layers.find(l =>
+    l.id && (l.id.startsWith('place') || l.id.startsWith('label') || l.id.includes('-label'))
+  )?.id;
+
+  if (!mlMap.getLayer('3d-buildings')) {
+    mlMap.addLayer({
+      id: '3d-buildings',
+      source: vtSrc,
+      'source-layer': 'building',
+      type: 'fill-extrusion',
+      minzoom: 0,
+      paint: {
+        'fill-extrusion-color': [
+          'interpolate', ['linear'],
+          ['coalesce', ['get', 'render_height'], 5],
+          0,   '#0d1320',
+          10,  '#1a2440',
+          25,  '#253656',
+          60,  '#2d4470',
+          120, '#3a5880',
+        ],
+        'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 5],
+        'fill-extrusion-base':   ['coalesce', ['get', 'render_min_height'], 0],
+        'fill-extrusion-opacity': 0.88,
+      }
+    }, insertBefore);
+  }
+}
+
+function addCommuneLayer() {
+  const colored = colorCommuneFeatures();
+  mlMap.addSource('communes', { type: 'geojson', data: colored });
+
+  mlMap.addLayer({
+    id: 'communes-fill', type: 'fill', source: 'communes',
+    paint: { 'fill-color': ['get', 'dtColor'], 'fill-opacity': 0.65 }
+  });
+
+  mlMap.addLayer({
+    id: 'communes-stroke', type: 'line', source: 'communes',
+    paint: { 'line-color': 'rgba(255,255,255,0.15)', 'line-width': 0.8 }
+  });
+
+  mlMap.addLayer({
+    id: 'communes-highlight', type: 'line', source: 'communes',
+    paint: { 'line-color': '#3ac0f9', 'line-width': 2.5, 'line-opacity': 0.9 },
+    filter: ['==', ['get', 'niscode'], '']
+  });
+}
+
+function colorCommuneFeatures() {
+  const ch     = activeChallenge;
+  const cloned = JSON.parse(JSON.stringify(GEOJSON));
+  if (!ch || !DATA) {
+    cloned.features.forEach(f => { f.properties.dtColor = '#1a2440'; });
+    return cloned;
+  }
+  const vals = DISTRICTS.map(d => d[ch.primaryVar]).filter(v => v != null && isFinite(v));
+  const mn = Math.min(...vals), mx = Math.max(...vals);
+  cloned.features.forEach(f => {
+    const nis = String(f.properties.niscode || '');
+    const d   = findDistrict(nis);
+    const v   = d ? d[ch.primaryVar] : null;
+    f.properties.dtColor = (v != null && isFinite(v))
+      ? colorScaleCh(v, mn, mx, ch.worseIsLower, ch.rgb)
+      : '#1a2440';
+  });
+  return cloned;
+}
+
+function updateMapLibreColors() {
+  if (!mlMap || !mlMap.isStyleLoaded()) return;
+  const src = mlMap.getSource('communes');
+  if (!src) return;
+  src.setData(colorCommuneFeatures());
+}
+
+// =====================================================================
+// SIMULATE PANEL
+// =====================================================================
+function renderSimPanel() {
+  const pane = document.getElementById('pane-simulate');
+  if (!pane) return;
+
+  const ch   = activeChallenge || CHALLENGES[0];
+  const nis  = dtCommune;
+  const name = nis ? (findDistrict(nis)?.name || nis) : null;
+
+  const interventionsHtml = DT_INTERVENTIONS.map(iv => {
+    const st   = dtIntState[iv.id];
+    const dots = [1,2,3,4,5].map(n =>
+      `<span class="sim-dot${n <= st.level ? ' on' : ''}" onclick="setDTLevel('${iv.id}',${n})" title="Level ${n}"></span>`
+    ).join('');
+    return `
+      <div class="sim-int-row">
+        <input type="checkbox" id="dti-${iv.id}" ${st.checked ? 'checked' : ''}
+               onchange="setDTCheck('${iv.id}',this.checked)">
+        <label class="sim-int-label${st.checked ? ' on' : ''}" for="dti-${iv.id}">${iv.label}</label>
+        <div class="sim-dots" title="Investment level (1-5)">${dots}</div>
+      </div>`;
+  }).join('');
+
+  const hzHtml = [5,10,15,20].map(h =>
+    `<button class="sim-hz-btn${dtHorizon===h?' active':''}" onclick="setDTHorizon(${h})">${h} yr</button>`
+  ).join('');
+
+  const communeSel = DISTRICTS.length
+    ? `<select class="sim-commune-sel" onchange="setDTCommune(this.value)">
+        <option value="">— Click map or select —</option>
+        ${DISTRICTS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(d =>
+          `<option value="${d.niscode}" ${d.niscode===nis?'selected':''}>${d.name}</option>`
+        ).join('')}
+       </select>`
+    : '';
+
+  pane.innerHTML = `
+    <div class="sim-header">
+      <div class="sim-header-title">Policy Simulation Engine</div>
+      <div class="sim-header-sub">Project how interventions shift the <strong>${ch.label}</strong> indicator.</div>
+    </div>
+    <div class="sim-section">
+      <div class="sim-label">Commune</div>
+      ${communeSel}
+      ${name ? `<div style="font-size:0.78rem;color:var(--text-sub);margin-top:0.35rem">Selected: <strong style="color:var(--text)">${name}</strong></div>` : ''}
+    </div>
+    <div class="sim-section">
+      <div class="sim-label">Interventions &amp; investment level</div>
+      ${interventionsHtml}
+    </div>
+    <div class="sim-section">
+      <div class="sim-label">Projection horizon</div>
+      <div class="sim-horizon-row">${hzHtml}</div>
+    </div>
+    <div class="sim-run">
+      <button class="sim-run-btn" onclick="runSimulation()">Run Simulation</button>
+    </div>
+    <div class="sim-chart-area">
+      <canvas class="sim-canvas" id="sim-canvas"></canvas>
+      <div class="sim-leg">
+        <div class="sim-leg-item"><div class="sim-leg-line" style="background:#3ac0f9"></div>Historical</div>
+        <div class="sim-leg-item"><div class="sim-leg-line" style="border-top:2px dashed rgba(58,192,249,0.5);background:transparent"></div>Baseline</div>
+        <div class="sim-leg-item"><div class="sim-leg-line" style="background:${ch.color}"></div>With interventions</div>
+      </div>
+    </div>
+    <div class="sim-summary" id="sim-summary">
+      Select interventions and a commune, then run the simulation.
+    </div>
+  `;
+
+  if (dtSimDone && nis) runSimulation(true);
+}
+
+function setDTCommune(nis) {
+  dtCommune = nis || null;
+  dtSimDone = false;
+  if (mlMap && mlMap.getLayer('communes-highlight')) {
+    mlMap.setFilter('communes-highlight', ['==', ['get', 'niscode'], dtCommune || '']);
+  }
+  renderSimPanel();
+}
+
+function setDTCheck(id, checked) {
+  dtIntState[id].checked = checked;
+  dtSimDone = false;
+  renderSimPanel();
+}
+
+function setDTLevel(id, level) {
+  dtIntState[id].level = level;
+  dtSimDone = false;
+  renderSimPanel();
+}
+
+function setDTHorizon(h) {
+  dtHorizon = h;
+  dtSimDone = false;
+  renderSimPanel();
+}
+
+// =====================================================================
+// SIMULATION ENGINE
+// =====================================================================
+function computeSlope(pts) {
+  if (pts.length < 2) return 0;
+  const n  = pts.length;
+  const mx = (n - 1) / 2;
+  const my = pts.reduce((s, p) => s + p[1], 0) / n;
+  let num = 0, den = 0;
+  pts.forEach((p, i) => { const dx = i - mx; num += dx * (p[1] - my); den += dx * dx; });
+  return den === 0 ? 0 : num / den;
+}
+
+function computeRegCoeff(xKey, yKey) {
+  const pairs = [];
+  for (const [nis, c] of Object.entries(DATA.communes)) {
+    const tsX = c.timeseries?.[xKey] || {};
+    const tsY = c.timeseries?.[yKey] || {};
+    for (const yr of Object.keys(tsX)) {
+      if (tsY[yr] === undefined) continue;
+      const x = tsX[yr], yv = tsY[yr];
+      if (x != null && yv != null && isFinite(x) && isFinite(yv)) pairs.push({ x, y: yv });
+    }
+  }
+  if (pairs.length < 3) return 0;
+  const n  = pairs.length;
+  const mx = pairs.reduce((s, p) => s + p.x, 0) / n;
+  const my = pairs.reduce((s, p) => s + p.y, 0) / n;
+  let num = 0, den = 0;
+  for (const p of pairs) { const dx = p.x - mx; num += dx * (p.y - my); den += dx * dx; }
+  return den === 0 ? 0 : num / den;
+}
+
+function runSimulation(reuse = false) {
+  const ch  = activeChallenge || CHALLENGES[0];
+  const nis = dtCommune;
+  if (!nis) {
+    const el = document.getElementById('sim-summary');
+    if (el) el.textContent = 'Please select a commune first.';
+    return;
+  }
+
+  const hist = getLastNYears(nis, ch.primaryVar, Infinity);
+  if (hist.length < 2) {
+    const el = document.getElementById('sim-summary');
+    if (el) el.textContent = 'Not enough historical data for this commune.';
+    return;
+  }
+
+  const fitPts = hist.slice(-Math.min(hist.length, 7));
+  const slope  = computeSlope(fitPts);
+  const lastYr = hist[hist.length - 1][0];
+  const lastVl = hist[hist.length - 1][1];
+
+  const baseline  = [];
+  const projected = [];
+
+  const activeIntv = DT_INTERVENTIONS.filter(iv => dtIntState[iv.id].checked);
+  let intEffect = 0;
+  for (const iv of activeIntv) {
+    const lvl = dtIntState[iv.id].level;
+    const eff = iv.effects[ch.primaryVar];
+    if (eff != null && eff !== 0) {
+      intEffect += eff * (lvl / 5) * 0.01;
+    } else {
+      for (const [drvKey, drvEff] of Object.entries(iv.effects)) {
+        if (drvKey === ch.primaryVar) continue;
+        const coeff = computeRegCoeff(drvKey, ch.primaryVar);
+        intEffect += coeff * drvEff * (lvl / 5) * 0.01;
+      }
+    }
+  }
+
+  const ramp = (yr) => Math.min(1, yr / 3);
+
+  for (let i = 1; i <= dtHorizon; i++) {
+    const bv = lastVl + slope * i;
+    const pv = bv + intEffect * ramp(i) * i;
+    baseline.push([lastYr + i, bv]);
+    projected.push([lastYr + i, pv]);
+  }
+
+  dtSimDone = true;
+  drawSimChart(hist, baseline, projected, ch);
+  renderSimSummary(baseline, projected, activeIntv, ch);
+}
+
+function renderSimSummary(baseline, projected, activeIntv, ch) {
+  const el = document.getElementById('sim-summary');
+  if (!el) return;
+
+  const baseEnd = baseline[baseline.length - 1][1];
+  const projEnd = projected[projected.length - 1][1];
+  const delta   = projEnd - baseEnd;
+  const sign    = delta > 0 ? '+' : '';
+  const better  = ch.worseIsLower ? delta > 0 : delta < 0;
+  const vc      = better ? 'var(--ok)' : 'var(--crit)';
+  const verdict = better ? 'improvement' : 'worsening';
+
+  const intList = activeIntv.length
+    ? activeIntv.map(iv => `<strong>${iv.label}</strong> (Level ${dtIntState[iv.id].level})`).join(', ')
+    : 'None selected';
+
+  el.innerHTML = `
+    <strong>Interventions:</strong> ${intList}<br>
+    After <strong>${dtHorizon} years</strong> —
+    Baseline: <strong>${fmtVal(ch.primaryVar, baseEnd)}</strong> &rarr;
+    With policy: <span style="color:${vc};font-weight:700">${fmtVal(ch.primaryVar, projEnd)}</span>
+    (<strong>${sign}${fmtVal(ch.primaryVar, delta)}</strong> —
+    <span style="color:${vc}">${verdict}</span>)<br>
+    <span style="font-size:0.7rem;color:var(--text-dim)">Illustrative OLS model. Results depend on implementation quality and co-factors not captured here.</span>
+  `;
+}
+
+function drawSimChart(hist, baseline, projected, ch) {
+  const canvas = document.getElementById('sim-canvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const W   = canvas.offsetWidth  || (canvas.parentElement?.offsetWidth || 260);
+  const H   = canvas.offsetHeight || 155;
+  canvas.width  = W * dpr;
+  canvas.height = H * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  ctx.clearRect(0, 0, W, H);
+
+  const allVals = [...hist, ...baseline, ...projected].map(p => p[1]).filter(v => isFinite(v));
+  if (allVals.length === 0) return;
+
+  const pad   = { t: 12, b: 26, l: 46, r: 10 };
+  const iw    = W - pad.l - pad.r;
+  const ih    = H - pad.t - pad.b;
+  const allYr = [...hist, ...baseline].map(p => p[0]);
+  const mnYr  = Math.min(...allYr);
+  const mxYr  = Math.max(...allYr);
+  const vPad  = (Math.max(...allVals) - Math.min(...allVals)) * 0.06;
+  const mnV   = Math.min(...allVals) - vPad;
+  const mxV   = Math.max(...allVals) + vPad;
+  const rngV  = mxV - mnV || 1;
+  const rngYr = mxYr - mnYr || 1;
+
+  const px = yr => pad.l + ((yr - mnYr) / rngYr) * iw;
+  const py = v  => pad.t + ih - ((v  - mnV)  / rngV)  * ih;
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.t + (ih / 4) * i;
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iw, y); ctx.stroke();
+  }
+
+  ctx.fillStyle = 'rgba(176,196,224,0.65)';
+  ctx.font = '9px "Montserrat", sans-serif';
+  ctx.textAlign = 'right';
+  for (let i = 0; i <= 4; i++) {
+    const v = mnV + (rngV / 4) * (4 - i);
+    const y = pad.t + (ih / 4) * i;
+    ctx.fillText(fmtVal(ch.primaryVar, v), pad.l - 4, y + 3);
+  }
+
+  ctx.textAlign = 'center';
+  const allYrsUniq = [...new Set([...hist, ...baseline].map(p => p[0]))].sort((a,b) => a-b);
+  const step = Math.max(1, Math.ceil(allYrsUniq.length / 5));
+  allYrsUniq.forEach((yr, i) => {
+    if (i % step === 0 || i === allYrsUniq.length - 1) {
+      ctx.fillText(yr, px(yr), H - pad.b + 14);
+    }
+  });
+
+  if (hist.length && baseline.length) {
+    const divX = px(hist[hist.length - 1][0]);
+    ctx.save();
+    ctx.setLineDash([2, 4]);
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(divX, pad.t); ctx.lineTo(divX, pad.t + ih); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  if (hist.length >= 2) {
+    ctx.beginPath();
+    ctx.moveTo(px(hist[0][0]), py(hist[0][1]));
+    hist.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
+    ctx.strokeStyle = '#3ac0f9';
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  const bBridge = hist.length ? [hist[hist.length - 1], ...baseline] : baseline;
+  if (bBridge.length >= 2) {
+    ctx.save();
+    ctx.setLineDash([5, 4]);
+    ctx.beginPath();
+    ctx.moveTo(px(bBridge[0][0]), py(bBridge[0][1]));
+    bBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
+    ctx.strokeStyle = 'rgba(58,192,249,0.45)';
+    ctx.lineWidth = 1.5;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  const pBridge = hist.length ? [hist[hist.length - 1], ...projected] : projected;
+  const [cr, cg, cb] = ch.rgb.split(',').map(Number);
+
+  if (pBridge.length >= 2 && bBridge.length >= 2) {
+    ctx.beginPath();
+    ctx.moveTo(px(pBridge[0][0]), py(pBridge[0][1]));
+    pBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
+    for (let i = bBridge.length - 1; i >= 0; i--) ctx.lineTo(px(bBridge[i][0]), py(bBridge[i][1]));
+    ctx.closePath();
+    ctx.fillStyle = `rgba(${cr},${cg},${cb},0.12)`;
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(px(pBridge[0][0]), py(pBridge[0][1]));
+    pBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
+    ctx.strokeStyle = `rgb(${cr},${cg},${cb})`;
+    ctx.lineWidth = 2;
+    ctx.lineJoin = 'round';
+    ctx.stroke();
+  }
+
+  if (hist.length) {
+    const lp = hist[hist.length - 1];
+    ctx.beginPath(); ctx.arc(px(lp[0]), py(lp[1]), 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#3ac0f9'; ctx.fill();
+  }
+  if (projected.length) {
+    const ep = projected[projected.length - 1];
+    ctx.beginPath(); ctx.arc(px(ep[0]), py(ep[1]), 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgb(${cr},${cg},${cb})`; ctx.fill();
+  }
+}
+
+</script>
+<div id="spark-tooltip"><span class="sp-year"></span><span class="sp-val"></span><span class="sp-hint">↵ set year</span></div>
+<div id="cmp-slot-tooltip"></div>
+</body>
+</html>

@@ -1,6 +1,29 @@
+# ── Source data (large, already processed into brussels-combined.json) ──
+data/Characteristics Cadastral Data/
+data/Cadastral Income/
+data/*.xlsx
+data/*.csv
+
+# ── Generated build intermediates (recreated by npm run build) ──
+data/brussels-data.json
+data/brussels-merged.geojson
+data/brussels-districts.geojson
+data/brussels-communes.geojson
+
+# ── Raw source geometry (already processed) ──
+UrbAdm_StatisticalUnits.gml
+UrbISAdminUnits_31370_SHP_04000_20251017/
+
+# ── Build tooling ──
 node_modules/
-.claude/
-~$*.xlsx
-*.tmp
+package-lock.json
+
+# ── Local scratch ──
+compact_data.json
+plan-statistical-models.md
+minimize.mjs
+dt-patch.mjs
+
+# ── OS ──
 .DS_Store
 Thumbs.db
