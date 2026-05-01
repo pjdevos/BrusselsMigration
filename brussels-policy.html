@@ -528,9 +528,11 @@ input[type=range].whatif-slider {
 
 /* ── DIGITAL TWIN ── */
 .map-area { position: relative; overflow: hidden; }
+#map-legend { position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 1000; }
 #map, #maplibre-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 #maplibre-container { display: none; z-index: 2; }
-.dt-toggle {
+/* .dt-toggle removed — replaced by legend-3d-btn */
+.dt-toggle-REMOVED {
   font-size: 0.78rem; font-weight: 700; padding: 0.38rem 1rem;
   border: 1px solid var(--border2); border-radius: 0.3rem;
   background: none; color: var(--text-sub); cursor: pointer;
@@ -542,45 +544,57 @@ input[type=range].whatif-slider {
 .dt-toggle.active { background: var(--accent); color: #070b13; border-color: var(--accent); }
 /* Simulate pane */
 #pane-simulate { flex-direction: column; overflow-y: auto; gap: 0; }
-.sim-header { padding: 1rem 1.25rem 0.75rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.sim-header-title { font-size: 0.88rem; font-weight: 700; color: var(--text); margin-bottom: 0.2rem; }
-.sim-header-sub { font-size: 0.75rem; color: var(--text-sub); line-height: 1.5; }
-.sim-section { padding: 0.85rem 1.25rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-.sim-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.6rem; }
-.sim-commune-sel {
-  width: 100%; padding: 0.42rem 0.65rem; background: var(--surface2);
-  border: 1px solid var(--border2); border-radius: 0.3rem; color: var(--text);
-  font-size: 0.8rem; font-family: var(--sans); cursor: pointer;
+.dt-metric-strip { padding: 0.75rem 1rem 0.6rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.dt-metric-label { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.4rem; }
+.dt-metric-chips { display: flex; flex-wrap: wrap; gap: 0.3rem; }
+.dt-chip { font-size: 0.68rem; padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 99px; cursor: pointer; color: var(--text-sub); background: transparent; transition: all 0.15s; line-height: 1.4; }
+.dt-chip:hover { color: var(--text); border-color: var(--text-dim); }
+/* dt-tog-btn removed */
+.dt-spotlight { flex: 1; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.65rem; min-height: 0; }
+.dt-no-sel { color: var(--text-dim); font-size: 0.82rem; text-align: center; margin: auto; }
+.dt-spot-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
+.dt-spot-name { font-size: 0.95rem; font-weight: 700; color: var(--text); line-height: 1.2; }
+.dt-spot-kpis { display: flex; flex-direction: column; gap: 0.15rem; }
+.dt-kpi-row { display: flex; align-items: baseline; gap: 0.35rem; font-size: 0.76rem; }
+.dt-kpi-label { color: var(--text-sub); flex: 1; min-width: 0; line-height: 1.3; }
+.dt-kpi-val { color: var(--text); font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+.dt-kpi-arr { font-size: 0.82rem; flex-shrink: 0; }
+.dt-kpi-avg { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 0.3rem; }
+.dt-view-btn { font-size: 0.72rem; padding: 0.28rem 0.7rem; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--text-sub); background: transparent; }
+.dt-view-btn:hover { color: var(--accent); border-color: var(--accent); }
+.dt-status-strip { padding: 0.6rem 1rem 0.8rem; border-top: 1px solid var(--border); flex-shrink: 0; }
+.dt-status-counts { display: flex; gap: 0.3rem; }
+.dt-sc-item { flex: 1; text-align: center; padding: 0.25rem 0.15rem; }
+.dt-sc-n { font-size: 1rem; font-weight: 700; font-family: var(--mono); }
+.dt-sc-lbl { font-size: 0.6rem; color: var(--text-dim); line-height: 1.3; }
+/* Leaflet pulse rings for top-4 challenge communes */
+@keyframes lf-pulse {
+  0%   { transform: scale(0.2); opacity: 0.9; }
+  100% { transform: scale(3.8); opacity: 0; }
 }
-.sim-int-row { display: flex; align-items: center; gap: 0.6rem; padding: 0.3rem 0; }
-.sim-int-row input[type=checkbox] { accent-color: var(--accent); width: 0.9rem; height: 0.9rem; flex-shrink: 0; cursor: pointer; }
-.sim-int-label { font-size: 0.78rem; color: var(--text-sub); flex: 1; line-height: 1.35; }
-.sim-int-label.on { color: var(--text); }
-.sim-dots { display: flex; gap: 0.22rem; flex-shrink: 0; }
-.sim-dot { width: 0.52rem; height: 0.52rem; border-radius: 50%; background: var(--border2); cursor: pointer; transition: background 0.12s; }
-.sim-dot.on { background: var(--accent); }
-.sim-horizon-row { display: flex; gap: 0.45rem; flex-wrap: wrap; }
-.sim-hz-btn {
-  font-size: 0.74rem; font-weight: 600; padding: 0.28rem 0.65rem;
-  border-radius: 0.25rem; border: 1px solid var(--border2);
-  background: none; color: var(--text-sub); cursor: pointer;
-  font-family: var(--sans); transition: all 0.12s;
+.lf-pulse-wrap { position: relative; width: 0; height: 0; pointer-events: none; }
+.lf-pulse-ring {
+  position: absolute;
+  width: 36px; height: 36px;
+  margin-left: -18px; margin-top: -18px;
+  border-radius: 50%;
+  border: 2px solid var(--lf-pc, #e84a6a);
+  animation: lf-pulse 3.2s ease-out infinite;
+  pointer-events: none;
 }
-.sim-hz-btn.active { background: var(--accent); color: #070b13; border-color: var(--accent); }
-.sim-run { padding: 0.75rem 1.25rem 0; flex-shrink: 0; }
-.sim-run-btn {
-  width: 100%; padding: 0.58rem; background: var(--accent); color: #070b13;
-  border: none; border-radius: 0.3rem; font-size: 0.82rem; font-weight: 700;
-  letter-spacing: 0.06em; cursor: pointer; font-family: var(--sans); transition: opacity 0.15s;
+.lf-pulse-ring:nth-child(2) { animation-delay: 1.07s; }
+.lf-pulse-ring:nth-child(3) { animation-delay: 2.13s; }
+
+.legend-3d-btn {
+  display: block; margin-bottom: 0.5rem; width: 100%;
+  font-size: 0.7rem; padding: 0.22rem 0; border: 1px solid #4a9de8;
+  border-radius: 4px; cursor: pointer; color: #4a9de8;
+  background: transparent; font-family: var(--mono); letter-spacing: 0.06em;
+  transition: all 0.12s;
 }
-.sim-run-btn:hover { opacity: 0.85; }
-.sim-chart-area { padding: 0.85rem 1.25rem 0; flex-shrink: 0; }
-.sim-canvas { display: block; width: 100%; height: 155px; border-radius: 0.3rem; background: var(--surface2); }
-.sim-leg { display: flex; gap: 0.85rem; margin-top: 0.45rem; flex-wrap: wrap; }
-.sim-leg-item { display: flex; align-items: center; gap: 0.35rem; font-size: 0.68rem; color: var(--text-sub); }
-.sim-leg-line { width: 1.1rem; height: 2px; border-radius: 1px; flex-shrink: 0; }
-.sim-summary { padding: 0.7rem 1.25rem 1rem; font-size: 0.78rem; color: var(--text-sub); line-height: 1.65; border-top: 1px solid var(--border); }
-.sim-summary strong { color: var(--text); }
+.legend-3d-btn:hover { background: rgba(74,157,232,0.12); }
+.legend-3d-btn.active { background: #4a9de8; color: #070b13; border-color: #4a9de8; }
+
 /* MapLibre attribution override for dark theme */
 .maplibregl-ctrl-attrib { background: rgba(7,11,19,0.7) !important; color: var(--text-dim) !important; font-size: 0.62rem !important; }
 .maplibregl-ctrl-attrib a { color: var(--accent) !important; }
@@ -599,9 +613,7 @@ input[type=range].whatif-slider {
   </div>
   <div class="header-links">
     <button class="src-info-btn" onclick="showSourcesInfo()" title="Data sources">ⓘ</button>
-    <button class="dt-toggle" id="dt-toggle-btn" onclick="toggleDigitalTwin()" title="Toggle Digital Twin mode">
-      <span class="dt-icon">⬡</span> Digital Twin
-    </button>
+
   </div>
 </header>
 
@@ -635,13 +647,20 @@ input[type=range].whatif-slider {
 <div class="map-area">
 <div id="map"></div>
 <div id="maplibre-container"></div>
+<div class="map-legend" id="map-legend">
+  <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
+  <div class="legend-title" id="legend-title">Select a challenge</div>
+  <div class="legend-bar" id="leg-bar"></div>
+  <div class="legend-labels"><span id="leg-min">low</span><span id="leg-max">high</span></div>
+  <div class="legend-dir"><span id="leg-dir-lo"></span><span id="leg-dir-hi"></span></div>
+</div>
 </div>
 
 <div class="right-panel">
   <div class="tab-bar">
     <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">District</button>
     <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare</button>
-    <button class="tab-btn" id="btn-simulate" onclick="switchTab('simulate')" style="display:none">Simulate</button>
+
   </div>
   <!-- District tab -->
   <div class="tab-pane" id="pane-district">
@@ -659,10 +678,7 @@ input[type=range].whatif-slider {
       <div class="no-selection">Pin two districts to compare.</div>
     </div>
   </div>
-  <!-- Simulate tab -->
-  <div class="tab-pane" id="pane-simulate" style="display:none">
-    <!-- built by renderSimPanel() -->
-  </div>
+
 </div>
 
 <!-- Challenge hover tooltip -->
@@ -902,6 +918,7 @@ let activeDrivers    = [];
 
 let map, geojsonLayer, basemapLayer, highlightGroup;
 let layerByNiscode = {};
+let pulseGroup = null;
 let currentBasemap = 'dark';
 
 // =====================================================================
@@ -1484,6 +1501,8 @@ function selectChallenge(id) {
 
   // Re-render selected district if any
   if (selectedDistrict) renderDetailPanel(selectedDistrict);
+
+  updatePulseMarkers();
 }
 
 // =====================================================================
@@ -1848,12 +1867,9 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('pane-district').style.display = tab === 'district' ? 'flex' : 'none';
   document.getElementById('pane-compare').style.display  = tab === 'compare'  ? 'flex' : 'none';
-  document.getElementById('pane-simulate').style.display = tab === 'simulate' ? 'flex' : 'none';
   document.getElementById('btn-district').classList.toggle('active', tab === 'district');
   document.getElementById('btn-compare').classList.toggle('active',  tab === 'compare');
-  document.getElementById('btn-simulate').classList.toggle('active', tab === 'simulate');
-  if (tab === 'compare')  { renderCompareSlots(); renderCompareTable(); }
-  if (tab === 'simulate') { renderSimPanel(); }
+  if (tab === 'compare') { renderCompareSlots(); renderCompareTable(); }
   updateMapColors();
 }
 
@@ -2075,18 +2091,7 @@ function updateHighlights() {
 }
 
 function buildLegend() {
-  const Legend = L.Control.extend({
-    onAdd: function() {
-      const div = L.DomUtil.create('div', 'map-legend');
-      div.id = 'map-legend';
-      div.innerHTML = `<div class="legend-title" id="legend-title">Select a challenge</div>
-        <div class="legend-bar" id="leg-bar"></div>
-        <div class="legend-labels"><span id="leg-min">low</span><span id="leg-max">high</span></div>
-        <div class="legend-dir"><span id="leg-dir-lo"></span><span id="leg-dir-hi"></span></div>`;
-      return div;
-    }
-  });
-  new Legend({ position: 'bottomleft' }).addTo(map);
+  // Legend is a static HTML div in .map-area — nothing to build
 }
 
 function updateLegend() {
@@ -2194,57 +2199,58 @@ loadData().catch(err => {
 // =====================================================================
 // DIGITAL TWIN
 // =====================================================================
-var dtMode     = false;
-var mlMap      = null;
-var dtCommune  = null;
-var dtHorizon  = 10;
-var dtSimDone  = false;
+var dtMode       = false;
+var mlMap        = null;
+var dtCommune    = null;
+var dtChallenge  = null;
+var dtPulseRaf   = null;
+var dtPulsePhase = 0;
 
-var DT_INTERVENTIONS = [
-  { id: 'edu',       label: 'Education & youth services',
-    effects: { internal_balance_pct: 0.20, internal_out_pct: -0.12, fam_couple_children: 0.008 } },
-  { id: 'transport', label: 'Public transport access',
-    effects: { internal_balance_pct: 0.22, internal_out_pct: -0.14 } },
-  { id: 'housing',   label: 'Affordable housing program',
-    effects: { hq_qual_basic: -0.35, pri_avg_dwelling: 22, internal_balance_pct: 0.12 } },
-  { id: 'green',     label: 'Green space & public realm',
-    effects: { internal_balance_pct: 0.10, internal_out_pct: -0.08 } },
-  { id: 'social',    label: 'Social cohesion services',
-    effects: { international_balance_num: 7, internal_balance_pct: 0.07 } },
-];
 
-var dtIntState = {};
-DT_INTERVENTIONS.forEach(iv => { dtIntState[iv.id] = { checked: false, level: 2 }; });
+function updatePulseMarkers() {
+  if (!map || !activeChallenge || !DISTRICTS.length || !GEOJSON) return;
+  if (!pulseGroup) { pulseGroup = L.layerGroup().addTo(map); }
+  pulseGroup.clearLayers();
+
+  const ch = activeChallenge;
+  const sorted = [...DISTRICTS]
+    .filter(d => d[ch.primaryVar] != null)
+    .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar] - b[ch.primaryVar] : b[ch.primaryVar] - a[ch.primaryVar]);
+
+  sorted.slice(0, 4).forEach(d => {
+    const feature = GEOJSON.features.find(f => String(f.properties.niscode) === String(d.niscode));
+    if (!feature) return;
+    let [lng, lat] = computeCentroid(feature);
+    if (String(d.niscode) === '21004') lat += 0.012;
+    const rings = '<div class="lf-pulse-ring" style="--lf-pc:' + ch.color + '"></div>'
+                + '<div class="lf-pulse-ring" style="--lf-pc:' + ch.color + '"></div>'
+                + '<div class="lf-pulse-ring" style="--lf-pc:' + ch.color + '"></div>';
+    const icon = L.divIcon({
+      className: '',
+      html: '<div class="lf-pulse-wrap">' + rings + '</div>',
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+    });
+    L.marker([lat, lng], { icon, interactive: false }).addTo(pulseGroup);
+  });
+}
 
 function toggleDigitalTwin() {
   dtMode = !dtMode;
-  const btn = document.getElementById('dt-toggle-btn');
-  if (btn) btn.classList.toggle('active', dtMode);
-
-  const leafletMap  = document.getElementById('map');
-  const mlContainer = document.getElementById('maplibre-container');
-  const simBtn      = document.getElementById('btn-simulate');
-
-  leafletMap.style.display  = dtMode ? 'none' : '';
-  mlContainer.style.display = dtMode ? 'block' : 'none';
-  if (simBtn) simBtn.style.display = dtMode ? '' : 'none';
-
-  if (!dtMode && currentTab === 'simulate') switchTab('district');
-
+  const btn = document.getElementById('legend-3d-btn');
+  if (btn) { btn.classList.toggle('active', dtMode); btn.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
+  document.getElementById('map').style.display                = dtMode ? 'none' : '';
+  document.getElementById('maplibre-container').style.display = dtMode ? 'block' : 'none';
   if (dtMode) {
-    if (!mlMap) {
-      initMapLibre();
-    } else {
-      if (mlMap.isStyleLoaded()) updateMapLibreColors();
-    }
-    switchTab('simulate');
+    if (!mlMap) initMapLibre();
+    else if (mlMap.isStyleLoaded()) updateMapLibreColors();
   }
 }
 
 function initMapLibre() {
   mlMap = new maplibregl.Map({
     container: 'maplibre-container',
-    style: 'https://tiles.openfreemap.org/styles/liberty',
+    style: 'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
     center: [4.352, 50.851],
     zoom: 11.2,
     pitch: 48,
@@ -2252,8 +2258,6 @@ function initMapLibre() {
     antialias: true,
     attributionControl: false,
   });
-
-  mlMap.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
 
   mlMap.on('load', () => {
     inject3DBuildings();
@@ -2332,10 +2336,30 @@ function addCommuneLayer() {
     paint: { 'line-color': '#3ac0f9', 'line-width': 2.5, 'line-opacity': 0.9 },
     filter: ['==', ['get', 'niscode'], '']
   });
+
+  mlMap.addSource('communes-pulse-src', { type: 'geojson', data: buildPulseGeoJSON() });
+  mlMap.addLayer({
+    id: 'communes-pulse', type: 'circle', source: 'communes-pulse-src',
+    paint: {
+      'circle-radius': 8, 'circle-color': 'transparent',
+      'circle-stroke-width': 2.5, 'circle-stroke-color': '#e84a6a',
+      'circle-stroke-opacity': 0.85,
+    }
+  });
+  mlMap.addLayer({
+    id: 'communes-pulse2', type: 'circle', source: 'communes-pulse-src',
+    paint: {
+      'circle-radius': 19, 'circle-color': 'transparent',
+      'circle-stroke-width': 1.5, 'circle-stroke-color': '#e84a6a',
+      'circle-stroke-opacity': 0.35,
+    }
+  });
+
+  startPulse();
 }
 
 function colorCommuneFeatures() {
-  const ch     = activeChallenge;
+  const ch     = dtChallenge || activeChallenge;
   const cloned = JSON.parse(JSON.stringify(GEOJSON));
   if (!ch || !DATA) {
     cloned.features.forEach(f => { f.properties.dtColor = '#1a2440'; });
@@ -2347,9 +2371,7 @@ function colorCommuneFeatures() {
     const nis = String(f.properties.niscode || '');
     const d   = findDistrict(nis);
     const v   = d ? d[ch.primaryVar] : null;
-    f.properties.dtColor = (v != null && isFinite(v))
-      ? colorScaleCh(v, mn, mx, ch.worseIsLower, ch.rgb)
-      : '#1a2440';
+    f.properties.dtColor = (v != null && isFinite(v)) ? colorScaleCh(v, mn, mx, ch.worseIsLower, ch.rgb) : '#1a2440';
   });
   return cloned;
 }
@@ -2357,349 +2379,170 @@ function colorCommuneFeatures() {
 function updateMapLibreColors() {
   if (!mlMap || !mlMap.isStyleLoaded()) return;
   const src = mlMap.getSource('communes');
-  if (!src) return;
-  src.setData(colorCommuneFeatures());
+  if (src) src.setData(colorCommuneFeatures());
+  const pulseSrc = mlMap.getSource('communes-pulse-src');
+  if (pulseSrc) pulseSrc.setData(buildPulseGeoJSON());
 }
 
 // =====================================================================
-// SIMULATE PANEL
+// DIGITAL TWIN PANEL
 // =====================================================================
 function renderSimPanel() {
   const pane = document.getElementById('pane-simulate');
   if (!pane) return;
 
-  const ch   = activeChallenge || CHALLENGES[0];
-  const nis  = dtCommune;
-  const name = nis ? (findDistrict(nis)?.name || nis) : null;
+  const ch  = dtChallenge || activeChallenge || CHALLENGES[0];
+  const nis = dtCommune;
+  const d   = nis ? findDistrict(nis) : null;
 
-  const interventionsHtml = DT_INTERVENTIONS.map(iv => {
-    const st   = dtIntState[iv.id];
-    const dots = [1,2,3,4,5].map(n =>
-      `<span class="sim-dot${n <= st.level ? ' on' : ''}" onclick="setDTLevel('${iv.id}',${n})" title="Level ${n}"></span>`
-    ).join('');
-    return `
-      <div class="sim-int-row">
-        <input type="checkbox" id="dti-${iv.id}" ${st.checked ? 'checked' : ''}
-               onchange="setDTCheck('${iv.id}',this.checked)">
-        <label class="sim-int-label${st.checked ? ' on' : ''}" for="dti-${iv.id}">${iv.label}</label>
-        <div class="sim-dots" title="Investment level (1-5)">${dots}</div>
-      </div>`;
+  const chipsHtml = CHALLENGES.map(c => {
+    const on  = c.id === ch.id;
+    const sty = on
+      ? 'background:' + c.color + ';border-color:' + c.color + ';color:#070b13'
+      : 'border-color:rgba(' + c.rgb + ',0.4);color:var(--text-sub)';
+    return '<button class="dt-chip' + (on ? ' active' : '') + '" style="' + sty + '" onclick="switchDTChallenge(\'' + c.id + '\')">' + c.icon + ' ' + c.label + '</button>';
   }).join('');
 
-  const hzHtml = [5,10,15,20].map(h =>
-    `<button class="sim-hz-btn${dtHorizon===h?' active':''}" onclick="setDTHorizon(${h})">${h} yr</button>`
-  ).join('');
+  let spotHtml;
+  if (!d) {
+    spotHtml = '<div class="dt-no-sel"><div style="font-size:1.6rem;margin-bottom:0.5rem">⬡</div>Click a commune on the 3D map to explore its profile</div>';
+  } else {
+    const status   = getStatusInfo(nis, ch.primaryVar, ch.worseIsLower, ch.statusLabels);
+    const trend    = computeTrend(nis, ch.primaryVar, ch.worseIsLower);
+    const ARROWS   = { worse: '↑', better: '↓', stable: '→' };
+    const CLSES    = { worse: 'arr-worse', better: 'arr-better', stable: 'arr-stable' };
+    const tArrow   = ARROWS[trend.verdict];
+    const tCls     = CLSES[trend.verdict];
+    const sparkPts = getLastNYears(nis, ch.primaryVar, Infinity);
 
-  const communeSel = DISTRICTS.length
-    ? `<select class="sim-commune-sel" onchange="setDTCommune(this.value)">
-        <option value="">— Click map or select —</option>
-        ${DISTRICTS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(d =>
-          `<option value="${d.niscode}" ${d.niscode===nis?'selected':''}>${d.name}</option>`
-        ).join('')}
-       </select>`
-    : '';
+    const extraKpis = (ch.drivers || []).slice(0, 2).map((drvKey, i) => {
+      const lbl = ch.driverLabels && ch.driverLabels[i] ? ch.driverLabels[i] : (PLAIN_LABELS[drvKey] || drvKey);
+      const dt2 = computeTrend(nis, drvKey, false);
+      return '<div class="dt-kpi-row">'
+        + '<span class="dt-kpi-label">' + lbl + '</span>'
+        + '<span class="dt-kpi-val">' + fmtVal(drvKey, d[drvKey]) + '</span>'
+        + '<span class="dt-kpi-arr ' + CLSES[dt2.verdict] + '">' + ARROWS[dt2.verdict] + '</span>'
+        + '</div>'
+        + '<div class="dt-kpi-avg">Brussels avg: ' + fmtVal(drvKey, getCityAvg(drvKey)) + '</div>';
+    }).join('');
 
-  pane.innerHTML = `
-    <div class="sim-header">
-      <div class="sim-header-title">Policy Simulation Engine</div>
-      <div class="sim-header-sub">Project how interventions shift the <strong>${ch.label}</strong> indicator.</div>
-    </div>
-    <div class="sim-section">
-      <div class="sim-label">Commune</div>
-      ${communeSel}
-      ${name ? `<div style="font-size:0.78rem;color:var(--text-sub);margin-top:0.35rem">Selected: <strong style="color:var(--text)">${name}</strong></div>` : ''}
-    </div>
-    <div class="sim-section">
-      <div class="sim-label">Interventions &amp; investment level</div>
-      ${interventionsHtml}
-    </div>
-    <div class="sim-section">
-      <div class="sim-label">Projection horizon</div>
-      <div class="sim-horizon-row">${hzHtml}</div>
-    </div>
-    <div class="sim-run">
-      <button class="sim-run-btn" onclick="runSimulation()">Run Simulation</button>
-    </div>
-    <div class="sim-chart-area">
-      <canvas class="sim-canvas" id="sim-canvas"></canvas>
-      <div class="sim-leg">
-        <div class="sim-leg-item"><div class="sim-leg-line" style="background:#3ac0f9"></div>Historical</div>
-        <div class="sim-leg-item"><div class="sim-leg-line" style="border-top:2px dashed rgba(58,192,249,0.5);background:transparent"></div>Baseline</div>
-        <div class="sim-leg-item"><div class="sim-leg-line" style="background:${ch.color}"></div>With interventions</div>
-      </div>
-    </div>
-    <div class="sim-summary" id="sim-summary">
-      Select interventions and a commune, then run the simulation.
-    </div>
-  `;
+    const sparkBlock = sparkPts.length > 1
+      ? '<div class="dt-spark-wrap"><div class="dt-spark-lbl">Trend ' + sparkPts[0][0] + '–' + sparkPts[sparkPts.length-1][0] + '</div>'
+        + '<canvas class="sparkline-canvas" id="dt-spark-' + nis + '" style="height:52px"></canvas></div>'
+      : '';
 
-  if (dtSimDone && nis) runSimulation(true);
-}
-
-function setDTCommune(nis) {
-  dtCommune = nis || null;
-  dtSimDone = false;
-  if (mlMap && mlMap.getLayer('communes-highlight')) {
-    mlMap.setFilter('communes-highlight', ['==', ['get', 'niscode'], dtCommune || '']);
+    spotHtml = '<div class="dt-spot-head">'
+      + '<div class="dt-spot-name">' + d.name + '</div>'
+      + '<span class="status-badge ' + status.cls + '">' + status.label + '</span>'
+      + '</div>'
+      + '<div class="dt-spot-kpis">'
+      + '<div class="dt-kpi-row">'
+      + '<span class="dt-kpi-label" style="font-weight:600;color:var(--text)">' + ch.kpiLabel + '</span>'
+      + '<span class="dt-kpi-val">' + fmtVal(ch.primaryVar, d[ch.primaryVar]) + '</span>'
+      + '<span class="dt-kpi-arr ' + tCls + '">' + tArrow + '</span>'
+      + '</div>'
+      + '<div class="dt-kpi-avg">Brussels avg: ' + fmtVal(ch.primaryVar, getCityAvg(ch.primaryVar)) + '</div>'
+      + extraKpis
+      + '</div>'
+      + sparkBlock
+      + '<button class="dt-view-btn" onclick="switchTab(\'district\'); selectDistrict(\'' + nis + '\')">' + 'View full profile →' + '</button>';
   }
+
+  const sorted = DISTRICTS.filter(dd => dd[ch.primaryVar] != null)
+    .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
+  const tot = sorted.length || 1;
+  const bColors = ['#e84a6a', '#e87a2a', '#4a9de8', '#4ae89a'];
+  const bLabels = ch.statusLabels || ['Critical','Elevated','Moderate','OK'];
+  const statusHtml = [0,1,2,3].map(band => {
+    const cnt = sorted.filter((_,i) => { const p = i/(tot-1||1); return p >= band*0.25 && (band<3 ? p<(band+1)*0.25 : p<=1); }).length;
+    return '<div class="dt-sc-item"><div class="dt-sc-n" style="color:' + bColors[band] + '">' + cnt + '</div><div class="dt-sc-lbl">' + bLabels[band] + '</div></div>';
+  }).join('');
+
+  pane.innerHTML =
+    '<div class="dt-metric-strip"><div class="dt-metric-label">Indicator</div><div class="dt-metric-chips">' + chipsHtml + '</div></div>'
+
+    + '<div class="dt-spotlight">' + spotHtml + '</div>'
+    + '<div class="dt-status-strip"><div class="dt-metric-label" style="margin-bottom:0.35rem">BCR — ' + ch.label + '</div><div class="dt-status-counts">' + statusHtml + '</div></div>';
+
+  if (d) {
+    const sparkPts = getLastNYears(nis, ch.primaryVar, Infinity);
+    requestAnimationFrame(function() {
+      const canvas = document.getElementById('dt-spark-' + nis);
+      if (canvas && sparkPts.length > 1) drawSparkline(canvas, sparkPts, ch.color, ch.worseIsLower, -1, currentYear);
+    });
+  }
+}
+
+function switchDTChallenge(chId) {
+  dtChallenge = CHALLENGES.find(c => c.id === chId) || null;
+  updateMapLibreColors();
   renderSimPanel();
 }
 
-function setDTCheck(id, checked) {
-  dtIntState[id].checked = checked;
-  dtSimDone = false;
-  renderSimPanel();
-}
+function computeCentroid(feature) {
+  const geom = feature.geometry;
+  if (!geom) return [4.352, 50.851];
 
-function setDTLevel(id, level) {
-  dtIntState[id].level = level;
-  dtSimDone = false;
-  renderSimPanel();
-}
-
-function setDTHorizon(h) {
-  dtHorizon = h;
-  dtSimDone = false;
-  renderSimPanel();
-}
-
-// =====================================================================
-// SIMULATION ENGINE
-// =====================================================================
-function computeSlope(pts) {
-  if (pts.length < 2) return 0;
-  const n  = pts.length;
-  const mx = (n - 1) / 2;
-  const my = pts.reduce((s, p) => s + p[1], 0) / n;
-  let num = 0, den = 0;
-  pts.forEach((p, i) => { const dx = i - mx; num += dx * (p[1] - my); den += dx * dx; });
-  return den === 0 ? 0 : num / den;
-}
-
-function computeRegCoeff(xKey, yKey) {
-  const pairs = [];
-  for (const [nis, c] of Object.entries(DATA.communes)) {
-    const tsX = c.timeseries?.[xKey] || {};
-    const tsY = c.timeseries?.[yKey] || {};
-    for (const yr of Object.keys(tsX)) {
-      if (tsY[yr] === undefined) continue;
-      const x = tsX[yr], yv = tsY[yr];
-      if (x != null && yv != null && isFinite(x) && isFinite(yv)) pairs.push({ x, y: yv });
+  // For MultiPolygon pick the ring with the largest signed area
+  let ring;
+  if (geom.type === 'Polygon') {
+    ring = geom.coordinates[0];
+  } else if (geom.type === 'MultiPolygon') {
+    let bestArea = -Infinity, bestRing = null;
+    for (const poly of geom.coordinates) {
+      const r = poly[0];
+      let a = 0;
+      for (let i = 0; i < r.length - 1; i++) a += r[i][0]*r[i+1][1] - r[i+1][0]*r[i][1];
+      if (Math.abs(a) > bestArea) { bestArea = Math.abs(a); bestRing = r; }
     }
+    ring = bestRing;
   }
-  if (pairs.length < 3) return 0;
-  const n  = pairs.length;
-  const mx = pairs.reduce((s, p) => s + p.x, 0) / n;
-  const my = pairs.reduce((s, p) => s + p.y, 0) / n;
-  let num = 0, den = 0;
-  for (const p of pairs) { const dx = p.x - mx; num += dx * (p.y - my); den += dx * dx; }
-  return den === 0 ? 0 : num / den;
+  if (!ring || ring.length < 3) return [4.352, 50.851];
+
+  // Area-weighted centroid (Shoelace formula) — lands at true geometric centre
+  let cx = 0, cy = 0, area = 0;
+  for (let i = 0; i < ring.length - 1; i++) {
+    const cross = ring[i][0] * ring[i+1][1] - ring[i+1][0] * ring[i][1];
+    cx   += (ring[i][0] + ring[i+1][0]) * cross;
+    cy   += (ring[i][1] + ring[i+1][1]) * cross;
+    area += cross;
+  }
+  area /= 2;
+  if (Math.abs(area) < 1e-12) {
+    // Degenerate polygon — fall back to vertex mean
+    let lng = 0, lat = 0;
+    for (const c of ring) { lng += c[0]; lat += c[1]; }
+    return [lng / ring.length, lat / ring.length];
+  }
+  return [cx / (6 * area), cy / (6 * area)];
 }
 
-function runSimulation(reuse = false) {
-  const ch  = activeChallenge || CHALLENGES[0];
-  const nis = dtCommune;
-  if (!nis) {
-    const el = document.getElementById('sim-summary');
-    if (el) el.textContent = 'Please select a commune first.';
-    return;
-  }
-
-  const hist = getLastNYears(nis, ch.primaryVar, Infinity);
-  if (hist.length < 2) {
-    const el = document.getElementById('sim-summary');
-    if (el) el.textContent = 'Not enough historical data for this commune.';
-    return;
-  }
-
-  const fitPts = hist.slice(-Math.min(hist.length, 7));
-  const slope  = computeSlope(fitPts);
-  const lastYr = hist[hist.length - 1][0];
-  const lastVl = hist[hist.length - 1][1];
-
-  const baseline  = [];
-  const projected = [];
-
-  const activeIntv = DT_INTERVENTIONS.filter(iv => dtIntState[iv.id].checked);
-  let intEffect = 0;
-  for (const iv of activeIntv) {
-    const lvl = dtIntState[iv.id].level;
-    const eff = iv.effects[ch.primaryVar];
-    if (eff != null && eff !== 0) {
-      intEffect += eff * (lvl / 5) * 0.01;
-    } else {
-      for (const [drvKey, drvEff] of Object.entries(iv.effects)) {
-        if (drvKey === ch.primaryVar) continue;
-        const coeff = computeRegCoeff(drvKey, ch.primaryVar);
-        intEffect += coeff * drvEff * (lvl / 5) * 0.01;
-      }
-    }
-  }
-
-  const ramp = (yr) => Math.min(1, yr / 3);
-
-  for (let i = 1; i <= dtHorizon; i++) {
-    const bv = lastVl + slope * i;
-    const pv = bv + intEffect * ramp(i) * i;
-    baseline.push([lastYr + i, bv]);
-    projected.push([lastYr + i, pv]);
-  }
-
-  dtSimDone = true;
-  drawSimChart(hist, baseline, projected, ch);
-  renderSimSummary(baseline, projected, activeIntv, ch);
+function buildPulseGeoJSON() {
+  const ch = dtChallenge || activeChallenge;
+  if (!ch || !GEOJSON || !DISTRICTS.length) return { type: 'FeatureCollection', features: [] };
+  const sorted = DISTRICTS.filter(d => d[ch.primaryVar] != null)
+    .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
+  const critNis = new Set(sorted.slice(0, Math.ceil(sorted.length * 0.25)).map(d => d.niscode));
+  return {
+    type: 'FeatureCollection',
+    features: GEOJSON.features
+      .filter(f => critNis.has(String(f.properties.niscode || '')))
+      .map(f => ({ type: 'Feature', geometry: { type: 'Point', coordinates: computeCentroid(f) }, properties: { niscode: f.properties.niscode } }))
+  };
 }
 
-function renderSimSummary(baseline, projected, activeIntv, ch) {
-  const el = document.getElementById('sim-summary');
-  if (!el) return;
-
-  const baseEnd = baseline[baseline.length - 1][1];
-  const projEnd = projected[projected.length - 1][1];
-  const delta   = projEnd - baseEnd;
-  const sign    = delta > 0 ? '+' : '';
-  const better  = ch.worseIsLower ? delta > 0 : delta < 0;
-  const vc      = better ? 'var(--ok)' : 'var(--crit)';
-  const verdict = better ? 'improvement' : 'worsening';
-
-  const intList = activeIntv.length
-    ? activeIntv.map(iv => `<strong>${iv.label}</strong> (Level ${dtIntState[iv.id].level})`).join(', ')
-    : 'None selected';
-
-  el.innerHTML = `
-    <strong>Interventions:</strong> ${intList}<br>
-    After <strong>${dtHorizon} years</strong> —
-    Baseline: <strong>${fmtVal(ch.primaryVar, baseEnd)}</strong> &rarr;
-    With policy: <span style="color:${vc};font-weight:700">${fmtVal(ch.primaryVar, projEnd)}</span>
-    (<strong>${sign}${fmtVal(ch.primaryVar, delta)}</strong> —
-    <span style="color:${vc}">${verdict}</span>)<br>
-    <span style="font-size:0.7rem;color:var(--text-dim)">Illustrative OLS model. Results depend on implementation quality and co-factors not captured here.</span>
-  `;
+function animatePulse() {
+  dtPulsePhase = (dtPulsePhase + 0.022) % 1;
+  const p2 = (dtPulsePhase + 0.5) % 1;
+  if (mlMap) {
+    if (mlMap.getLayer('communes-pulse'))  { mlMap.setPaintProperty('communes-pulse',  'circle-radius', 8 + dtPulsePhase*22); mlMap.setPaintProperty('communes-pulse',  'circle-stroke-opacity', 0.85*(1-dtPulsePhase)); }
+    if (mlMap.getLayer('communes-pulse2')) { mlMap.setPaintProperty('communes-pulse2', 'circle-radius', 8 + p2*22);           mlMap.setPaintProperty('communes-pulse2', 'circle-stroke-opacity', 0.85*(1-p2)); }
+  }
+  dtPulseRaf = requestAnimationFrame(animatePulse);
 }
 
-function drawSimChart(hist, baseline, projected, ch) {
-  const canvas = document.getElementById('sim-canvas');
-  if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  const W   = canvas.offsetWidth  || (canvas.parentElement?.offsetWidth || 260);
-  const H   = canvas.offsetHeight || 155;
-  canvas.width  = W * dpr;
-  canvas.height = H * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  ctx.clearRect(0, 0, W, H);
-
-  const allVals = [...hist, ...baseline, ...projected].map(p => p[1]).filter(v => isFinite(v));
-  if (allVals.length === 0) return;
-
-  const pad   = { t: 12, b: 26, l: 46, r: 10 };
-  const iw    = W - pad.l - pad.r;
-  const ih    = H - pad.t - pad.b;
-  const allYr = [...hist, ...baseline].map(p => p[0]);
-  const mnYr  = Math.min(...allYr);
-  const mxYr  = Math.max(...allYr);
-  const vPad  = (Math.max(...allVals) - Math.min(...allVals)) * 0.06;
-  const mnV   = Math.min(...allVals) - vPad;
-  const mxV   = Math.max(...allVals) + vPad;
-  const rngV  = mxV - mnV || 1;
-  const rngYr = mxYr - mnYr || 1;
-
-  const px = yr => pad.l + ((yr - mnYr) / rngYr) * iw;
-  const py = v  => pad.t + ih - ((v  - mnV)  / rngV)  * ih;
-
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.t + (ih / 4) * i;
-    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l + iw, y); ctx.stroke();
-  }
-
-  ctx.fillStyle = 'rgba(176,196,224,0.65)';
-  ctx.font = '9px "Montserrat", sans-serif';
-  ctx.textAlign = 'right';
-  for (let i = 0; i <= 4; i++) {
-    const v = mnV + (rngV / 4) * (4 - i);
-    const y = pad.t + (ih / 4) * i;
-    ctx.fillText(fmtVal(ch.primaryVar, v), pad.l - 4, y + 3);
-  }
-
-  ctx.textAlign = 'center';
-  const allYrsUniq = [...new Set([...hist, ...baseline].map(p => p[0]))].sort((a,b) => a-b);
-  const step = Math.max(1, Math.ceil(allYrsUniq.length / 5));
-  allYrsUniq.forEach((yr, i) => {
-    if (i % step === 0 || i === allYrsUniq.length - 1) {
-      ctx.fillText(yr, px(yr), H - pad.b + 14);
-    }
-  });
-
-  if (hist.length && baseline.length) {
-    const divX = px(hist[hist.length - 1][0]);
-    ctx.save();
-    ctx.setLineDash([2, 4]);
-    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
-    ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.moveTo(divX, pad.t); ctx.lineTo(divX, pad.t + ih); ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-
-  if (hist.length >= 2) {
-    ctx.beginPath();
-    ctx.moveTo(px(hist[0][0]), py(hist[0][1]));
-    hist.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
-    ctx.strokeStyle = '#3ac0f9';
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  }
-
-  const bBridge = hist.length ? [hist[hist.length - 1], ...baseline] : baseline;
-  if (bBridge.length >= 2) {
-    ctx.save();
-    ctx.setLineDash([5, 4]);
-    ctx.beginPath();
-    ctx.moveTo(px(bBridge[0][0]), py(bBridge[0][1]));
-    bBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
-    ctx.strokeStyle = 'rgba(58,192,249,0.45)';
-    ctx.lineWidth = 1.5;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-    ctx.setLineDash([]);
-    ctx.restore();
-  }
-
-  const pBridge = hist.length ? [hist[hist.length - 1], ...projected] : projected;
-  const [cr, cg, cb] = ch.rgb.split(',').map(Number);
-
-  if (pBridge.length >= 2 && bBridge.length >= 2) {
-    ctx.beginPath();
-    ctx.moveTo(px(pBridge[0][0]), py(pBridge[0][1]));
-    pBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
-    for (let i = bBridge.length - 1; i >= 0; i--) ctx.lineTo(px(bBridge[i][0]), py(bBridge[i][1]));
-    ctx.closePath();
-    ctx.fillStyle = `rgba(${cr},${cg},${cb},0.12)`;
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.moveTo(px(pBridge[0][0]), py(pBridge[0][1]));
-    pBridge.forEach(p => ctx.lineTo(px(p[0]), py(p[1])));
-    ctx.strokeStyle = `rgb(${cr},${cg},${cb})`;
-    ctx.lineWidth = 2;
-    ctx.lineJoin = 'round';
-    ctx.stroke();
-  }
-
-  if (hist.length) {
-    const lp = hist[hist.length - 1];
-    ctx.beginPath(); ctx.arc(px(lp[0]), py(lp[1]), 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = '#3ac0f9'; ctx.fill();
-  }
-  if (projected.length) {
-    const ep = projected[projected.length - 1];
-    ctx.beginPath(); ctx.arc(px(ep[0]), py(ep[1]), 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = `rgb(${cr},${cg},${cb})`; ctx.fill();
-  }
-}
+function startPulse() { if (!dtPulseRaf) animatePulse(); }
+function stopPulse()  { if (dtPulseRaf) { cancelAnimationFrame(dtPulseRaf); dtPulseRaf = null; } }
 
 </script>
 <div id="spark-tooltip"><span class="sp-year"></span><span class="sp-val"></span><span class="sp-hint">↵ set year</span></div>
