@@ -536,7 +536,53 @@ input[type=range].whatif-slider {
 .map-area { position: relative; overflow: hidden; background: var(--bg); }
 /* Override Leaflet's default #ddd container background */
 .leaflet-container { background: var(--bg) !important; }
-#map-legend { position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 1000; }
+/* Buildings loading bar */
+#bld-loading-bar {
+  position: absolute; bottom: 2.8rem; left: 50%; transform: translateX(-50%);
+  z-index: 200; background: rgba(14,15,20,0.9); border: 1px solid rgba(0,222,255,0.35);
+  border-radius: 0.55rem; padding: 0.55rem 1.1rem 0.6rem;
+  display: flex; flex-direction: column; gap: 0.38rem; min-width: 210px;
+  pointer-events: none; transition: opacity 0.5s ease;
+}
+#bld-loading-bar.bld-hidden { opacity: 0; }
+#bld-loading-bar .bld-label {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
+  color: rgba(0,222,255,0.85); letter-spacing: 0.05em;
+}
+#bld-loading-bar .bld-track {
+  height: 3px; background: rgba(0,222,255,0.15); border-radius: 2px; overflow: hidden;
+}
+#bld-loading-bar .bld-fill {
+  height: 100%; background: #00deff; border-radius: 2px;
+  animation: bld-sweep 1.5s ease-in-out infinite;
+}
+@keyframes bld-sweep {
+  0%   { width: 0%;   margin-left: 0%;   }
+  50%  { width: 55%;  margin-left: 22%;  }
+  100% { width: 0%;   margin-left: 100%; }
+}
+.commune-label-2d {
+  position: absolute; transform: translate(-50%, -50%);
+  font-family: 'IBM Plex Sans', sans-serif; font-size: 13px; font-weight: 700;
+  color: rgba(255,255,255,0.92); white-space: nowrap; pointer-events: none;
+  text-shadow: 0 0 3px #000, 0 0 6px #000, 0 1px 2px #000;
+}
+#map-legend {
+  position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 1000;
+  display: flex; flex-direction: column; gap: 0.45rem; align-items: stretch;
+}
+/* "Show All Buildings" toggle — only shown in 3D mode */
+.bld-all-btn {
+  display: none; /* shown via JS when dtMode=true */
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
+  letter-spacing: 0.04em; padding: 0.42rem 0.75rem;
+  background: rgba(0,222,255,0.07); border: 1px solid rgba(0,222,255,0.4);
+  border-radius: 0.4rem; color: rgba(0,222,255,0.85); cursor: pointer;
+  transition: background 0.18s, color 0.18s, border-color 0.18s;
+  white-space: nowrap;
+}
+.bld-all-btn:hover { background: rgba(0,222,255,0.18); border-color: rgba(0,222,255,0.7); color: #00deff; }
+.bld-all-btn.active { background: #00deff; border-color: #00deff; color: #050f18; }
 #map, #maplibre-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 #maplibre-container { display: none; z-index: 2; }
 /* .dt-toggle removed — replaced by legend-3d-btn */
@@ -694,21 +740,30 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
 
 <div class="map-area">
 <div id="map"></div>
-<div id="maplibre-container"><div id="dt-pulse-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;"></div></div>
+<div id="maplibre-container">
+  <div id="dt-pulse-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;"></div>
+  <div id="bld-loading-bar" class="bld-hidden">
+    <div class="bld-label">Loading buildings…</div>
+    <div class="bld-track"><div class="bld-fill"></div></div>
+  </div>
+</div>
 <button class="panel-toggle left-toggle"  id="left-toggle"  onclick="toggleLeftPanel()"  title="Hide / show left panel"><span class="tog-arrow"></span></button>
 <button class="panel-toggle right-toggle" id="right-toggle" onclick="toggleRightPanel()" title="Hide / show right panel"><span class="tog-arrow"></span></button>
-<div class="map-legend" id="map-legend">
-  <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
-  <div class="legend-title" id="legend-title">Select a challenge</div>
-  <div class="legend-bar" id="leg-bar"></div>
-  <div class="legend-labels"><span id="leg-min">low</span><span id="leg-max">high</span></div>
-  <div class="legend-dir"><span id="leg-dir-lo"></span><span id="leg-dir-hi"></span></div>
+<div id="map-legend">
+  <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
+  <div class="map-legend">
+    <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
+    <div class="legend-title" id="legend-title">Select a challenge</div>
+    <div class="legend-bar" id="leg-bar"></div>
+    <div class="legend-labels"><span id="leg-min">low</span><span id="leg-max">high</span></div>
+    <div class="legend-dir"><span id="leg-dir-lo"></span><span id="leg-dir-hi"></span></div>
+  </div>
 </div>
 </div>
 
 <div class="right-panel">
   <div class="tab-bar">
-    <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">District</button>
+    <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">Commune Info</button>
     <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare</button>
 
   </div>
@@ -966,7 +1021,7 @@ let currentTab       = 'district';
 let whatIfOverrides  = {};
 let activeDrivers    = [];
 
-let map, geojsonLayer, basemapLayer, highlightGroup;
+let map, geojsonLayer, basemapLayer, highlightGroup, labelGroup;
 let layerByNiscode = {};
 let pulseGroup = null;
 let currentBasemap = 'dark';
@@ -1553,6 +1608,7 @@ function selectChallenge(id) {
   if (selectedDistrict) renderDetailPanel(selectedDistrict);
 
   updatePulseMarkers();
+  updateBuildingFilter();
 }
 
 // =====================================================================
@@ -1597,6 +1653,7 @@ function selectDistrict(niscode) {
     renderCompareTable();
   } else {
     selectedDistrict = niscode;
+    dtCommune = niscode;          // keep 3D state in sync
     renderDetailPanel(niscode);
     // Update ranking highlight
     document.querySelectorAll('.ranking-item').forEach(el => {
@@ -1605,6 +1662,8 @@ function selectDistrict(niscode) {
   }
 
   updateMapColors();
+  updateBuildingFilter();
+  sync3DHighlight();
 }
 
 // =====================================================================
@@ -1721,7 +1780,7 @@ function buildWhatIfHTML(niscode, ch) {
   let html = `
     <div class="whatif-section">
       <div class="whatif-header">
-        <span class="section-label" style="margin:0">What if?</span>
+        <span class="section-label" style="margin:0">What If Scenarios?</span>
         <button class="whatif-info-btn" onclick="showModelInfo()" title="About this model">ℹ</button>
       </div>`;
 
@@ -1921,6 +1980,8 @@ function switchTab(tab) {
   document.getElementById('btn-compare').classList.toggle('active',  tab === 'compare');
   if (tab === 'compare') { renderCompareSlots(); renderCompareTable(); }
   updateMapColors();
+  updateBuildingFilter();
+  sync3DHighlight();
 }
 
 function renderCompareSlots() {
@@ -1965,6 +2026,8 @@ function clearCompareSlot(idx) {
   renderCompareSlots();
   renderCompareTable();
   updateMapColors();
+  updateBuildingFilter();
+  sync3DHighlight();
 }
 
 function toggleCmpGroup(key) {
@@ -2102,6 +2165,27 @@ function initMap() {
     }
   }).addTo(map);
 
+  // Commune name labels — dedicated pane above all map layers
+  map.createPane('communeLabelPane');
+  map.getPane('communeLabelPane').style.zIndex = 700;
+  map.getPane('communeLabelPane').style.pointerEvents = 'none';
+
+  labelGroup = L.layerGroup().addTo(map);
+  GEOJSON.features.forEach(f => {
+    const [lng, lat] = computeCentroid(f);
+    const name = f.properties.naam || f.properties.name || '';
+    if (!name) return;
+    let labelLat = lat;
+    if (String(f.properties.niscode) === '21004') labelLat += 0.012;
+    const icon = L.divIcon({
+      className: '',
+      html: `<span class="commune-label-2d">${name}</span>`,
+      iconSize: [0, 0],
+      iconAnchor: [0, 0],
+    });
+    L.marker([labelLat, lng], { icon, interactive: false, keyboard: false, pane: 'communeLabelPane' }).addTo(labelGroup);
+  });
+
   highlightGroup = L.layerGroup().addTo(map);
 
   buildLegend();
@@ -2189,6 +2273,8 @@ function onYearChange(year) {
   updateMapColors();
   renderRankingList();
   if (selectedDistrict) renderDetailPanel(selectedDistrict);
+  updatePulseMarkers();
+  rebuild3DPulseRings();
 }
 
 function rebuildDistrictsForYear(year) {
@@ -2232,6 +2318,9 @@ async function loadData() {
   initMap();
   buildChallengeCards();
   selectChallenge('leaving');
+
+  // Prefetch buildings in the background so 3D view opens instantly
+  fetchOSMBuildings().catch(() => {});
 }
 
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
@@ -2249,10 +2338,11 @@ loadData().catch(err => {
 // =====================================================================
 // DIGITAL TWIN
 // =====================================================================
-var dtMode      = false;
-var mlMap       = null;
-var dtCommune   = null;
-var dtChallenge = null;
+var dtMode           = false;
+var mlMap            = null;
+var dtCommune        = null;
+var dtChallenge      = null;
+var _showAllBuildings = false;
 var dt3DPulseWraps = [];
 
 
@@ -2284,15 +2374,49 @@ function updatePulseMarkers() {
   });
 }
 
+function toggleAllBuildings() {
+  _showAllBuildings = !_showAllBuildings;
+  const btn = document.getElementById('bld-all-toggle');
+  if (btn) {
+    btn.classList.toggle('active', _showAllBuildings);
+    btn.textContent = _showAllBuildings ? '⬡ Hide All Buildings' : '⬡ Show All Buildings';
+  }
+  updateBuildingFilter();
+}
+
 function toggleDigitalTwin() {
   dtMode = !dtMode;
-  const btn = document.getElementById('legend-3d-btn');
-  if (btn) { btn.classList.toggle('active', dtMode); btn.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
-  document.getElementById('map').style.display                = dtMode ? 'none' : '';
+  const btn3d  = document.getElementById('legend-3d-btn');
+  const btnAll = document.getElementById('bld-all-toggle');
+  if (btn3d)  { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
+  if (btnAll) btnAll.style.display = dtMode ? 'block' : 'none';
+  const mapEl = document.getElementById('map');
+  mapEl.style.display                                          = dtMode ? 'none' : '';
   document.getElementById('maplibre-container').style.display = dtMode ? 'block' : 'none';
   if (dtMode) {
-    if (!mlMap) initMapLibre();
-    else if (mlMap.isStyleLoaded()) updateMapLibreColors();
+    if (!mlMap) {
+      initMapLibre();
+    } else {
+      requestAnimationFrame(() => {
+        mlMap.resize();
+        if (mlMap.isStyleLoaded()) {
+          updateMapLibreColors();
+        } else {
+          mlMap.once('idle', updateMapLibreColors);
+        }
+      });
+    }
+  } else {
+    // Clear any stale transform/width left by panel-toggle animations
+    mapEl.style.transform = '';
+    mapEl.style.width     = '';
+    // Leaflet's container was display:none — recalculate size + repaint highlights
+    requestAnimationFrame(() => {
+      if (map) {
+        map.invalidateSize({ animate: false, pan: false });
+        updateHighlights();
+      }
+    });
   }
 }
 
@@ -2309,20 +2433,29 @@ function initMapLibre() {
   });
 
   mlMap.on('load', () => {
+    // Remove all basemap text labels — we render our own commune labels
+    mlMap.getStyle().layers
+      .filter(l => l.type === 'symbol' && l.layout && l.layout['text-field'])
+      .forEach(l => { try { mlMap.removeLayer(l.id); } catch(e) {} });
+
     inject3DBuildings();
     addCommuneLayer();
+    sync3DHighlight();
     renderSimPanel();
   });
   mlMap.on('move', reposition3DPulseRings);
 
   mlMap.on('click', 'communes-fill', e => {
     if (e.features.length) {
-      dtCommune = e.features[0].properties.niscode;
+      const nis = e.features[0].properties.niscode;
+      dtCommune = nis;
       dtSimDone = false;
       renderSimPanel();
       if (mlMap.getLayer('communes-highlight')) {
-        mlMap.setFilter('communes-highlight', ['==', ['get', 'niscode'], dtCommune]);
+        mlMap.setFilter('communes-highlight', ['==', ['get', 'niscode'], nis]);
       }
+      // Sync to right panel (Commune Info) + ranking list highlight — same as 2D click
+      selectDistrict(nis);
     }
   });
 
@@ -2330,40 +2463,209 @@ function initMapLibre() {
   mlMap.on('mouseleave', 'communes-fill', () => { mlMap.getCanvas().style.cursor = ''; });
 }
 
-function inject3DBuildings() {
-  const style    = mlMap.getStyle();
-  const srcNames = Object.keys(style.sources || {});
-  const vtSrc    = srcNames.find(s => s === 'openmaptiles')
-                || srcNames.find(s => !['carto','satellite','esri'].includes(s))
-                || srcNames[0];
-  if (!vtSrc) return;
+// Cached OSM building GeoJSON — fetched once, reused on 3D re-init
+var _osmBuildingsCache = null;
+var _osmBuildingsFetch = null; // in-progress promise — reused on concurrent calls
+// Bump this string whenever the bbox or query changes to invalidate sessionStorage cache
+const _OSM_CACHE_KEY = 'osm_buildings_v4'; // bumped: buildings now tagged with niscode
 
-  const insertBefore = style.layers.find(l =>
-    l.id && (l.id.startsWith('place') || l.id.startsWith('label') || l.id.includes('-label'))
-  )?.id;
+function fetchOSMBuildings() {
+  if (_osmBuildingsCache) return Promise.resolve(_osmBuildingsCache);
+  if (_osmBuildingsFetch) return _osmBuildingsFetch; // already in flight
 
-  if (!mlMap.getLayer('3d-buildings')) {
-    mlMap.addLayer({
-      id: '3d-buildings',
-      source: vtSrc,
-      'source-layer': 'building',
-      type: 'fill-extrusion',
-      minzoom: 0,
-      paint: {
-        'fill-extrusion-color': [
-          'interpolate', ['linear'],
-          ['coalesce', ['get', 'render_height'], 5],
-          0,   '#0d1320',
-          10,  '#1a2440',
-          25,  '#253656',
-          60,  '#2d4470',
-          120, '#3a5880',
-        ],
-        'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 5],
-        'fill-extrusion-base':   ['coalesce', ['get', 'render_min_height'], 0],
-        'fill-extrusion-opacity': 0.88,
+  // Try sessionStorage so a page-refresh skips the Overpass round-trip
+  try {
+    const stored = sessionStorage.getItem(_OSM_CACHE_KEY);
+    if (stored) {
+      _osmBuildingsCache = JSON.parse(stored);
+      return Promise.resolve(_osmBuildingsCache);
+    }
+  } catch(e) {}
+
+  // Full BCR extent + buffer — covers all 19 communes incl. Ukkel / Watermaal /
+  // Sint-Pieters-Woluwe / Oudergem whose polygons extend beyond the old bbox.
+  const q = `[out:json][timeout:60];(way["building"](50.755,4.235,50.925,4.495););out body geom qt;`;
+
+  _osmBuildingsFetch = fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(q),
+  })
+  .then(r => r.json())
+  .then(osm => {
+    const features = [];
+    for (const el of (osm.elements || [])) {
+      if (el.type !== 'way' || !el.geometry || el.geometry.length < 4) continue;
+      const coords = el.geometry.map(n => [n.lon, n.lat]);
+      const f = coords[0], l = coords[coords.length - 1];
+      if (f[0] !== l[0] || f[1] !== l[1]) coords.push(coords[0]);
+      const tags = el.tags || {};
+      let h = 8;
+      if (tags.height)                  h = parseFloat(tags.height) || 8;
+      else if (tags['building:levels']) h = (parseInt(tags['building:levels']) || 2) * 3.2;
+      features.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] }, properties: { h, minH: 0 } });
+    }
+    // Tag each building with its BCR commune niscode via point-in-polygon
+    if (GEOJSON) {
+      const communes = GEOJSON.features.map(f => {
+        const geom = f.geometry;
+        const rings = geom.type === 'Polygon'
+          ? [geom.coordinates[0]]
+          : geom.type === 'MultiPolygon' ? geom.coordinates.map(p => p[0]) : [];
+        let minLat=90, maxLat=-90, minLon=180, maxLon=-180;
+        for (const r of rings) for (const [ln, lt] of r) {
+          if (lt < minLat) minLat=lt; if (lt > maxLat) maxLat=lt;
+          if (ln < minLon) minLon=ln; if (ln > maxLon) maxLon=ln;
+        }
+        return { niscode: String(f.properties.niscode), rings, minLat, maxLat, minLon, maxLon };
+      });
+
+      for (const feat of features) {
+        const ring = feat.geometry.coordinates[0];
+        let cx=0, cy=0;
+        for (const [ln, lt] of ring) { cx+=ln; cy+=lt; }
+        cx /= ring.length; cy /= ring.length;
+        for (const c of communes) {
+          if (cy < c.minLat || cy > c.maxLat || cx < c.minLon || cx > c.maxLon) continue;
+          for (const r of c.rings) {
+            if (_pip(cx, cy, r)) { feat.properties.niscode = c.niscode; break; }
+          }
+          if (feat.properties.niscode) break;
+        }
       }
-    }, insertBefore);
+    }
+
+    _osmBuildingsCache = { type: 'FeatureCollection', features };
+    try { sessionStorage.setItem(_OSM_CACHE_KEY, JSON.stringify(_osmBuildingsCache)); } catch(e) {}
+    return _osmBuildingsCache;
+  });
+
+  return _osmBuildingsFetch;
+}
+
+// ── Building filter helpers + 3D↔2D sync ────────────────────────────────────
+
+// Update the 3D commune highlight outline and sim panel to match current selection.
+// Works for district mode (single) and compare mode (multi).
+function sync3DHighlight() {
+  if (!mlMap) return;
+
+  if (currentTab === 'compare') {
+    const slots = compareSlots.filter(Boolean);
+    if (mlMap.getLayer('communes-highlight')) {
+      mlMap.setFilter('communes-highlight',
+        slots.length
+          ? ['in', ['get', 'niscode'], ['literal', slots.map(n => String(n))]]
+          : ['==', ['get', 'niscode'], -1]
+      );
+    }
+  } else {
+    const nis = dtCommune || selectedDistrict;
+    if (mlMap.getLayer('communes-highlight')) {
+      mlMap.setFilter('communes-highlight',
+        nis ? ['==', ['get', 'niscode'], String(nis)] : ['==', ['get', 'niscode'], -1]
+      );
+    }
+    if (dtMode) renderSimPanel();
+  }
+}
+
+// Ray-casting point-in-polygon for a coordinate ring [[lon,lat],…]
+function _pip(px, py, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi))
+      inside = !inside;
+  }
+  return inside;
+}
+
+// Returns the niscodes whose buildings should be visible right now
+function getActiveBuildingNiscodes() {
+  if (currentTab === 'compare') {
+    return compareSlots.filter(Boolean).map(String);
+  }
+  const nis = dtCommune || selectedDistrict;
+  if (nis) return [String(nis)];
+  if (activeChallenge && DISTRICTS.length) {
+    const ch = activeChallenge;
+    const top = [...DISTRICTS]
+      .filter(d => d[ch.primaryVar] != null)
+      .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
+    return top.length ? [String(top[0].niscode)] : [];
+  }
+  return [];
+}
+
+// Toggle visibility on per-commune building layers — O(19) instant ops,
+// no filter evaluation over thousands of polygons.
+function updateBuildingFilter() {
+  if (!mlMap || !GEOJSON) return;
+  const active = _showAllBuildings ? null : new Set(getActiveBuildingNiscodes());
+  GEOJSON.features.forEach(f => {
+    const nis   = String(f.properties.niscode);
+    const lyrId = `3d-buildings-${nis}`;
+    if (mlMap.getLayer(lyrId)) {
+      mlMap.setLayoutProperty(lyrId, 'visibility',
+        (active === null || active.has(nis)) ? 'visible' : 'none');
+    }
+  });
+}
+
+async function inject3DBuildings() {
+  // Strip any fill-extrusion layers baked into the basemap style
+  mlMap.getStyle().layers
+    .filter(l => l.type === 'fill-extrusion')
+    .forEach(l => { try { mlMap.removeLayer(l.id); } catch(e) {} });
+
+  const bar = document.getElementById('bld-loading-bar');
+  const barTimer = !_osmBuildingsCache
+    ? setTimeout(() => { if (bar) bar.classList.remove('bld-hidden'); }, 250)
+    : null;
+
+  try {
+    const geojson = await fetchOSMBuildings();
+
+    // Group buildings by commune niscode
+    const groups = {};
+    for (const feat of geojson.features) {
+      const nis = feat.properties.niscode;
+      if (!nis) continue;
+      (groups[nis] = groups[nis] || []).push(feat);
+    }
+
+    const PAINT = {
+      'fill-extrusion-color': [
+        'interpolate', ['linear'], ['get', 'h'],
+        0, '#005566', 5, '#007a8a', 20, '#00a8c0', 50, '#00ccee', 100, '#00e8ff',
+      ],
+      'fill-extrusion-height':            ['get', 'h'],
+      'fill-extrusion-base':              ['get', 'minH'],
+      'fill-extrusion-opacity':           0.92,
+      'fill-extrusion-vertical-gradient': true,
+    };
+
+    // One small GeoJSON source + layer per commune — visibility toggle is instant
+    for (const [nis, feats] of Object.entries(groups)) {
+      const srcId = `bld-${nis}`;
+      const lyrId = `3d-buildings-${nis}`;
+      if (!mlMap.getSource(srcId)) {
+        mlMap.addSource(srcId, { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, buffer: 64 });
+      }
+      if (!mlMap.getLayer(lyrId)) {
+        mlMap.addLayer({ id: lyrId, source: srcId, type: 'fill-extrusion',
+          layout: { visibility: 'none' }, paint: PAINT });
+      }
+    }
+
+    updateBuildingFilter();
+    if (mlMap.getLayer('communes-labels')) mlMap.moveLayer('communes-labels');
+
+  } catch(e) {
+    console.warn('3D buildings load failed:', e);
+  } finally {
+    clearTimeout(barTimer);
+    if (bar) bar.classList.add('bld-hidden');
   }
 }
 
@@ -2383,8 +2685,26 @@ function addCommuneLayer() {
 
   mlMap.addLayer({
     id: 'communes-highlight', type: 'line', source: 'communes',
-    paint: { 'line-color': '#3ac0f9', 'line-width': 2.5, 'line-opacity': 0.9 },
-    filter: ['==', ['get', 'niscode'], '']
+    paint: { 'line-color': '#ffffff', 'line-width': 2.5, 'line-opacity': 0.9 },
+    filter: ['==', ['get', 'niscode'], -1]
+  });
+
+  mlMap.addLayer({
+    id: 'communes-labels', type: 'symbol', source: 'communes',
+    layout: {
+      'text-field': ['get', 'naam'],
+      'text-font': ['Noto Sans Bold', 'Noto Sans Regular'],
+      'text-size': 15,
+      'text-anchor': 'center',
+      'text-allow-overlap': true,
+      'text-ignore-placement': true,
+      'symbol-placement': 'point',
+    },
+    paint: {
+      'text-color': 'rgba(255,255,255,0.92)',
+      'text-halo-color': 'rgba(0,0,0,0.75)',
+      'text-halo-width': 1.5,
+    }
   });
 
   rebuild3DPulseRings();
@@ -2413,6 +2733,8 @@ function updateMapLibreColors() {
   const src = mlMap.getSource('communes');
   if (src) src.setData(colorCommuneFeatures());
   rebuild3DPulseRings();
+  updateBuildingFilter();
+  sync3DHighlight();
 }
 
 // =====================================================================
@@ -2623,24 +2945,46 @@ function toggleLeftPanel() {
   leftCollapsed = !leftCollapsed;
   document.body.classList.toggle('left-collapsed', leftCollapsed);
 
-  // Each frame: measure how far the panel's left edge moved since the last frame
-  // and pan the Leaflet map by the same amount in the opposite direction.
-  // This keeps every existing tile pinned to its current screen position while
-  // new tiles load into the revealed area — identical to how the right panel behaves.
   const panelEl = document.querySelector('.left-panel');
-  let prevW = parseFloat(getComputedStyle(panelEl).width) || 0;
+  const mapEl   = document.getElementById('map');
+  if (!mapEl) { _resizeMapsFor(450); return; }
+
+  // During the CSS width transition, the map-area's left edge drifts.
+  // Counteract this each frame with a CSS transform on #map — runs on the
+  // compositor with zero Leaflet API calls, so there is no per-frame jitter.
+  let prevW      = parseFloat(getComputedStyle(panelEl).width) || 0;
+  let totalDelta = 0;
   const deadline = performance.now() + 450;
 
   (function tick() {
     const curW  = parseFloat(getComputedStyle(panelEl).width) || 0;
-    const delta = prevW - curW;               // >0 while collapsing, <0 while expanding
-    if (map) {
-      map.invalidateSize({ animate: false, pan: false });
-      if (delta !== 0) map.panBy([-delta, 0], { animate: false });
-    }
+    totalDelta += prevW - curW;
+
+    mapEl.style.transform = `translateX(${totalDelta}px)`;
+    // Collapse (totalDelta > 0): #map shifts right — dark area on the left is
+    //   intentional (the newly revealed space before tiles load in). No right gap.
+    // Expand  (totalDelta < 0): #map shifts left — extend its width rightward by
+    //   the same amount so the right edge stays flush with the map-area boundary.
+    //   This fills in with the tiles that were already loaded at full width,
+    //   so there is no dark "phantom panel" on the right.
+    mapEl.style.width = totalDelta < 0 ? `calc(100% + ${-totalDelta}px)` : '';
+
     if (mlMap) mlMap.resize();
     prevW = curW;
-    if (performance.now() < deadline) requestAnimationFrame(tick);
+
+    if (performance.now() < deadline) {
+      requestAnimationFrame(tick);
+    } else {
+      // Animation complete — remove compensation and settle Leaflet in one
+      // synchronous block so the browser batches it into a single repaint.
+      mapEl.style.transform = '';
+      mapEl.style.width     = '';
+      if (map) {
+        map.panBy([-totalDelta, 0], { animate: false });
+        map.invalidateSize({ animate: false, pan: false });
+      }
+      if (mlMap) mlMap.resize();
+    }
   })();
 }
 
