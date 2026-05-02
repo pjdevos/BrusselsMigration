@@ -42,7 +42,7 @@ body {
   height: 100vh;
   display: grid;
   grid-template-rows: auto 1fr;
-  grid-template-columns: var(--panel-w) 1fr var(--panel-w);
+  grid-template-columns: auto 1fr auto;
   overflow: hidden;
 }
 
@@ -114,7 +114,10 @@ header::after {
   background: var(--surface);
   border-right: 1px solid var(--border);
   display: flex; flex-direction: column; overflow: hidden;
+  width: var(--panel-w); min-width: 0; will-change: width;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1), border-color 0.4s;
 }
+body.left-collapsed .left-panel { width: 0; border-right-color: transparent; }
 .left-scroll {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   display: flex; flex-direction: column;
@@ -215,7 +218,10 @@ input[type=range]#year-slider {
   background: var(--surface);
   border-left: 1px solid var(--border);
   display: flex; flex-direction: column; overflow: hidden;
+  width: var(--panel-w); min-width: 0; will-change: width;
+  transition: width 0.4s cubic-bezier(0.4,0,0.2,1), border-color 0.4s;
 }
+body.right-collapsed .right-panel { width: 0; border-left-color: transparent; }
 
 /* ── TAB BAR ── */
 .tab-bar {
@@ -527,7 +533,9 @@ input[type=range].whatif-slider {
 .leaflet-interactive:focus { outline: none !important; }
 
 /* ── DIGITAL TWIN ── */
-.map-area { position: relative; overflow: hidden; }
+.map-area { position: relative; overflow: hidden; background: var(--bg); }
+/* Override Leaflet's default #ddd container background */
+.leaflet-container { background: var(--bg) !important; }
 #map-legend { position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 1000; }
 #map, #maplibre-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 #maplibre-container { display: none; z-index: 2; }
@@ -567,6 +575,46 @@ input[type=range].whatif-slider {
 .dt-sc-item { flex: 1; text-align: center; padding: 0.25rem 0.15rem; }
 .dt-sc-n { font-size: 1rem; font-weight: 700; font-family: var(--mono); }
 .dt-sc-lbl { font-size: 0.6rem; color: var(--text-dim); line-height: 1.3; }
+/* ── PANEL TOGGLE BUTTONS ── */
+.panel-toggle {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1001;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  width: 1.6rem;
+  height: 5.5rem;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; font-family: var(--sans);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.45);
+  transition: background 0.2s, color 0.2s, border-color 0.2s, box-shadow 0.2s;
+}
+.panel-toggle:hover {
+  background: var(--surface3);
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 4px 22px rgba(58,192,249,0.22), 0 0 0 1px rgba(58,192,249,0.12);
+}
+.tog-arrow {
+  display: block;
+  width: 0.52rem; height: 0.52rem;
+  border-right: 2.5px solid currentColor;
+  border-top: 2.5px solid currentColor;
+  border-radius: 1px;
+  transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+  flex-shrink: 0;
+}
+.left-toggle  { left: 0;  border-radius: 0 0.55rem 0.55rem 0; border-left: none; }
+.right-toggle { right: 0; border-radius: 0.55rem 0 0 0.55rem; border-right: none; }
+/* Chevron directions — CSS handles the flip, no JS textContent needed */
+.left-toggle  .tog-arrow { transform: rotate(-135deg); } /* ← = collapse */
+body.left-collapsed  .left-toggle  .tog-arrow { transform: rotate(45deg); }   /* → = expand */
+.right-toggle .tog-arrow { transform: rotate(45deg); }   /* → = collapse */
+body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /* ← = expand */
+
 /* Leaflet pulse rings for top-4 challenge communes */
 @keyframes lf-pulse {
   0%   { transform: scale(0.2); opacity: 0.9; }
@@ -646,7 +694,9 @@ input[type=range].whatif-slider {
 
 <div class="map-area">
 <div id="map"></div>
-<div id="maplibre-container"></div>
+<div id="maplibre-container"><div id="dt-pulse-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;"></div></div>
+<button class="panel-toggle left-toggle"  id="left-toggle"  onclick="toggleLeftPanel()"  title="Hide / show left panel"><span class="tog-arrow"></span></button>
+<button class="panel-toggle right-toggle" id="right-toggle" onclick="toggleRightPanel()" title="Hide / show right panel"><span class="tog-arrow"></span></button>
 <div class="map-legend" id="map-legend">
   <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
   <div class="legend-title" id="legend-title">Select a challenge</div>
@@ -2199,12 +2249,11 @@ loadData().catch(err => {
 // =====================================================================
 // DIGITAL TWIN
 // =====================================================================
-var dtMode       = false;
-var mlMap        = null;
-var dtCommune    = null;
-var dtChallenge  = null;
-var dtPulseRaf   = null;
-var dtPulsePhase = 0;
+var dtMode      = false;
+var mlMap       = null;
+var dtCommune   = null;
+var dtChallenge = null;
+var dt3DPulseWraps = [];
 
 
 function updatePulseMarkers() {
@@ -2264,6 +2313,7 @@ function initMapLibre() {
     addCommuneLayer();
     renderSimPanel();
   });
+  mlMap.on('move', reposition3DPulseRings);
 
   mlMap.on('click', 'communes-fill', e => {
     if (e.features.length) {
@@ -2337,25 +2387,7 @@ function addCommuneLayer() {
     filter: ['==', ['get', 'niscode'], '']
   });
 
-  mlMap.addSource('communes-pulse-src', { type: 'geojson', data: buildPulseGeoJSON() });
-  mlMap.addLayer({
-    id: 'communes-pulse', type: 'circle', source: 'communes-pulse-src',
-    paint: {
-      'circle-radius': 8, 'circle-color': 'transparent',
-      'circle-stroke-width': 2.5, 'circle-stroke-color': '#e84a6a',
-      'circle-stroke-opacity': 0.85,
-    }
-  });
-  mlMap.addLayer({
-    id: 'communes-pulse2', type: 'circle', source: 'communes-pulse-src',
-    paint: {
-      'circle-radius': 19, 'circle-color': 'transparent',
-      'circle-stroke-width': 1.5, 'circle-stroke-color': '#e84a6a',
-      'circle-stroke-opacity': 0.35,
-    }
-  });
-
-  startPulse();
+  rebuild3DPulseRings();
 }
 
 function colorCommuneFeatures() {
@@ -2380,8 +2412,7 @@ function updateMapLibreColors() {
   if (!mlMap || !mlMap.isStyleLoaded()) return;
   const src = mlMap.getSource('communes');
   if (src) src.setData(colorCommuneFeatures());
-  const pulseSrc = mlMap.getSource('communes-pulse-src');
-  if (pulseSrc) pulseSrc.setData(buildPulseGeoJSON());
+  rebuild3DPulseRings();
 }
 
 // =====================================================================
@@ -2517,32 +2548,107 @@ function computeCentroid(feature) {
   return [cx / (6 * area), cy / (6 * area)];
 }
 
-function buildPulseGeoJSON() {
+// Build the exact same .lf-pulse-wrap / .lf-pulse-ring DOM elements used in 2D,
+// positioned over the 3D MapLibre canvas via mlMap.project().
+// Call on challenge change or first load (resets CSS animations intentionally).
+function rebuild3DPulseRings() {
+  const overlay = document.getElementById('dt-pulse-overlay');
+  if (!overlay || !mlMap) return;
+  overlay.innerHTML = '';
+  dt3DPulseWraps = [];
+
   const ch = dtChallenge || activeChallenge;
-  if (!ch || !GEOJSON || !DISTRICTS.length) return { type: 'FeatureCollection', features: [] };
-  const sorted = DISTRICTS.filter(d => d[ch.primaryVar] != null)
-    .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
-  const critNis = new Set(sorted.slice(0, Math.ceil(sorted.length * 0.25)).map(d => d.niscode));
-  return {
-    type: 'FeatureCollection',
-    features: GEOJSON.features
-      .filter(f => critNis.has(String(f.properties.niscode || '')))
-      .map(f => ({ type: 'Feature', geometry: { type: 'Point', coordinates: computeCentroid(f) }, properties: { niscode: f.properties.niscode } }))
-  };
+  if (!ch || !GEOJSON || !DISTRICTS.length) return;
+
+  const sorted = [...DISTRICTS]
+    .filter(d => d[ch.primaryVar] != null)
+    .sort((a, b) => ch.worseIsLower ? a[ch.primaryVar] - b[ch.primaryVar] : b[ch.primaryVar] - a[ch.primaryVar]);
+
+  sorted.slice(0, 4).forEach(d => {
+    const feat = GEOJSON.features.find(f => String(f.properties.niscode) === String(d.niscode));
+    if (!feat) return;
+    let [lng, lat] = computeCentroid(feat);
+    if (String(d.niscode) === '21004') lat += 0.012;
+    const pt = mlMap.project([lng, lat]);
+
+    const wrap = document.createElement('div');
+    wrap.className = 'lf-pulse-wrap';
+    // Override position:relative from class to absolute so it anchors in overlay
+    wrap.style.cssText = 'position:absolute;left:' + pt.x + 'px;top:' + pt.y + 'px;width:0;height:0;pointer-events:none;';
+    wrap.dataset.lng = lng;
+    wrap.dataset.lat = lat;
+
+    for (let i = 0; i < 3; i++) {
+      const ring = document.createElement('div');
+      ring.className = 'lf-pulse-ring';
+      ring.style.setProperty('--lf-pc', ch.color);
+      wrap.appendChild(ring);
+    }
+
+    overlay.appendChild(wrap);
+    dt3DPulseWraps.push(wrap);
+  });
 }
 
-function animatePulse() {
-  dtPulsePhase = (dtPulsePhase + 0.022) % 1;
-  const p2 = (dtPulsePhase + 0.5) % 1;
-  if (mlMap) {
-    if (mlMap.getLayer('communes-pulse'))  { mlMap.setPaintProperty('communes-pulse',  'circle-radius', 8 + dtPulsePhase*22); mlMap.setPaintProperty('communes-pulse',  'circle-stroke-opacity', 0.85*(1-dtPulsePhase)); }
-    if (mlMap.getLayer('communes-pulse2')) { mlMap.setPaintProperty('communes-pulse2', 'circle-radius', 8 + p2*22);           mlMap.setPaintProperty('communes-pulse2', 'circle-stroke-opacity', 0.85*(1-p2)); }
+// Called on every map move/zoom frame — only updates left/top so CSS animations
+// are never interrupted (no DOM removal = no animation reset).
+function reposition3DPulseRings() {
+  if (!mlMap || !dt3DPulseWraps.length) return;
+  dt3DPulseWraps.forEach(wrap => {
+    const pt = mlMap.project([parseFloat(wrap.dataset.lng), parseFloat(wrap.dataset.lat)]);
+    wrap.style.left = pt.x + 'px';
+    wrap.style.top  = pt.y + 'px';
+  });
+}
+
+// =====================================================================
+// PANEL COLLAPSE TOGGLES
+// =====================================================================
+var leftCollapsed  = false;
+var rightCollapsed = false;
+
+// Continuously resize the map canvas every RAF frame for the full duration
+// of the panel CSS transition so the viewport moves in lockstep.
+function _resizeMapsFor(ms) {
+  const deadline = performance.now() + ms;
+  function tick() {
+    if (map)   map.invalidateSize({ animate: false, pan: false });
+    if (mlMap) mlMap.resize();
+    if (performance.now() < deadline) requestAnimationFrame(tick);
   }
-  dtPulseRaf = requestAnimationFrame(animatePulse);
+  requestAnimationFrame(tick);
 }
 
-function startPulse() { if (!dtPulseRaf) animatePulse(); }
-function stopPulse()  { if (dtPulseRaf) { cancelAnimationFrame(dtPulseRaf); dtPulseRaf = null; } }
+function toggleLeftPanel() {
+  leftCollapsed = !leftCollapsed;
+  document.body.classList.toggle('left-collapsed', leftCollapsed);
+
+  // Each frame: measure how far the panel's left edge moved since the last frame
+  // and pan the Leaflet map by the same amount in the opposite direction.
+  // This keeps every existing tile pinned to its current screen position while
+  // new tiles load into the revealed area — identical to how the right panel behaves.
+  const panelEl = document.querySelector('.left-panel');
+  let prevW = parseFloat(getComputedStyle(panelEl).width) || 0;
+  const deadline = performance.now() + 450;
+
+  (function tick() {
+    const curW  = parseFloat(getComputedStyle(panelEl).width) || 0;
+    const delta = prevW - curW;               // >0 while collapsing, <0 while expanding
+    if (map) {
+      map.invalidateSize({ animate: false, pan: false });
+      if (delta !== 0) map.panBy([-delta, 0], { animate: false });
+    }
+    if (mlMap) mlMap.resize();
+    prevW = curW;
+    if (performance.now() < deadline) requestAnimationFrame(tick);
+  })();
+}
+
+function toggleRightPanel() {
+  rightCollapsed = !rightCollapsed;
+  document.body.classList.toggle('right-collapsed', rightCollapsed);
+  _resizeMapsFor(450);
+}
 
 </script>
 <div id="spark-tooltip"><span class="sp-year"></span><span class="sp-val"></span><span class="sp-hint">↵ set year</span></div>
