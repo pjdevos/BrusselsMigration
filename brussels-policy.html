@@ -191,6 +191,51 @@ body.left-collapsed .left-panel { width: 0; border-right-color: transparent; }
 .arr-worse  { color: var(--crit); }
 .arr-better { color: var(--ok); }
 .arr-stable { color: var(--text-dim); }
+.ranking-section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem; }
+#ranking-label { font-size: 0.63rem; margin-bottom: 0; }
+.ranking-tabs { display: flex; gap: 0.22rem; }
+.rtab {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
+  padding: 0.22rem 0.6rem; border-radius: 0.28rem;
+  border: 1px solid rgba(255,255,255,0.16); background: transparent;
+  color: var(--text-dim); cursor: pointer; transition: all 0.12s;
+}
+.rtab.active { background: rgba(58,192,249,0.18); border-color: var(--accent2); color: var(--accent2); }
+.rank-val-wrap { display: flex; flex-direction: column; align-items: flex-end; gap: 0.04rem; }
+.rank-sim-sub { font-size: 0.67rem; color: var(--accent2); opacity: 0.8; }
+.rank-sim-delta { font-size: 0.67rem; font-weight: 600; }
+.sim-delta-better { color: var(--ok); }
+.sim-delta-worse  { color: var(--crit); }
+.sim-dot { font-size: 0.45rem; color: var(--accent2); margin-left: 0.25rem; vertical-align: middle; opacity: 0.9; }
+.sim-map-badge { position: absolute; width: 11px; height: 11px; margin-left: -5.5px; margin-top: -5.5px; border-radius: 50%; background: #00deff; border: 1.5px solid #070b13; opacity: 0.92; pointer-events: none; }
+.whatif-actions { display: flex; gap: 0.4rem; margin-top: 0.55rem; }
+.sim-save-btn {
+  flex: 1; padding: 0.46rem 0.7rem; border-radius: 0.3rem;
+  background: rgba(0,222,255,0.07); border: 1px solid rgba(0,222,255,0.32);
+  color: rgba(0,222,255,0.78); cursor: pointer; font-size: 0.79rem;
+  font-family: 'IBM Plex Mono', monospace; transition: all 0.14s;
+}
+.sim-save-btn:hover { background: rgba(0,222,255,0.15); }
+.sim-save-btn.saved { background: rgba(74,232,154,0.12); border-color: var(--ok); color: var(--ok); }
+.sim-clear-btn {
+  padding: 0.36rem 0.6rem; border-radius: 0.3rem;
+  background: rgba(232,74,106,0.07); border: 1px solid rgba(232,74,106,0.28);
+  color: var(--crit); cursor: pointer; font-size: 0.72rem;
+  font-family: 'IBM Plex Mono', monospace; transition: all 0.14s;
+}
+.sim-clear-btn:hover { background: rgba(232,74,106,0.15); }
+.clear-all-sims-row {
+  display: flex; justify-content: flex-end;
+  margin-bottom: 0.65rem;
+}
+.clear-all-sims-btn {
+  font-family: 'IBM Plex Mono', monospace; font-size: 0.68rem; font-weight: 600;
+  padding: 0; border: none; background: transparent;
+  color: rgba(232,74,106,0.72); cursor: pointer; transition: color 0.15s;
+  text-decoration: underline; text-underline-offset: 3px; text-decoration-style: dotted;
+  letter-spacing: 0.01em;
+}
+.clear-all-sims-btn:hover { color: var(--crit); }
 
 /* ── YEAR SLIDER ── */
 .year-section {
@@ -719,7 +764,16 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
     </div>
     <div class="challenge-grid" id="challenge-grid"></div>
     <div class="ranking-section panel-section" id="ranking-section">
-      <div class="section-label" id="ranking-label">Most affected</div>
+      <div class="ranking-section-header">
+        <div class="section-label" id="ranking-label">Most affected</div>
+        <div class="ranking-tabs">
+          <button class="rtab active" id="rtab-actual"    onclick="switchRankingTab('actual')">Actual</button>
+          <button class="rtab"        id="rtab-simulated" onclick="switchRankingTab('simulated')">Simulated</button>
+        </div>
+      </div>
+      <div class="clear-all-sims-row" id="clear-all-sims-row" style="display:none">
+        <button class="clear-all-sims-btn" id="clear-all-sims-btn" onclick="onClearAllSimulations()">✕ Clear all scenarios</button>
+      </div>
       <div class="ranking-list" id="ranking-list"></div>
     </div>
   </div>
@@ -815,6 +869,8 @@ const CHALLENGES = [
     statusLabels: ['Critical','Elevated','Moderate','OK'],
     drivers: ['hq_qual_basic','hq_build_pre1900','fam_couple_children'],
     driverLabels: ['Poor housing quality','Very old buildings (pre-1900)','Families with children'],
+    driverDirections: [false, false, true],
+    driverActionLabels: ['Better housing quality','More modernised buildings','More families with children'],
     driverReasons: [
       'Improving housing quality reduces the main reason residents cite for leaving',
       'Renovating pre-1900 buildings removes a key push factor for families',
@@ -830,6 +886,8 @@ const CHALLENGES = [
     statusLabels: ['Critical','Elevated','Moderate','OK'],
     drivers: ['hq_build_pre1900','hq_renov_by2022','internal_balance_pct'],
     driverLabels: ['Very old buildings (pre-1900)','Recently renovated homes','Net population change'],
+    driverDirections: [false, true, true],
+    driverActionLabels: ['More modernised buildings','More recently renovated homes','Stronger population growth'],
     driverReasons: [
       'Older buildings are the primary source of deteriorated housing stock',
       'Renovation directly converts poor-quality units into standard housing',
@@ -838,17 +896,19 @@ const CHALLENGES = [
   },
   {
     id: 'aging', icon: '⬡', label: 'Aging & isolation',
-    desc: 'Many elderly residents, often living alone',
+    desc: 'High share of elderly residents in the commune',
     kpiLabel: 'Share of residents aged 65 or older',
     color: '#4a9de8', rgb: '74,157,232',
     primaryVar: 'age_pct_65plus', worseIsLower: false,
     statusLabels: ['Critical','Elevated','Moderate','OK'],
-    drivers: ['fam_alone_65plus_pct','age_pct_80plus','internal_out_pct'],
-    driverLabels: ['Elderly living alone','Residents aged 80+','Residents moving away'],
+    drivers: ['fam_couple_children','internal_balance_pct','internal_out_pct'],
+    driverLabels: ['Families with children','Net population change','Residents moving away'],
+    driverDirections: [true, true, false],
+    driverActionLabels: ['More families with children','Stronger resident inflow','Stronger resident retention'],
     driverReasons: [
-      'Reducing isolation among the elderly is the primary policy lever for this challenge',
-      'The oldest residents drive the concentration of high-care-need elderly people',
-      'Retaining younger residents slows the relative ageing of the commune',
+      'Attracting families actively lowers the elderly share by growing the youth and working-age population',
+      'A growing population brings in younger residents, diluting the elderly share over time',
+      'Retaining younger residents prevents the selective out-migration that raises the elderly share',
     ],
   },
   {
@@ -860,6 +920,8 @@ const CHALLENGES = [
     statusLabels: ['Critical','Elevated','Moderate','OK'],
     drivers: ['hq_qual_basic','hq_build_pre1900','fam_couple_children'],
     driverLabels: ['Poor housing quality','Very old buildings (pre-1900)','Families with children'],
+    driverDirections: [false, false, true],
+    driverActionLabels: ['Better housing quality','More modernised buildings','More families with children'],
     driverReasons: [
       'Poor housing is the top reason families move to neighbouring communes',
       'Old building stock is directly associated with higher family departure rates',
@@ -875,6 +937,8 @@ const CHALLENGES = [
     statusLabels: ['Very high','High','Moderate','Low'],
     drivers: ['migbg_total','nat_belgian_pct','hq_qual_basic'],
     driverLabels: ['Residents with migration background','Belgian nationals','Poor housing quality'],
+    driverDirections: [false, true, false],
+    driverActionLabels: ['Stronger integration outcomes','Stronger Belgian community','Better housing conditions'],
     driverReasons: [
       'Existing communities are the strongest predictor of continued international settlement',
       'A lower Belgian share correlates with higher international arrival rates',
@@ -890,6 +954,8 @@ const CHALLENGES = [
     statusLabels: ['Declining','Shrinking','Stable','Growing'],
     drivers: ['internal_balance_pct','fam_couple_children','avg_net_income'],
     driverLabels: ['Net population change','Families with children','Average household income'],
+    driverDirections: [true, true, true],
+    driverActionLabels: ['Stronger net migration balance','More families with children','Higher household income'],
     driverReasons: [
       'Net internal migration is the primary short-term driver of population change',
       'Families with children contribute to natural growth and long-term residential stability',
@@ -905,6 +971,8 @@ const CHALLENGES = [
     statusLabels: ['Very low','Low','Moderate','High'],
     drivers: ['avg_net_income','rc_pct_high','hq_qual_basic'],
     driverLabels: ['Average household income','High-value properties','Poor housing quality'],
+    driverDirections: [true, true, false],
+    driverActionLabels: ['Higher household income','More high-value properties','Better housing quality'],
     driverReasons: [
       'Wealthier residents own higher-value properties, raising the property tax base',
       'More high-value dwellings directly lifts the average property tax per dwelling',
@@ -920,6 +988,8 @@ const CHALLENGES = [
     statusLabels: ['Very low','Low','Moderate','High'],
     drivers: ['zero_income_rate','pri_avg_dwelling','nat_belgian_pct'],
     driverLabels: ['Households with no income','Annual property tax','Belgian nationals'],
+    driverDirections: [false, true, true],
+    driverActionLabels: ['Fewer zero-income households','Stronger property wealth base','Stronger Belgian community'],
     driverReasons: [
       'Every reduction in zero-income households raises the commune-wide income average',
       'Higher property wealth correlates with higher-income residents in those properties',
@@ -935,6 +1005,8 @@ const CHALLENGES = [
     statusLabels: ['Stagnant','Low activity','Moderate','Active'],
     drivers: ['re_apt_median','total_population','avg_net_income'],
     driverLabels: ['Median apartment price','Total residents','Average household income'],
+    driverDirections: [true, true, true],
+    driverActionLabels: ['Higher apartment market value','Growing resident population','Higher household income'],
     driverReasons: [
       'Higher apartment prices improve developer returns, making new construction viable',
       'A larger population base creates housing demand that developers respond to',
@@ -950,10 +1022,12 @@ const CHALLENGES = [
     statusLabels: ['Disinvested','Below average','Above average','Premium'],
     drivers: ['avg_net_income','pri_avg_dwelling','bp_res_new_dwellings'],
     driverLabels: ['Average household income','Annual property tax','New housing permits'],
+    driverDirections: [true, true, false],
+    driverActionLabels: ['Higher household income','Stronger property wealth base','New dwelling permits cap'],
     driverReasons: [
       'Purchasing power directly determines what buyers are willing and able to pay',
       'A stronger property wealth base signals an established market with sustained demand',
-      'New supply moderates price growth; low construction sustains upward price pressure',
+      'Restricting annual permit approvals limits new supply and sustains upward price pressure',
     ],
   },
 ];
@@ -1025,6 +1099,12 @@ let map, geojsonLayer, basemapLayer, highlightGroup, labelGroup;
 let layerByNiscode = {};
 let pulseGroup = null;
 let currentBasemap = 'dark';
+let simBadgeGroup = null;
+
+// ── SIMULATION STATE ─────────────────────────────────────────────────────────
+var savedSimulations = {};
+const SIM_STORAGE_KEY = 'brussels_policy_sims_v1';
+var rankingTab = 'actual';
 
 // =====================================================================
 // FORMATTING HELPERS
@@ -1372,6 +1452,20 @@ function computeLinearCoeff(xKey, yKey) {
   return den === 0 ? 0 : num/den;
 }
 
+// Returns the regression coefficient corrected to match the declared driverDirections sign.
+// Without this, spurious regression coefficients (small sample, n=19) produce wrong impact direction.
+// Expected sign: direction=true + worseIsLower=true  → positive coeff (more driver → higher primary → better)
+//                direction=true + worseIsLower=false → negative coeff (more driver → lower primary → better)
+//                direction=false + worseIsLower=true  → negative coeff (less driver → higher primary → better)
+//                direction=false + worseIsLower=false → positive coeff (less driver → lower primary → better)
+function getDirectedCoeff(ch, drvKey, drvIdx) {
+  const raw = computeLinearCoeff(drvKey, ch.primaryVar);
+  if (!ch.driverDirections || ch.driverDirections[drvIdx] == null) return raw;
+  const dir = ch.driverDirections[drvIdx];
+  const expectedSign = (dir === ch.worseIsLower) ? 1 : -1;
+  return Math.abs(raw) * expectedSign;
+}
+
 // =====================================================================
 // SPARKLINE
 // =====================================================================
@@ -1609,6 +1703,8 @@ function selectChallenge(id) {
 
   updatePulseMarkers();
   updateBuildingFilter();
+  updateSimBadges();
+  rebuild3DSimBadges();
 }
 
 // =====================================================================
@@ -1617,9 +1713,18 @@ function selectChallenge(id) {
 function renderRankingList() {
   if (!activeChallenge) return;
   const ch = activeChallenge;
+  // Show/hide global clear button based on whether any simulations exist
+  const clearAllRow = document.getElementById('clear-all-sims-row');
+  if (clearAllRow) clearAllRow.style.display = Object.keys(savedSimulations).length > 0 ? 'flex' : 'none';
+  // Actual tab: sort by real values. Simulated tab: sort by effective value
+  // (saved simulated value where available, real value otherwise).
   const sorted = [...DISTRICTS]
     .filter(d => d[ch.primaryVar] != null)
-    .sort((a,b) => ch.worseIsLower ? a[ch.primaryVar]-b[ch.primaryVar] : b[ch.primaryVar]-a[ch.primaryVar]);
+    .sort((a, b) => {
+      const va = getDisplayValue(a.niscode, ch) ?? a[ch.primaryVar];
+      const vb = getDisplayValue(b.niscode, ch) ?? b[ch.primaryVar];
+      return ch.worseIsLower ? va - vb : vb - va;
+    });
   const list = document.getElementById('ranking-list');
   list.innerHTML = '';
   sorted.forEach((d, idx) => {
@@ -1629,10 +1734,45 @@ function renderRankingList() {
     const item = document.createElement('div');
     item.className = 'ranking-item' + (d.niscode === selectedDistrict ? ' selected' : '');
     item.dataset.niscode = d.niscode;
+
+    const sim     = savedSimulations[String(d.niscode)]?.[ch.id];
+    const realVal = d[ch.primaryVar];
+    const simVal  = sim?.predictedValue;
+    const hasSim  = sim != null && simVal != null;
+
+    // Highlight row green/red in Simulated tab based on improvement direction
+    if (rankingTab === 'simulated' && hasSim) {
+      const delta = simVal - realVal;
+      const isImprovement = ch.worseIsLower ? delta > 0 : delta < 0;
+      item.style.background = isImprovement
+        ? 'rgba(74,232,154,0.10)'
+        : 'rgba(232,74,106,0.10)';
+      item.style.borderColor = isImprovement
+        ? 'rgba(74,232,154,0.28)'
+        : 'rgba(232,74,106,0.28)';
+    }
+
+    // Value column — two lines when simulation exists
+    let valHtml;
+    if (rankingTab === 'simulated' && hasSim) {
+      const delta = simVal - realVal;
+      const isImprovement = ch.worseIsLower ? delta > 0 : delta < 0;
+      valHtml = `<div class="rank-val-wrap">
+        <span class="rank-val">${fmtVal(ch.primaryVar, simVal)}</span>
+        <span class="rank-sim-delta ${isImprovement ? 'sim-delta-better' : 'sim-delta-worse'}">${fmtDelta(ch.primaryVar, delta)}</span>
+      </div>`;
+    } else {
+      valHtml = `<div class="rank-val-wrap">
+        <span class="rank-val">${fmtVal(ch.primaryVar, realVal)}</span>
+        ${hasSim ? `<span class="rank-sim-sub">Sim: ${fmtVal(ch.primaryVar, simVal)}</span>` : ''}
+      </div>`;
+    }
+
+    const badge = hasSim ? '<span class="sim-dot" title="Scenario saved">●</span>' : '';
     item.innerHTML = `
       <span class="rank-num ${idx < 3 ? 'urgent' : ''}">${idx+1}</span>
-      <span class="rank-name">${d.name}</span>
-      <span class="rank-val">${fmtVal(ch.primaryVar, d[ch.primaryVar])}</span>
+      <span class="rank-name">${d.name}${badge}</span>
+      ${valHtml}
       <span class="rank-arrow ${arr.cls}">${arr.sym}</span>`;
     item.onclick = () => selectDistrict(d.niscode);
     list.appendChild(item);
@@ -1654,6 +1794,7 @@ function selectDistrict(niscode) {
   } else {
     selectedDistrict = niscode;
     dtCommune = niscode;          // keep 3D state in sync
+    whatIfOverrides = {};         // clear stale overrides from previous commune
     renderDetailPanel(niscode);
     // Update ranking highlight
     document.querySelectorAll('.ranking-item').forEach(el => {
@@ -1690,6 +1831,16 @@ function renderDetailPanel(niscode) {
   const sparkPts   = getLastNYears(niscode, ch.primaryVar, Infinity);
   const kpiSentence = getKpiSentence(ch.primaryVar, val);
   const def = DEFINITIONS[ch.primaryVar] || '';
+
+  // Restore per-commune per-challenge slider state from saved simulation (carry forward)
+  const _simEntry = savedSimulations[String(niscode)]?.[ch.id];
+  if (_simEntry?.sliderValues) {
+    (ch.drivers || []).forEach(k => {
+      whatIfOverrides[k] = _simEntry.sliderValues[k] !== undefined ? _simEntry.sliderValues[k] : (d?.[k] ?? 0);
+    });
+  } else {
+    (ch.drivers || []).forEach(k => delete whatIfOverrides[k]);
+  }
 
   const driversHTML = ch.drivers ? buildDriversHTML(niscode, ch) : '';
   const whatifHTML  = ch.drivers ? buildWhatIfHTML(niscode, ch)  : '';
@@ -1786,7 +1937,7 @@ function buildWhatIfHTML(niscode, ch) {
 
   ch.drivers.forEach((drvKey, i) => {
     const dmeta    = DRIVER_META[drvKey];
-    const label    = ch.driverLabels?.[i] || dmeta?.name || PLAIN_LABELS[drvKey] || drvKey;
+    const baseLabel = ch.driverLabels?.[i] || dmeta?.name || PLAIN_LABELS[drvKey] || drvKey;
     const subtitle = ch.driverReasons?.[i] || '';
     const d        = findDistrict(niscode);
     const val      = d?.[drvKey];
@@ -1795,6 +1946,24 @@ function buildWhatIfHTML(niscode, ch) {
     const step     = meta?.step || 0.001;
     const curVal   = whatIfOverrides[drvKey] !== undefined ? whatIfOverrides[drvKey] : (val ?? avg ?? 0);
     const { min: dMin, max: dMax } = getChallengeRange(drvKey);
+    const inverted = !!(ch.driverDirections && ch.driverDirections[i] === false);
+    const sliderPos = inverted ? (dMax + dMin - curVal) : curVal;
+
+    // Use positive action label if defined, else fall back to direction prefix + base label
+    const actionLabel = ch.driverActionLabels?.[i];
+    let label;
+    if (actionLabel) {
+      label = actionLabel;
+    } else {
+      let isIncrease;
+      if (ch.driverDirections && ch.driverDirections[i] != null) {
+        isIncrease = ch.driverDirections[i];
+      } else {
+        const coeff = computeLinearCoeff(drvKey, ch.primaryVar);
+        isIncrease = Math.abs(coeff) > 1e-10 && (ch.worseIsLower === (coeff > 0));
+      }
+      label = (isIncrease ? 'Increase in ' : 'Reduction in ') + baseLabel;
+    }
 
     html += `
       <div class="whatif-item">
@@ -1808,13 +1977,23 @@ function buildWhatIfHTML(niscode, ch) {
         <input type="range" class="whatif-slider"
                id="wi-${drvKey}"
                data-key="${drvKey}" data-niscode="${niscode}"
+               data-inverted="${inverted ? '1' : '0'}"
+               data-dmin="${dMin}" data-dmax="${dMax}"
                min="${dMin}" max="${dMax}" step="${step}"
-               value="${curVal}">
+               value="${sliderPos}">
         <div class="whatif-ref">Brussels avg: ${fmtVal(drvKey, avg)}</div>
       </div>`;
   });
 
-  html += `<div class="whatif-result" id="whatif-result">Adjust sliders to simulate impact.</div></div>`;
+  const _hasSaved = !!(savedSimulations[String(niscode)]?.[ch.id]);
+  html += `<div class="whatif-result" id="whatif-result">Adjust sliders to simulate impact.</div>
+    <div class="whatif-actions">
+      <button class="sim-save-btn${_hasSaved ? ' saved' : ''}" id="sim-save-btn" onclick="onSaveSimulation('${niscode}')">
+        ${_hasSaved ? '✓ Scenario saved' : 'Save Scenario'}
+      </button>
+      ${_hasSaved ? `<button class="sim-clear-btn" onclick="onClearSimulation('${niscode}')">✕ Clear</button>` : ''}
+    </div>
+  </div>`;
   return html;
 }
 
@@ -1825,13 +2004,176 @@ function attachWhatIfListeners(niscode) {
 }
 
 function onWhatIfSlide(inputEl) {
-  const key     = inputEl.dataset.key;
-  const niscode = inputEl.dataset.niscode;
-  const val     = parseFloat(inputEl.value);
-  whatIfOverrides[key] = val;
+  const key       = inputEl.dataset.key;
+  const niscode   = inputEl.dataset.niscode;
+  const sliderPos = parseFloat(inputEl.value);
+  const inverted  = inputEl.dataset.inverted === '1';
+  const rawVal    = inverted
+    ? parseFloat(inputEl.dataset.dmax) + parseFloat(inputEl.dataset.dmin) - sliderPos
+    : sliderPos;
+  whatIfOverrides[key] = rawVal;
   const display = document.getElementById('wi-val-' + key);
-  if (display) display.textContent = fmtVal(key, val);
+  if (display) display.textContent = fmtVal(key, rawVal);
   updateWhatIfResult(niscode);
+  // If sliders change after a save, revert button to unsaved state
+  const saveBtn = document.getElementById('sim-save-btn');
+  if (saveBtn && saveBtn.classList.contains('saved')) {
+    saveBtn.classList.remove('saved');
+    saveBtn.textContent = 'Save Scenario';
+  }
+}
+
+// =====================================================================
+// SIMULATION — save / clear / persist / display helpers
+// =====================================================================
+
+function loadSavedSimulations() {
+  try {
+    const s = localStorage.getItem(SIM_STORAGE_KEY);
+    if (s) savedSimulations = JSON.parse(s);
+  } catch(e) {}
+}
+
+function persistSimulations() {
+  try { localStorage.setItem(SIM_STORAGE_KEY, JSON.stringify(savedSimulations)); } catch(e) {}
+}
+
+// Returns the value to display/color a commune — simulated if on Simulated tab and saved, else real.
+function getDisplayValue(niscode, ch) {
+  if (!ch) return null;
+  if (rankingTab === 'simulated') {
+    const sim = savedSimulations[String(niscode)]?.[ch.id];
+    if (sim?.predictedValue != null) return sim.predictedValue;
+  }
+  const d = findDistrict(niscode);
+  return d ? d[ch.primaryVar] : null;
+}
+
+function switchRankingTab(tab) {
+  rankingTab = tab;
+  document.getElementById('rtab-actual')?.classList.toggle('active', tab === 'actual');
+  document.getElementById('rtab-simulated')?.classList.toggle('active', tab === 'simulated');
+  renderRankingList();
+  updateMapColors();
+}
+
+function onSaveSimulation(niscode) {
+  if (!activeChallenge) return;
+  const ch = activeChallenge;
+  const d  = findDistrict(niscode);
+  if (!d) return;
+
+  // Compute predicted value from current overrides
+  let totalImpact = 0;
+  for (let di = 0; di < (ch.drivers || []).length; di++) {
+    const drvKey = ch.drivers[di];
+    const orig = d[drvKey];
+    const ov   = whatIfOverrides[drvKey];
+    if (ov === undefined || orig == null) continue;
+    const delta = ov - orig;
+    if (Math.abs(delta) < 1e-10) continue;
+    totalImpact += getDirectedCoeff(ch, drvKey, di) * delta;
+  }
+  const baseVal = d[ch.primaryVar];
+  const predictedValue = baseVal != null ? baseVal + totalImpact : null;
+
+  if (!savedSimulations[String(niscode)]) savedSimulations[String(niscode)] = {};
+  savedSimulations[String(niscode)][ch.id] = {
+    sliderValues:   { ...whatIfOverrides },
+    predictedValue,
+  };
+  persistSimulations();
+
+  // Refresh UI
+  const saveBtn = document.getElementById('sim-save-btn');
+  if (saveBtn) { saveBtn.classList.add('saved'); saveBtn.textContent = '✓ Scenario saved'; }
+  // Add Clear button if not present
+  if (saveBtn && !document.querySelector('.sim-clear-btn')) {
+    const clr = document.createElement('button');
+    clr.className = 'sim-clear-btn';
+    clr.textContent = '✕ Clear';
+    clr.onclick = () => onClearSimulation(niscode);
+    saveBtn.parentElement.appendChild(clr);
+  }
+
+  renderRankingList();
+  updateMapColors();
+  updateSimBadges();
+  rebuild3DSimBadges();
+}
+
+function onClearAllSimulations() {
+  savedSimulations = {};
+  whatIfOverrides  = {};
+  persistSimulations();
+  renderRankingList();
+  updateMapColors();
+  updateSimBadges();
+  rebuild3DSimBadges();
+  if (selectedDistrict) renderDetailPanel(selectedDistrict);
+}
+
+function onClearSimulation(niscode) {
+  if (!activeChallenge) return;
+  const ch = activeChallenge;
+  const nis = String(niscode);
+  if (savedSimulations[nis]) {
+    delete savedSimulations[nis][ch.id];
+    if (!Object.keys(savedSimulations[nis]).length) delete savedSimulations[nis];
+  }
+  persistSimulations();
+
+  // Clear working overrides for this challenge's drivers
+  (ch.drivers || []).forEach(k => delete whatIfOverrides[k]);
+
+  renderRankingList();
+  updateMapColors();
+  updateSimBadges();
+  rebuild3DSimBadges();
+  // Re-render detail panel to reset sliders to actual values
+  if (selectedDistrict === niscode || selectedDistrict === String(niscode)) {
+    renderDetailPanel(niscode);
+  }
+}
+
+// 2D badge layer — small cyan dot, same position as pulse circle centroid
+function updateSimBadges() {
+  if (!map || !GEOJSON || !activeChallenge) return;
+  if (!simBadgeGroup) simBadgeGroup = L.layerGroup().addTo(map);
+  simBadgeGroup.clearLayers();
+  const chId = activeChallenge.id;
+  for (const nis of Object.keys(savedSimulations)) {
+    if (!savedSimulations[nis][chId]) continue;
+    const feat = GEOJSON.features.find(f => String(f.properties.niscode) === nis);
+    if (!feat) continue;
+    let [lng, lat] = computeCentroid(feat);
+    if (nis === '21004') lat += 0.012;   // same offset as pulse circles
+    const icon = L.divIcon({ className: '', html: '<div class="sim-map-badge"></div>', iconSize: [0, 0], iconAnchor: [0, 0] });
+    L.marker([lat, lng], { icon, interactive: false, pane: 'communeLabelPane' }).addTo(simBadgeGroup);
+  }
+}
+
+// 3D badge — small cyan dot DOM element, same position as 3D pulse rings
+function rebuild3DSimBadges() {
+  const overlay = document.getElementById('dt-pulse-overlay');
+  if (!overlay || !mlMap || !activeChallenge || !GEOJSON) return;
+  overlay.querySelectorAll('.dt-sim-badge').forEach(el => el.remove());
+  const chId = activeChallenge.id;
+  for (const nis of Object.keys(savedSimulations)) {
+    if (!savedSimulations[nis][chId]) continue;
+    const feat = GEOJSON.features.find(f => String(f.properties.niscode) === nis);
+    if (!feat) continue;
+    let [lng, lat] = computeCentroid(feat);
+    if (nis === '21004') lat += 0.012;   // same offset as pulse circles
+    const pt = mlMap.project([lng, lat]);
+    const dot = document.createElement('div');
+    dot.className = 'dt-sim-badge';
+    dot.dataset.lng = lng; dot.dataset.lat = lat;
+    dot.style.cssText = `position:absolute;left:${pt.x}px;top:${pt.y}px;
+      width:11px;height:11px;border-radius:50%;margin-left:-5.5px;margin-top:-5.5px;
+      background:#00deff;border:1.5px solid #070b13;opacity:0.92;pointer-events:none;`;
+    overlay.appendChild(dot);
+  }
 }
 
 // =====================================================================
@@ -1942,16 +2284,17 @@ function updateWhatIfResult(niscode) {
   let totalImpact = 0;
   const parts = [];
 
-  for (const drvKey of (ch.drivers || [])) {
-    const originalVal  = d[drvKey];
-    const overrideVal  = whatIfOverrides[drvKey];
+  for (let di = 0; di < (ch.drivers || []).length; di++) {
+    const drvKey      = ch.drivers[di];
+    const originalVal = d[drvKey];
+    const overrideVal = whatIfOverrides[drvKey];
     if (overrideVal === undefined || originalVal == null) continue;
     const delta = overrideVal - originalVal;
     if (Math.abs(delta) < 1e-10) continue;
-    const coeff = computeLinearCoeff(drvKey, ch.primaryVar);
+    const coeff  = getDirectedCoeff(ch, drvKey, di);
     const impact = coeff * delta;
     totalImpact += impact;
-    const label = ch.driverLabels?.[ch.drivers.indexOf(drvKey)] || PLAIN_LABELS[drvKey] || drvKey;
+    const label = ch.driverActionLabels?.[di] || ch.driverLabels?.[di] || PLAIN_LABELS[drvKey] || drvKey;
     parts.push(`${label}: <strong>${fmtDelta(ch.primaryVar, impact)}</strong>`);
   }
 
@@ -2111,7 +2454,7 @@ function styleFeature(feature) {
   const d = findDistrict(niscode);
   if (!d || !activeChallenge) return { color:'#666666', weight:1.5, fillColor:'#131b2e', fillOpacity:0.7, opacity:0.6 };
   const ch = activeChallenge;
-  const val = d[ch.primaryVar];
+  const val = getDisplayValue(niscode, ch);
   const { min, max } = getChallengeRange(ch.primaryVar);
   const fill = val != null ? colorScaleCh(val, min, max, ch.worseIsLower, ch.rgb) : '#131b2e';
   return {
@@ -2292,6 +2635,7 @@ function rebuildDistrictsForYear(year) {
 // LOAD DATA
 // =====================================================================
 async function loadData() {
+  loadSavedSimulations();
   const bust = `?v=${Date.now()}`;
   const combined = await fetch('data/brussels-combined.json' + bust).then(r => r.json());
   GEOJSON = combined.geojson;
@@ -2444,6 +2788,12 @@ function initMapLibre() {
     renderSimPanel();
   });
   mlMap.on('move', reposition3DPulseRings);
+  mlMap.on('move', () => {
+    document.querySelectorAll('.dt-sim-badge').forEach(dot => {
+      const pt = mlMap.project([parseFloat(dot.dataset.lng), parseFloat(dot.dataset.lat)]);
+      dot.style.left = pt.x + 'px'; dot.style.top = pt.y + 'px';
+    });
+  });
 
   mlMap.on('click', 'communes-fill', e => {
     if (e.features.length) {
@@ -2721,8 +3071,7 @@ function colorCommuneFeatures() {
   const mn = Math.min(...vals), mx = Math.max(...vals);
   cloned.features.forEach(f => {
     const nis = String(f.properties.niscode || '');
-    const d   = findDistrict(nis);
-    const v   = d ? d[ch.primaryVar] : null;
+    const v   = getDisplayValue(nis, ch);
     f.properties.dtColor = (v != null && isFinite(v)) ? colorScaleCh(v, mn, mx, ch.worseIsLower, ch.rgb) : '#1a2440';
   });
   return cloned;
