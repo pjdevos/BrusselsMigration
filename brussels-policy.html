@@ -628,6 +628,192 @@ input[type=range].whatif-slider {
 }
 .bld-all-btn:hover { background: rgba(0,222,255,0.18); border-color: rgba(0,222,255,0.7); color: #00deff; }
 .bld-all-btn.active { background: #00deff; border-color: #00deff; color: #050f18; }
+.asset-mode-btn { background: rgba(232,200,74,0.07); border-color: rgba(232,200,74,0.4); color: rgba(232,200,74,0.85); }
+.asset-mode-btn:hover { background: rgba(232,200,74,0.18); border-color: rgba(232,200,74,0.7); color: #e8c84a; }
+.asset-mode-btn.active { background: #e8c84a; border-color: #e8c84a; color: #070b13; }
+.flood-map-btn { background: rgba(74,157,232,0.07); border-color: rgba(74,157,232,0.4); color: rgba(74,157,232,0.85); }
+.flood-map-btn:hover { background: rgba(74,157,232,0.18); border-color: rgba(74,157,232,0.7); color: #4a9de8; }
+.flood-map-btn.active { background: #4a9de8; border-color: #4a9de8; color: #050f18; }
+/* Asset panel */
+.asset-card { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+.asset-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; gap: 0.5rem; }
+.asset-card-title { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: #e8c84a; }
+.asset-card-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.9rem; padding: 0; line-height: 1; }
+.asset-card-close:hover { color: var(--text); }
+.asset-row { display: flex; align-items: baseline; gap: 0.35rem; font-size: 0.76rem; padding: 0.12rem 0; }
+.asset-label { color: var(--text-sub); flex: 1; min-width: 0; line-height: 1.3; }
+.asset-val { color: var(--text); font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+.asset-no-sel { color: var(--text-dim); font-size: 0.78rem; padding: 0.6rem 0; text-align: center; }
+.asset-sector-head { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin: 0.5rem 0 0.3rem; }
+.asset-sector-note { font-size: 0.7rem; color: var(--text-dim); line-height: 1.4; margin-top: 0.4rem; font-style: italic; }
+
+/* ── ASSET CARD V2 ────────────────────────────────────────────────────────── */
+.ac2 { flex-shrink: 0; border-bottom: 2px solid var(--border2); background: var(--surface); }
+.ac2-header { display: flex; align-items: flex-start; justify-content: space-between; padding: 0.85rem 1rem 0.65rem; gap: 0.5rem; }
+.ac2-header-left { display: flex; align-items: flex-start; gap: 0.5rem; flex: 1; min-width: 0; }
+.ac2-icon { font-size: 1.1rem; color: #e8c84a; flex-shrink: 0; line-height: 1.2; }
+.ac2-title-block { flex: 1; min-width: 0; }
+.ac2-addr-outer { position: relative; min-width: 0; }
+.ac2-addr { font-size: 0.81rem; font-weight: 700; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: default; }
+.ac2-addr-resolving { font-weight: 400; font-style: italic; color: var(--text-dim); }
+/* Global fixed-position address tooltip — escapes panel overflow, slides over the map */
+#g-addr-tip {
+  visibility: hidden; opacity: 0; pointer-events: none;
+  position: fixed; z-index: 9999;
+  max-width: 240px; min-width: 120px;
+  background: #12172a; border: 1px solid rgba(58,192,249,0.4);
+  color: #e8f4ff; font-size: 0.78rem; font-weight: 500; line-height: 1.55;
+  padding: 0.45rem 0.8rem; border-radius: 6px;
+  white-space: normal; word-break: break-word;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.65), 0 0 0 0.5px rgba(58,192,249,0.15);
+  letter-spacing: 0.01em;
+}
+/* Full-width name row inside physical properties grid */
+.ac2-prop-name { display: flex; align-items: baseline; gap: 0.5rem; padding: 0.38rem 0.75rem; border-bottom: 1px solid var(--border); }
+.ac2-prop-name-lbl { font-size: 0.56rem; color: var(--text-dim); letter-spacing: 0.07em; text-transform: uppercase; flex-shrink: 0; }
+.ac2-prop-name-val { font-size: 0.82rem; font-weight: 700; color: #e8c84a; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ac2-commune { font-size: 0.67rem; color: var(--text-sub); margin-top: 0.1rem; }
+.ac2-header-right { display: flex; align-items: center; gap: 0.3rem; flex-shrink: 0; margin-top: 0.05rem; }
+.ac2-close { background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 0.85rem; padding: 0.12rem 0.2rem; line-height: 1; border-radius: 0.2rem; }
+.ac2-close:hover { color: var(--text); }
+.ac2-badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.15rem 0.48rem; border-radius: 99px; line-height: 1.5; border: 1px solid; white-space: nowrap; }
+.ac2-badge-type { background: rgba(58,192,249,0.1); color: #3ac0f9; border-color: rgba(58,192,249,0.28); }
+/* Group dividers — ASSET METRICS / ZONE METRICS */
+.ac2-group-hdr {
+  display: flex; align-items: center; gap: 0.5rem;
+  padding: 0.42rem 1rem;
+  font-size: 0.68rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+  background: var(--surface2); border-top: 1px solid var(--border2); border-bottom: 1px solid var(--border);
+  user-select: none;
+}
+.ac2-group-hdr.asset { color: #e8c84a; }
+.ac2-group-hdr.zone  { color: var(--accent); margin-top: 1rem; }
+.ac2-group-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.ac2-group-hdr.asset .ac2-group-dot { background: #e8c84a; box-shadow: 0 0 4px rgba(232,200,74,0.6); }
+.ac2-group-hdr.zone  .ac2-group-dot { background: var(--accent); box-shadow: 0 0 4px rgba(58,192,249,0.5); }
+/* Physical property 2-column grid */
+.ac2-prop-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.ac2-prop-cell {
+  padding: 0.42rem 0.75rem; display: flex; flex-direction: column; gap: 0.12rem;
+  border-bottom: 1px solid var(--border);
+}
+.ac2-prop-cell:nth-child(odd)  { border-right: 1px solid var(--border); }
+.ac2-prop-cell:nth-last-child(-n+2) { border-bottom: none; }
+.ac2-prop-lbl { font-size: 0.56rem; color: var(--text-dim); letter-spacing: 0.07em; text-transform: uppercase; }
+.ac2-prop-val { font-size: 0.84rem; font-weight: 700; color: var(--text); line-height: 1.15; }
+/* Collapsible sections */
+.ac2-section { border-bottom: 1px solid var(--border); }
+.ac2-section:last-child { border-bottom: none; }
+.ac2-section-hdr { display: flex; align-items: center; gap: 0.4rem; padding: 0.52rem 1rem; cursor: pointer; user-select: none; transition: background 0.1s; }
+.ac2-section-hdr:hover { background: var(--surface2); }
+.ac2-s-icon { font-size: 0.88rem; color: var(--accent); width: 1rem; text-align: center; flex-shrink: 0; }
+.ac2-s-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sub); flex: 1; }
+.ac2-s-sub { font-size: 0.59rem; color: var(--text-dim); }
+.ac2-s-chevron { font-size: 0.58rem; color: var(--text-dim); transition: transform 0.15s; flex-shrink: 0; }
+.ac2-section.collapsed .ac2-s-chevron { transform: rotate(-90deg); }
+.ac2-section-body { padding: 0.35rem 1rem 0.6rem; }
+.ac2-section.collapsed .ac2-section-body { display: none; }
+/* Data rows */
+.ac2-data-row { display: flex; align-items: baseline; justify-content: space-between; padding: 0.18rem 0; gap: 0.5rem; font-size: 0.73rem; }
+.ac2-d-label { color: var(--text-sub); flex: 1; min-width: 0; line-height: 1.35; }
+.ac2-d-val { color: var(--text); font-weight: 600; text-align: right; white-space: nowrap; }
+/* Relative bar */
+.ac2-bar-wrap { margin: 0.1rem 0 0.25rem; height: 2px; background: var(--border); border-radius: 2px; overflow: hidden; }
+.ac2-bar-fill { height: 100%; border-radius: 2px; transition: width 0.5s ease; }
+.ac2-src-note { font-size: 0.59rem; color: var(--text-dim); margin-top: 0.45rem; }
+.ac2-src-note a { color: inherit; text-decoration: none; }
+.ac2-src-note a:hover { color: var(--accent); text-decoration: underline; }
+/* Risk chips */
+.ac2-risk-row { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.2rem 0 0.15rem; }
+/* Flood map overlay toggle button */
+/* Flood zone progress bar — floating in the 3D map while computing */
+#fml-progress-wrap { position:absolute; bottom:2.8rem; left:50%; transform:translateX(-50%); z-index:6; background:rgba(10,14,26,0.9); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:0.45rem 0.7rem; min-width:160px; backdrop-filter:blur(4px); pointer-events:none; }
+#fml-progress-label { font-size:0.6rem; color:var(--text-dim); margin-bottom:0.22rem; text-align:center; }
+#fml-progress-track { background:rgba(255,255,255,0.08); border-radius:99px; height:3px; overflow:hidden; }
+#fml-progress-fill  { background:#4a9de8; height:100%; width:0%; transition:width 0.12s linear; border-radius:99px; }
+/* Flood zone legend — rendered inside the right-panel 3D View tab */
+#flood-sim-legend { flex-shrink:0; border-bottom:1px solid var(--border); padding:0.6rem 1rem 0.65rem; background:var(--surface2); }
+#flood-sim-legend .fsl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.38rem; }
+#flood-sim-legend .fsl-title  { font-size:0.57rem; font-weight:700; color:var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; }
+#flood-sim-legend .fsl-commune { font-size:0.62rem; font-weight:600; color:var(--text-sub); }
+#flood-sim-legend .fsl-rows   { display:flex; flex-wrap:wrap; gap:0.22rem 0.9rem; }
+#flood-sim-legend .fsl-row    { display:flex; align-items:center; gap:0.35rem; font-size:0.65rem; color:var(--text-sub); white-space:nowrap; }
+#flood-sim-legend .fsl-dot    { width:0.55rem; height:0.55rem; border-radius:50%; flex-shrink:0; }
+.ac2-risk-chip { display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.24rem 0.6rem 0.24rem 0.44rem; border-radius: 99px; font-size: 0.63rem; font-weight: 600; border: 1px solid; transition: all 0.2s; }
+.ac2-rc-dot { width: 0.42rem; height: 0.42rem; border-radius: 50%; flex-shrink: 0; }
+.ac2-risk-chip.ok    { background: rgba(58,249,160,0.08);  border-color: rgba(58,249,160,0.3);  color: #3af9a0; }
+.ac2-risk-chip.ok   .ac2-rc-dot { background: #3af9a0; }
+.ac2-risk-chip.low   { background: rgba(249,170,58,0.1);   border-color: rgba(249,170,58,0.35);  color: #f9aa3a; }
+.ac2-risk-chip.low  .ac2-rc-dot { background: #f9aa3a; }
+.ac2-risk-chip.mod   { background: rgba(249,201,58,0.09);  border-color: rgba(249,201,58,0.3);  color: #f9c93a; }
+.ac2-risk-chip.mod  .ac2-rc-dot { background: #f9c93a; }
+.ac2-risk-chip.high  { background: rgba(249,92,122,0.09);  border-color: rgba(249,92,122,0.3);  color: #f95c7a; }
+.ac2-risk-chip.high .ac2-rc-dot { background: #f95c7a; }
+.ac2-risk-chip.pending { background: var(--surface2); border-color: var(--border); color: var(--text-dim); }
+.ac2-risk-chip.pending .ac2-rc-dot { background: var(--border2); }
+.ac2-risk-chip.clickable { cursor: pointer; }
+.ac2-risk-chip.clickable:hover { filter: brightness(1.25); }
+/* Risk metadata popup */
+#risk-meta-overlay { position:fixed; inset:0; z-index:10000; background:rgba(0,0,0,0.5); display:none; }
+#risk-meta-overlay.open { display:block; }
+#risk-meta-popup {
+  position:fixed; z-index:10001;
+  top:50%; left:50%; transform:translate(-50%,-50%);
+  background:#12172a; border:1px solid rgba(232,200,74,0.38);
+  border-radius:10px; padding:1.2rem 1.4rem;
+  min-width:300px; max-width:460px; max-height:80vh;
+  overflow-y:auto; color:var(--text);
+  box-shadow:0 12px 48px rgba(0,0,0,0.75);
+  display:none;
+}
+#risk-meta-popup.open { display:block; animation:rmpFadeUp 0.18s ease; }
+@keyframes rmpFadeUp { from{opacity:0;transform:translate(-50%,-47%)} to{opacity:1;transform:translate(-50%,-50%)} }
+.rmp-hdr { display:flex; justify-content:space-between; align-items:center; margin-bottom:0.85rem; padding-bottom:0.65rem; border-bottom:1px solid var(--border); }
+.rmp-title { font-size:0.72rem; font-weight:800; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; }
+.rmp-close { cursor:pointer; color:var(--text-dim); font-size:1rem; background:none; border:none; padding:0 0.2rem; line-height:1; }
+.rmp-close:hover { color:var(--text); }
+.rmp-sec { font-size:0.6rem; font-weight:700; color:var(--text-dim); letter-spacing:0.14em; text-transform:uppercase; margin:0.75rem 0 0.25rem; }
+.rmp-row { display:flex; gap:0.6rem; padding:0.26rem 0; border-bottom:1px solid rgba(255,255,255,0.04); font-size:0.7rem; }
+.rmp-row:last-child { border-bottom:none; }
+.rmp-k { color:var(--text-dim); flex-shrink:0; min-width:145px; }
+.rmp-v { color:var(--text); font-weight:600; word-break:break-all; font-family:'IBM Plex Mono',monospace; font-size:0.68rem; }
+.rmp-v.hi  { color:#f95c7a; }
+.rmp-v.mod { color:#f9c93a; }
+.rmp-v.low { color:#f9aa3a; }
+.rmp-v.ok  { color:#3af9a0; }
+.rmp-note { font-size:0.62rem; color:var(--text-dim); margin-top:0.75rem; line-height:1.6; padding-top:0.6rem; border-top:1px solid var(--border); }
+/* Flood popup verdict banner */
+.rmp-verdict { display:flex; align-items:flex-start; gap:0.7rem; padding:0.65rem 0.8rem; border-radius:7px; margin-bottom:0.8rem; border:1px solid; }
+.rmp-verdict.hi  { background:rgba(249,92,122,0.1);  border-color:rgba(249,92,122,0.3);  }
+.rmp-verdict.mod { background:rgba(249,201,58,0.08); border-color:rgba(249,201,58,0.28); }
+.rmp-verdict.low { background:rgba(249,170,58,0.08); border-color:rgba(249,170,58,0.3);  }
+.rmp-verdict.ok  { background:rgba(58,249,160,0.06); border-color:rgba(58,249,160,0.22); }
+.rmp-verdict-icon { font-size:1.2rem; line-height:1; flex-shrink:0; margin-top:0.05rem; }
+.rmp-verdict-label { font-size:0.8rem; font-weight:800; line-height:1.2; margin-bottom:0.18rem; }
+.rmp-verdict.hi  .rmp-verdict-label { color:#f95c7a; }
+.rmp-verdict.mod .rmp-verdict-label { color:#f9c93a; }
+.rmp-verdict.low .rmp-verdict-label { color:#f9aa3a; }
+.rmp-verdict.ok  .rmp-verdict-label { color:#3af9a0; }
+.rmp-verdict-sub { font-size:0.63rem; color:var(--text-dim); line-height:1.5; }
+.rmp-waterway-alert { background:rgba(249,170,58,0.07); border:1px solid rgba(249,170,58,0.28); border-radius:6px; padding:0.55rem 0.7rem; margin:0.15rem 0 0.6rem; font-size:0.67rem; line-height:1.65; color:var(--text-sub); }
+.rmp-waterway-alert strong { color:#f9aa3a; display:block; margin-bottom:0.15rem; }
+.rmp-plain-text { font-size:0.68rem; color:var(--text-sub); line-height:1.7; padding:0.1rem 0 0.55rem; }
+/* Permit items */
+.ac2-permit-item { padding: 0.4rem 0; border-bottom: 1px solid var(--border); }
+.ac2-permit-item:last-of-type { border-bottom: none; }
+.ac2-permit-ref  { font-size: 0.66rem; font-weight: 700; color: var(--accent); margin-bottom: 0.06rem; }
+.ac2-permit-desc { font-size: 0.7rem; color: var(--text-sub); line-height: 1.35; }
+.ac2-permit-meta { font-size: 0.61rem; color: var(--text-dim); margin-top: 0.06rem; }
+/* Loading spinner */
+.ac2-loading { display: flex; align-items: center; gap: 0.38rem; font-size: 0.68rem; color: var(--text-dim); padding: 0.2rem 0; }
+.ac2-spinner { width: 0.65rem; height: 0.65rem; border-radius: 50%; border: 1.5px solid var(--border2); border-top-color: var(--accent); animation: ac2-spin 0.75s linear infinite; flex-shrink: 0; }
+@keyframes ac2-spin { to { transform: rotate(360deg); } }
+/* Empty state */
+.ac2-prompt { padding: 1rem; display: flex; flex-direction: column; align-items: center; text-align: center; gap: 0.45rem; border-bottom: 2px solid var(--border2); }
+.ac2-prompt-icon { font-size: 1.3rem; color: rgba(232,200,74,0.35); }
+.ac2-prompt-text { font-size: 0.77rem; color: var(--text-dim); line-height: 1.5; }
+.ac2-prompt-hint { font-size: 0.63rem; color: var(--text-dim); opacity: 0.6; letter-spacing: 0.02em; }
+
 #map, #maplibre-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 #maplibre-container { display: none; z-index: 2; }
 /* .dt-toggle removed — replaced by legend-3d-btn */
@@ -649,7 +835,9 @@ input[type=range].whatif-slider {
 .dt-chip { font-size: 0.68rem; padding: 0.2rem 0.5rem; border: 1px solid var(--border); border-radius: 99px; cursor: pointer; color: var(--text-sub); background: transparent; transition: all 0.15s; line-height: 1.4; }
 .dt-chip:hover { color: var(--text); border-color: var(--text-dim); }
 /* dt-tog-btn removed */
-.dt-spotlight { flex: 1; padding: 0.9rem 1rem; display: flex; flex-direction: column; gap: 0.65rem; min-height: 0; }
+.dt-spotlight { flex: 1; padding: 0.9rem 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.55rem; min-height: 0; }
+.dt-zone-sec { display: flex; flex-direction: column; gap: 0.1rem; }
+.dt-zone-hdr { font-size: 0.61rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.18rem; padding-top: 0.35rem; border-top: 1px solid var(--border); }
 .dt-no-sel { color: var(--text-dim); font-size: 0.82rem; text-align: center; margin: auto; }
 .dt-spot-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.5rem; }
 .dt-spot-name { font-size: 0.95rem; font-weight: 700; color: var(--text); line-height: 1.2; }
@@ -659,8 +847,8 @@ input[type=range].whatif-slider {
 .dt-kpi-val { color: var(--text); font-family: var(--mono); font-weight: 600; white-space: nowrap; }
 .dt-kpi-arr { font-size: 0.82rem; flex-shrink: 0; }
 .dt-kpi-avg { font-size: 0.68rem; color: var(--text-dim); margin-bottom: 0.3rem; }
-.dt-view-btn { font-size: 0.72rem; padding: 0.28rem 0.7rem; border: 1px solid var(--border); border-radius: 4px; cursor: pointer; color: var(--text-sub); background: transparent; }
-.dt-view-btn:hover { color: var(--accent); border-color: var(--accent); }
+.dt-view-btn { font-size: 0.74rem; font-weight: 600; letter-spacing: 0.04em; padding: 0.42rem 1rem; border: 1px solid var(--border2); border-radius: 5px; cursor: pointer; color: var(--text); background: var(--surface2); display: block; width: calc(100% - 2rem); margin-left: 1rem; transition: all 0.15s; }
+.dt-view-btn:hover { color: var(--accent); border-color: var(--accent); background: rgba(58,192,249,0.06); }
 .dt-status-strip { padding: 0.6rem 1rem 0.8rem; border-top: 1px solid var(--border); flex-shrink: 0; }
 .dt-status-counts { display: flex; gap: 0.3rem; }
 .dt-sc-item { flex: 1; text-align: center; padding: 0.25rem 0.15rem; }
@@ -800,11 +988,18 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
     <div class="bld-label">Loading buildings…</div>
     <div class="bld-track"><div class="bld-fill"></div></div>
   </div>
+  <!-- Flood zone computation progress bar — shown in map centre while computing -->
+  <div id="fml-progress-wrap" style="display:none">
+    <div id="fml-progress-label">Computing…</div>
+    <div id="fml-progress-track"><div id="fml-progress-fill"></div></div>
+  </div>
 </div>
 <button class="panel-toggle left-toggle"  id="left-toggle"  onclick="toggleLeftPanel()"  title="Hide / show left panel"><span class="tog-arrow"></span></button>
 <button class="panel-toggle right-toggle" id="right-toggle" onclick="toggleRightPanel()" title="Hide / show right panel"><span class="tog-arrow"></span></button>
 <div id="map-legend">
   <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
+  <button id="asset-mode-btn" class="bld-all-btn asset-mode-btn" onclick="toggleAssetMode()" style="display:none" title="Click a building to view its metadata">⬡ Asset Mode</button>
+  <button id="flood-map-btn" class="bld-all-btn flood-map-btn" onclick="toggleFloodOverlay()" style="display:none" title="Color all buildings by flood risk zone">⬡ Flood Map</button>
   <div class="map-legend">
     <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
     <div class="legend-title" id="legend-title">Select a challenge</div>
@@ -819,6 +1014,7 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
   <div class="tab-bar">
     <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">Commune Info</button>
     <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare</button>
+    <button class="tab-btn"        id="btn-simulate" onclick="switchTab('simulate')" style="display:none">3D View</button>
 
   </div>
   <!-- District tab -->
@@ -836,6 +1032,9 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
     <div class="compare-table-wrap" id="compare-table-wrap">
       <div class="no-selection">Pin two districts to compare.</div>
     </div>
+  </div>
+  <!-- 3D / Simulate tab (shown only in 3D mode) -->
+  <div class="tab-pane" id="pane-simulate" style="display:none">
   </div>
 
 </div>
@@ -1794,6 +1993,7 @@ function selectDistrict(niscode) {
   } else {
     selectedDistrict = niscode;
     dtCommune = niscode;          // keep 3D state in sync
+    refreshFloodOverlayIfActive();
     whatIfOverrides = {};         // clear stale overrides from previous commune
     renderDetailPanel(niscode);
     // Update ranking highlight
@@ -2251,6 +2451,51 @@ function showSourcesInfo() {
         <span class="src-tag">Non-residential permits</span>
         <span class="src-tag">District boundaries (145 wijken)</span>
       </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">OpenStreetMap contributors</span>
+        <a class="src-url" href="https://www.openstreetmap.org" target="_blank" rel="noopener">openstreetmap.org ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">3D building footprints (Overpass API)</span>
+        <span class="src-tag">Building use types</span>
+        <span class="src-tag">Building height &amp; floor count</span>
+        <span class="src-tag">Live asset selection layer</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">Geoservices Brussels — UrbIS</span>
+        <a class="src-url" href="https://geoservices-urbis.irisnet.be" target="_blank" rel="noopener">geoservices-urbis.irisnet.be ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Authoritative building footprints (WFS)</span>
+        <span class="src-tag">Heritage &amp; protected buildings</span>
+        <span class="src-tag">Precise footprint area</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">opendata.brussels — Opendatasoft</span>
+        <a class="src-url" href="https://opendata.brussels.be" target="_blank" rel="noopener">opendata.brussels.be ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Building permit applications (live)</span>
+        <span class="src-tag">Permit type &amp; status</span>
+        <span class="src-tag">50 m radius proximity query</span>
+      </div>
+    </div>
+    <div class="src-entry">
+      <div class="src-entry-hdr">
+        <span class="src-institution">Bruxelles Environnement / Leefmilieu Brussel</span>
+        <a class="src-url" href="https://environnement.brussels" target="_blank" rel="noopener">environnement.brussels ↗</a>
+      </div>
+      <div class="src-tags">
+        <span class="src-tag">Flood hazard zones (WMS GetFeatureInfo)</span>
+        <span class="src-tag">Traffic noise exposure — Lden (dB)</span>
+        <span class="src-tag">Night-time noise — Ln (dB)</span>
+      </div>
     </div>`;
   document.getElementById('modal-overlay').style.display = 'flex';
 }
@@ -2319,9 +2564,14 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('pane-district').style.display = tab === 'district' ? 'flex' : 'none';
   document.getElementById('pane-compare').style.display  = tab === 'compare'  ? 'flex' : 'none';
+  const simPane = document.getElementById('pane-simulate');
+  if (simPane) simPane.style.display = tab === 'simulate' ? 'flex' : 'none';
   document.getElementById('btn-district').classList.toggle('active', tab === 'district');
   document.getElementById('btn-compare').classList.toggle('active',  tab === 'compare');
+  const simBtn = document.getElementById('btn-simulate');
+  if (simBtn) simBtn.classList.toggle('active', tab === 'simulate');
   if (tab === 'compare') { renderCompareSlots(); renderCompareTable(); }
+  if (tab === 'simulate') renderSimPanel();
   updateMapColors();
   updateBuildingFilter();
   sync3DHighlight();
@@ -2686,8 +2936,17 @@ var dtMode           = false;
 var mlMap            = null;
 var dtCommune        = null;
 var dtChallenge      = null;
-var _showAllBuildings = false;
+var _showAllBuildings    = false;
+var _floodOverlay            = false;      // flood zone color overlay active
+var _floodComputedNiscodes   = new Set();  // communes whose _fc has been tagged + pushed
+var _floodFlatZones          = null;       // pre-flattened flood polygons (cached)
+var _floodOverlayComputing   = false;      // guard against re-entrant calls
 var dt3DPulseWraps = [];
+// Asset mode
+var assetMode        = false;
+var selectedBuilding = null; // { properties, lngLat, geometry }
+var sectorData       = null; // loaded from data/brussels-sectors.geojson if available
+var _assetSectionOpen = { physical: true, risk: false, permits: false, heritage: false, re: false };
 
 
 function updatePulseMarkers() {
@@ -2725,15 +2984,154 @@ function toggleAllBuildings() {
     btn.classList.toggle('active', _showAllBuildings);
     btn.textContent = _showAllBuildings ? '⬡ Hide All Buildings' : '⬡ Show All Buildings';
   }
-  updateBuildingFilter();
+  updateBuildingFilter(); // update visibility first
+  // When flood is active, color any newly visible communes
+  if (_floodOverlay) {
+    _computeAndColor(_getVisibleCommuneNis());
+  }
+}
+
+// ── Asset Mode ──────────────────────────────────────────────────────────────
+function toggleAssetMode() {
+  assetMode = !assetMode;
+  const btn = document.getElementById('asset-mode-btn');
+  if (btn) {
+    btn.classList.toggle('active', assetMode);
+    btn.textContent = assetMode ? '⬡ Asset Mode ON' : '⬡ Asset Mode';
+  }
+  if (mlMap) {
+    mlMap.getCanvas().style.cursor = assetMode ? 'crosshair' : '';
+  }
+  if (!assetMode) {
+    clearBuildingHighlight();
+    // Turn off flood overlay when exiting asset mode
+    if (_floodOverlay) {
+      _floodOverlay = false;
+      _clearFloodColors();
+      const floodBtn = document.getElementById('flood-map-btn');
+      if (floodBtn) floodBtn.classList.remove('active');
+    }
+  }
+  renderSimPanel();
+}
+
+function clearBuildingHighlight() {
+  selectedBuilding = null;
+  if (mlMap && mlMap.getSource('bld-selected')) {
+    mlMap.getSource('bld-selected').setData({ type: 'FeatureCollection', features: [] });
+  }
+}
+
+function addBuildingHighlightLayer() {
+  if (!mlMap.getSource('bld-selected')) {
+    mlMap.addSource('bld-selected', { type: 'geojson', data: { type: 'FeatureCollection', features: [] } });
+  }
+  // Soft outer glow — slightly taller, semi-transparent warm halo
+  if (!mlMap.getLayer('3d-buildings-selected-glow')) {
+    mlMap.addLayer({
+      id: '3d-buildings-selected-glow',
+      source: 'bld-selected',
+      type: 'fill-extrusion',
+      paint: {
+        'fill-extrusion-color': '#ffe066',
+        'fill-extrusion-height': ['+', ['coalesce', ['get', 'h'], 3], 5],
+        'fill-extrusion-base':   ['get', 'minH'],
+        'fill-extrusion-opacity': 0.38,
+        'fill-extrusion-vertical-gradient': false,
+      }
+    });
+  }
+  // Solid selected fill on top of glow
+  if (!mlMap.getLayer('3d-buildings-selected')) {
+    mlMap.addLayer({
+      id: '3d-buildings-selected',
+      source: 'bld-selected',
+      type: 'fill-extrusion',
+      paint: {
+        'fill-extrusion-color': '#e8c84a',
+        'fill-extrusion-height': ['get', 'h'],
+        'fill-extrusion-base':   ['get', 'minH'],
+        'fill-extrusion-opacity': 1.0,
+        'fill-extrusion-vertical-gradient': false,
+      }
+    });
+  }
+}
+
+// Bring both highlight layers to the top of the render stack, keeping labels above everything.
+function bringHighlightToTop() {
+  if (mlMap.getLayer('3d-buildings-selected-glow')) mlMap.moveLayer('3d-buildings-selected-glow');
+  if (mlMap.getLayer('3d-buildings-selected'))      mlMap.moveLayer('3d-buildings-selected');
+  if (mlMap.getLayer('communes-labels'))             mlMap.moveLayer('communes-labels');
+}
+
+function selectBuilding(feature, lngLat) {
+  selectedBuilding = { properties: feature.properties, lngLat, geometry: feature.geometry };
+  // Highlight selected building
+  if (mlMap.getSource('bld-selected')) {
+    mlMap.getSource('bld-selected').setData({
+      type: 'FeatureCollection',
+      features: [feature],
+    });
+  }
+  // Ensure highlight layers sit on top of all building layers
+  bringHighlightToTop();
+  // Switch to 3D panel and re-render
+  if (currentTab !== 'simulate') switchTab('simulate');
+  renderSimPanel();
+}
+
+// Try to load sector GeoJSON from data/ (optional — only if user has run prepare-sectors.mjs)
+function tryLoadSectorData() {
+  if (sectorData !== null) return; // already tried
+  sectorData = undefined; // mark as loading
+  fetch('data/brussels-sectors.geojson')
+    .then(r => r.ok ? r.json() : null)
+    .then(gj => {
+      sectorData = gj || false;
+      if (sectorData && selectedBuilding) renderSimPanel();
+    })
+    .catch(() => { sectorData = false; });
+}
+
+// Find which statistical sector contains a point [lng, lat]
+function findSector(lng, lat) {
+  if (!sectorData || !sectorData.features) return null;
+  for (const f of sectorData.features) {
+    const geom = f.geometry;
+    if (!geom) continue;
+    const rings = geom.type === 'Polygon'
+      ? [geom.coordinates[0]]
+      : geom.type === 'MultiPolygon' ? geom.coordinates.map(p => p[0]) : [];
+    for (const ring of rings) {
+      if (_pip(lng, lat, ring)) return f.properties;
+    }
+  }
+  return null;
 }
 
 function toggleDigitalTwin() {
   dtMode = !dtMode;
-  const btn3d  = document.getElementById('legend-3d-btn');
-  const btnAll = document.getElementById('bld-all-toggle');
-  if (btn3d)  { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
-  if (btnAll) btnAll.style.display = dtMode ? 'block' : 'none';
+  const btn3d     = document.getElementById('legend-3d-btn');
+  const btnAll    = document.getElementById('bld-all-toggle');
+  const btnAsset  = document.getElementById('asset-mode-btn');
+  const btnFlood  = document.getElementById('flood-map-btn');
+  const btnSim    = document.getElementById('btn-simulate');
+  if (btn3d)    { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
+  if (btnAll)   btnAll.style.display  = dtMode ? 'block' : 'none';
+  if (btnAsset) btnAsset.style.display = dtMode ? 'block' : 'none';
+  if (btnFlood) btnFlood.style.display = dtMode ? 'block' : 'none';
+  if (btnSim)   btnSim.style.display  = dtMode ? '' : 'none';
+  // When entering 3D mode: switch to 3D View tab; when leaving: go back to district
+  if (dtMode) {
+    switchTab('simulate');
+  } else {
+    // Deactivate asset mode too
+    if (assetMode) { assetMode = false; if (btnAsset) btnAsset.classList.remove('active'); clearBuildingHighlight(); }
+    // Deactivate flood overlay too
+    if (_floodOverlay) { _floodOverlay = false; _clearFloodColors(); if (btnFlood) btnFlood.classList.remove('active'); }
+    switchTab('district');
+  }
   const mapEl = document.getElementById('map');
   mapEl.style.display                                          = dtMode ? 'none' : '';
   document.getElementById('maplibre-container').style.display = dtMode ? 'block' : 'none';
@@ -2784,8 +3182,11 @@ function initMapLibre() {
 
     inject3DBuildings();
     addCommuneLayer();
+    addBuildingHighlightLayer();
     sync3DHighlight();
     renderSimPanel();
+    tryLoadSectorData();
+    prefetchEnvData(); // warm flood cache before user clicks a building
   });
   mlMap.on('move', reposition3DPulseRings);
   mlMap.on('move', () => {
@@ -2796,9 +3197,11 @@ function initMapLibre() {
   });
 
   mlMap.on('click', 'communes-fill', e => {
+    if (assetMode) return; // let building click handler take over
     if (e.features.length) {
       const nis = e.features[0].properties.niscode;
       dtCommune = nis;
+      refreshFloodOverlayIfActive();
       dtSimDone = false;
       renderSimPanel();
       if (mlMap.getLayer('communes-highlight')) {
@@ -2809,15 +3212,37 @@ function initMapLibre() {
     }
   });
 
-  mlMap.on('mouseenter', 'communes-fill', () => { mlMap.getCanvas().style.cursor = 'pointer'; });
-  mlMap.on('mouseleave', 'communes-fill', () => { mlMap.getCanvas().style.cursor = ''; });
+  // Asset mode: click on 3D buildings
+  mlMap.on('click', e => {
+    if (!assetMode) return;
+    const bldLayers = (mlMap.getStyle().layers || [])
+      .filter(l => l.id.startsWith('3d-buildings-') && l.id !== '3d-buildings-selected' && l.type === 'fill-extrusion' && l.layout && l.layout.visibility !== 'none')
+      .map(l => l.id);
+    // Flood colors are applied via setPaintProperty on the same layers — no separate
+    // overlay layer exists, so buildings remain selectable whether flood is on or off.
+    if (!bldLayers.length) return;
+    const features = mlMap.queryRenderedFeatures(e.point, { layers: bldLayers });
+    if (!features.length) {
+      clearBuildingHighlight();
+      renderSimPanel();
+      return;
+    }
+    selectBuilding(features[0], e.lngLat);
+  });
+
+  mlMap.on('mouseenter', 'communes-fill', () => {
+    if (!assetMode) mlMap.getCanvas().style.cursor = 'pointer';
+  });
+  mlMap.on('mouseleave', 'communes-fill', () => {
+    if (!assetMode) mlMap.getCanvas().style.cursor = '';
+  });
 }
 
 // Cached OSM building GeoJSON — fetched once, reused on 3D re-init
 var _osmBuildingsCache = null;
 var _osmBuildingsFetch = null; // in-progress promise — reused on concurrent calls
 // Bump this string whenever the bbox or query changes to invalidate sessionStorage cache
-const _OSM_CACHE_KEY = 'osm_buildings_v4'; // bumped: buildings now tagged with niscode
+const _OSM_CACHE_KEY = 'osm_buildings_v6'; // bumped: amenity/shop/office/brand/operator/tourism/leisure
 
 function fetchOSMBuildings() {
   if (_osmBuildingsCache) return Promise.resolve(_osmBuildingsCache);
@@ -2849,10 +3274,28 @@ function fetchOSMBuildings() {
       const f = coords[0], l = coords[coords.length - 1];
       if (f[0] !== l[0] || f[1] !== l[1]) coords.push(coords[0]);
       const tags = el.tags || {};
-      let h = 8;
-      if (tags.height)                  h = parseFloat(tags.height) || 8;
-      else if (tags['building:levels']) h = (parseInt(tags['building:levels']) || 2) * 3.2;
-      features.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] }, properties: { h, minH: 0 } });
+      let h = 8, hTag = false;
+      // Strip any unit suffix from height tag (e.g. "12 m" → 12)
+      if (tags.height)                  { h = parseFloat(String(tags.height).replace(/[^\d.]/g, '')) || 8; hTag = true; }
+      else if (tags['building:levels']) { h = (parseInt(tags['building:levels']) || 2) * 3.2; }
+      const levels   = tags['building:levels'] ? parseInt(tags['building:levels']) || null : null;
+      const bType    = tags.building   || null;
+      // Address: street then housenumber (Belgian convention)
+      const houseNum = tags['addr:housenumber'] || '';
+      const streetNm = tags['addr:street']      || '';
+      const street   = (streetNm + (houseNum ? ' ' + houseNum : '')).trim() || null;
+      // Name: prefer explicit name, then localised variants, then brand/operator for commercial
+      const bName    = tags.name || tags['name:fr'] || tags['name:nl'] || tags['name:en']
+                     || tags.brand || tags.operator || null;
+      // Use/function tags for richer type classification
+      const amenity  = tags.amenity  || null;
+      const shop     = tags.shop     || null;
+      const office   = tags.office   || null;
+      const tourism  = tags.tourism  || null;
+      const leisure  = tags.leisure  || null;
+      const osmId    = el.id || null;
+      features.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] },
+        properties: { h, minH: 0, hTag, levels, bType, street, bName, amenity, shop, office, tourism, leisure, osmId } });
     }
     // Tag each building with its BCR commune niscode via point-in-polygon
     if (GEOJSON) {
@@ -2962,6 +3405,222 @@ function updateBuildingFilter() {
   });
 }
 
+// ── Flood zone overlay ──────────────────────────────────────────────────────
+// Colors the existing 3d-buildings-{nis} layers via setPaintProperty — no
+// duplicate geometry layers, buildings stay selectable at all times.
+// _floodComputedNiscodes tracks which communes have been PIP-tagged; _fc tags
+// persist in _osmBuildingsCache so re-enabling flood skips re-computation.
+// _clearFloodColors() resets all layers to BLD_DEFAULT_COLOR without wiping tags.
+
+// Default building color expression — height-based cyan gradient.
+// Used both in inject3DBuildings() and by _clearFloodColors() to restore default.
+const BLD_DEFAULT_COLOR = [
+  'interpolate', ['linear'], ['get', 'h'],
+  0, '#005566', 5, '#007a8a', 20, '#00a8c0', 50, '#00ccee', 100, '#00e8ff',
+];
+
+// Canonical flood zone colors — used in map paint AND right-panel legend dots.
+// green = no flood · yellow = slight (T1000) · orange = possible (T100/GW) · red = sure (T25)
+const FLOOD_MAP_COLORS = {
+  3:  '#c82828',   // High  T25    — red    "sure possibility"
+  2:  '#d46820',   // Med   T100   — orange "possibility"
+  1:  '#c8a820',   // Low   T1000  — yellow "slight possibility"
+  0:  '#d46820',   // Groundwater  — orange "possibility"
+ '-1':'#1e6b2e',   // No zone      — green  "no flooding"
+};
+
+// MapLibre paint expression that reads the _fc property set during PIP computation.
+const FLOOD_COLOR_EXPR = ['match', ['get', '_fc'],
+  3, FLOOD_MAP_COLORS[3],
+  2, FLOOD_MAP_COLORS[2],
+  1, FLOOD_MAP_COLORS[1],
+  0, FLOOD_MAP_COLORS[0],
+  FLOOD_MAP_COLORS['-1']   // default: no official zone (green)
+];
+
+// Returns niscodes of all building layers currently set to visible.
+function _getVisibleCommuneNis() {
+  if (!mlMap || !GEOJSON) return [];
+  const result = [];
+  for (const f of GEOJSON.features) {
+    const nis   = String(f.properties.niscode);
+    const lyrId = `3d-buildings-${nis}`;
+    if (mlMap.getLayer(lyrId) && mlMap.getLayoutProperty(lyrId, 'visibility') === 'visible') {
+      result.push(nis);
+    }
+  }
+  return result;
+}
+
+// Reset all commune layers back to the default height-gradient color.
+// Does NOT clear _floodComputedNiscodes — _fc tags are preserved so that
+// re-enabling flood can skip PIP re-computation and just re-apply colors.
+function _clearFloodColors() {
+  if (!mlMap || !GEOJSON) return;
+  for (const f of GEOJSON.features) {
+    const nis   = String(f.properties.niscode);
+    const lyrId = `3d-buildings-${nis}`;
+    if (mlMap.getLayer(lyrId)) {
+      mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', BLD_DEFAULT_COLOR);
+    }
+  }
+}
+
+async function toggleFloodOverlay() {
+  if (_floodOverlayComputing) return; // ignore clicks mid-computation
+
+  _floodOverlay = !_floodOverlay;
+  const btn = document.getElementById('flood-map-btn');
+  if (btn) btn.classList.toggle('active', _floodOverlay);
+
+  if (_floodOverlay) {
+    await _computeAndColor(_getVisibleCommuneNis());
+  } else {
+    _clearFloodColors();
+    renderSimPanel(); // removes legend from right panel
+  }
+}
+
+// Called whenever the active commune changes while the overlay is ON.
+// If the commune is already colored it just re-applies the expression (instant).
+function refreshFloodOverlayIfActive() {
+  if (!_floodOverlay || !dtCommune) return;
+  _computeAndColor([String(dtCommune)]);
+}
+
+// Core: PIP-tag buildings for any unprocessed communes, then push source data
+// and apply FLOOD_COLOR_EXPR via setPaintProperty on each commune's layer.
+// Already-computed communes skip PIP but still get setPaintProperty (needed
+// after _clearFloodColors resets the paint back to the default gradient).
+async function _computeAndColor(nisCodes) {
+  if (_floodOverlayComputing || !mlMap || !_osmBuildingsCache) return;
+  if (!nisCodes || nisCodes.length === 0) return;
+  _floodOverlayComputing = true;
+
+  const btn      = document.getElementById('flood-map-btn');
+  const progWrap = document.getElementById('fml-progress-wrap');
+  const progFill = document.getElementById('fml-progress-fill');
+  const progLbl  = document.getElementById('fml-progress-label');
+
+  if (btn) { btn.textContent = '⟳ …'; btn.disabled = true; }
+
+  // Ensure flood zone polygons are loaded
+  if (!_floodCache) {
+    if (!_floodFetch) prefetchEnvData();
+    await _floodFetch;
+  }
+  if (!_floodCache) {
+    _floodOverlayComputing = false;
+    if (progWrap) progWrap.style.display = 'none';
+    if (btn) { btn.textContent = '⬡ Flood Map'; btn.disabled = false; }
+    return;
+  }
+
+  // Pre-flatten zones once — reused across all calls
+  if (!_floodFlatZones) {
+    _floodFlatZones = [];
+    for (const f of (_floodCache.features || [])) {
+      const code = parseInt(f.properties?.code_alea ?? -1);
+      if (isNaN(code) || code < 0) continue;
+      const geom = f.geometry;
+      const polys = geom?.type === 'Polygon'      ? [geom.coordinates]
+                  : geom?.type === 'MultiPolygon' ? geom.coordinates : [];
+      for (const poly of polys) {
+        const ring = poly[0];
+        let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+        for (const pt of ring) {
+          if (pt[0]<minX) minX=pt[0]; if (pt[0]>maxX) maxX=pt[0];
+          if (pt[1]<minY) minY=pt[1]; if (pt[1]>maxY) maxY=pt[1];
+        }
+        _floodFlatZones.push({ code, ring, minX, minY, maxX, maxY });
+      }
+    }
+    _floodFlatZones.sort((a, b) => b.code - a.code);
+  }
+
+  // Collect features that still need PIP computation (not yet tagged)
+  const toProcess = [];
+  const newNis    = new Set();
+  for (const nis of nisCodes) {
+    const nisStr = String(nis);
+    if (!_floodComputedNiscodes.has(nisStr)) {
+      const feats = _osmBuildingsCache.features.filter(f => String(f.properties.niscode) === nisStr);
+      toProcess.push(...feats);
+      newNis.add(nisStr);
+    }
+  }
+
+  const total = toProcess.length;
+  const CHUNK = 200;
+  const fz    = _floodFlatZones;
+
+  if (total > 0) {
+    if (progWrap) progWrap.style.display = 'block';
+    if (progFill) progFill.style.width = '0%';
+    if (progLbl)  progLbl.textContent = `0 / ${total} buildings…`;
+
+    await new Promise(resolve => {
+      let i = 0;
+      function next() {
+        const end = Math.min(i + CHUNK, total);
+        for (; i < end; i++) {
+          const feat = toProcess[i];
+          const geom = feat.geometry;
+          const ring0 = geom.type === 'Polygon'      ? geom.coordinates[0]
+                      : geom.type === 'MultiPolygon' ? geom.coordinates[0][0] : null;
+          if (!ring0) { feat.properties._fc = -1; continue; }
+          let cx=0, cy=0, n=ring0.length;
+          for (let k=0; k<n; k++) { cx+=ring0[k][0]; cy+=ring0[k][1]; }
+          cx/=n; cy/=n;
+          const [lx, ly] = _wgs84ToLambert(cx, cy);
+          let fc = -1;
+          for (let z=0; z<fz.length; z++) {
+            const zone = fz[z];
+            if (lx<zone.minX||lx>zone.maxX||ly<zone.minY||ly>zone.maxY) continue;
+            if (_pip(lx, ly, zone.ring)) { fc = zone.code; break; }
+          }
+          feat.properties._fc = fc;
+        }
+        const pct = Math.round(i / total * 100);
+        if (progFill) progFill.style.width = pct + '%';
+        if (progLbl)  progLbl.textContent  = i >= total ? `${total} buildings mapped` : `${i} / ${total}…`;
+        if (i < total) setTimeout(next, 0);
+        else           resolve();
+      }
+      setTimeout(next, 0);
+    });
+  }
+
+  // Push updated GeoJSON source data for newly computed communes,
+  // then apply FLOOD_COLOR_EXPR on every requested commune's layer.
+  for (const nis of nisCodes) {
+    const nisStr = String(nis);
+    const srcId  = `bld-${nisStr}`;
+    const lyrId  = `3d-buildings-${nisStr}`;
+    // Update source so _fc values are visible to MapLibre's data expressions
+    if (newNis.has(nisStr) && mlMap.getSource(srcId)) {
+      const feats = _osmBuildingsCache.features.filter(f => String(f.properties.niscode) === nisStr);
+      mlMap.getSource(srcId).setData({ type: 'FeatureCollection', features: feats });
+    }
+    // Apply flood color expression (also re-applies for communes cleared by _clearFloodColors)
+    if (mlMap.getLayer(lyrId)) {
+      mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', FLOOD_COLOR_EXPR);
+    }
+    _floodComputedNiscodes.add(nisStr);
+  }
+
+  bringHighlightToTop();
+  _floodOverlayComputing = false;
+  if (btn) { btn.textContent = '⬡ Flood Map'; btn.disabled = false; btn.classList.add('active'); }
+
+  if (total > 0) {
+    setTimeout(() => { if (progWrap) progWrap.style.display = 'none'; }, 1200);
+  } else {
+    if (progWrap) progWrap.style.display = 'none';
+  }
+  renderSimPanel(); // injects #flood-sim-legend into the 3D View tab
+}
+
 async function inject3DBuildings() {
   // Strip any fill-extrusion layers baked into the basemap style
   mlMap.getStyle().layers
@@ -2985,10 +3644,7 @@ async function inject3DBuildings() {
     }
 
     const PAINT = {
-      'fill-extrusion-color': [
-        'interpolate', ['linear'], ['get', 'h'],
-        0, '#005566', 5, '#007a8a', 20, '#00a8c0', 50, '#00ccee', 100, '#00e8ff',
-      ],
+      'fill-extrusion-color':             BLD_DEFAULT_COLOR,
       'fill-extrusion-height':            ['get', 'h'],
       'fill-extrusion-base':              ['get', 'minH'],
       'fill-extrusion-opacity':           0.92,
@@ -3009,7 +3665,7 @@ async function inject3DBuildings() {
     }
 
     updateBuildingFilter();
-    if (mlMap.getLayer('communes-labels')) mlMap.moveLayer('communes-labels');
+    bringHighlightToTop(); // keep selection above all newly-added building layers
 
   } catch(e) {
     console.warn('3D buildings load failed:', e);
@@ -3087,6 +3743,914 @@ function updateMapLibreColors() {
 }
 
 // =====================================================================
+// ASSET CARD V2
+// =====================================================================
+function toggleAssetSection(id) {
+  _assetSectionOpen[id] = !_assetSectionOpen[id];
+  const sec = document.getElementById('ac2-sec-' + id);
+  if (sec) sec.classList.toggle('collapsed', !_assetSectionOpen[id]);
+}
+
+function _escHtml(s) {
+  return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+function _capitalise(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : ''; }
+
+// Derive a human-readable asset type from the full set of OSM use tags.
+// Priority: amenity → shop → office → tourism → leisure → building tag
+function _resolveAssetType(p) {
+  const AMENITY = {
+    restaurant:'restaurant', cafe:'café', fast_food:'fast food', bar:'bar',
+    pub:'pub', food_court:'food court', ice_cream:'ice cream',
+    bank:'bank', atm:'ATM', bureau_de_change:'exchange',
+    pharmacy:'pharmacy', hospital:'hospital', clinic:'clinic', doctors:'medical',
+    dentist:'dentist', veterinary:'veterinary',
+    school:'school', university:'university', college:'college', kindergarten:'kindergarten',
+    library:'library', cinema:'cinema', theatre:'theatre', nightclub:'nightclub',
+    place_of_worship:'place of worship', townhall:'town hall', post_office:'post office',
+    police:'police station', fire_station:'fire station', courthouse:'courthouse',
+    embassy:'embassy', prison:'prison', fuel:'petrol station',
+    parking:'parking', bicycle_parking:'bicycle parking', car_rental:'car rental',
+    community_centre:'community centre', social_facility:'social facility',
+    arts_centre:'arts centre', conference_centre:'conference centre',
+    marketplace:'market', vending_machine:'vending machine',
+  };
+  const SHOP = {
+    supermarket:'supermarket', convenience:'convenience store', mall:'shopping mall',
+    department_store:'department store', clothes:'clothes', shoes:'shoes',
+    electronics:'electronics', mobile_phone:'phone shop', computer:'computer shop',
+    books:'bookshop', stationery:'stationery', bakery:'bakery', butcher:'butcher',
+    greengrocer:'greengrocer', deli:'deli', alcohol:'off-licence',
+    sports:'sports shop', outdoor:'outdoor shop', bicycle:'bicycle shop',
+    car:'car dealership', car_repair:'car repair', hairdresser:'hairdresser',
+    beauty:'beauty salon', laundry:'laundry', dry_cleaning:'dry cleaning',
+    florist:'florist', gift:'gift shop', jewelry:'jewellery', optician:'optician',
+    medical_supply:'medical supply', hardware:'hardware', furniture:'furniture',
+    toys:'toy shop', musical_instrument:'music shop', photo:'photo shop',
+  };
+  const OFFICE = {
+    company:'company office', government:'government office', ngo:'NGO',
+    association:'association', financial:'financial office', insurance:'insurance office',
+    lawyer:'law office', notary:'notary', diplomatic:'diplomatic mission',
+    educational_institution:'educational office', research:'research office',
+    media:'media office', estate_agent:'estate agency', telecommunication:'telecom office',
+    yes:'office',
+  };
+  const BUILDING = {
+    apartments:'apartments', house:'house', residential:'residential',
+    detached:'detached house', semidetached_house:'semi-detached', terrace:'terraced house',
+    bungalow:'bungalow', dormitory:'dormitory',
+    commercial:'commercial', retail:'retail', office:'office',
+    industrial:'industrial', warehouse:'warehouse', storage_tank:'storage tank',
+    church:'church', cathedral:'cathedral', chapel:'chapel',
+    mosque:'mosque', synagogue:'synagogue', temple:'temple', shrine:'shrine',
+    hospital:'hospital', hotel:'hotel', hostel:'hostel', motel:'motel',
+    school:'school', university:'university', college:'college',
+    train_station:'train station', transportation:'transport hub', bridge:'bridge',
+    stadium:'stadium', sports_hall:'sports hall', grandstand:'grandstand',
+    parking:'parking', garage:'garage', carport:'carport',
+    public:'public building', civic:'civic building', government:'government building',
+    military:'military', fire_station:'fire station',
+  };
+  if (p.amenity && AMENITY[p.amenity]) return AMENITY[p.amenity];
+  if (p.amenity) return p.amenity.replace(/_/g,' ');
+  if (p.shop   && SHOP[p.shop])     return SHOP[p.shop];
+  if (p.shop)   return (p.shop.replace(/_/g,' ')) + ' shop';
+  if (p.office && OFFICE[p.office]) return OFFICE[p.office];
+  if (p.office) return 'office';
+  if (p.tourism === 'hotel')  return 'hotel';
+  if (p.tourism === 'museum') return 'museum';
+  if (p.tourism === 'guest_house') return 'guest house';
+  if (p.tourism) return p.tourism.replace(/_/g,' ');
+  if (p.leisure) return p.leisure.replace(/_/g,' ');
+  if (p.bType && p.bType !== 'yes' && BUILDING[p.bType]) return BUILDING[p.bType];
+  if (p.bType && p.bType !== 'yes') return p.bType.replace(/_/g,' ');
+  return 'building';
+}
+
+function renderAssetCard() {
+  if (!assetMode) return '';
+  const bld = selectedBuilding;
+  if (!bld) {
+    return '<div class="ac2">'
+      + '<div class="ac2-prompt">'
+      + '<div class="ac2-prompt-icon">⬡</div>'
+      + '<div class="ac2-prompt-text">Click any building on the 3D map to view its asset profile.</div>'
+      + '<div class="ac2-prompt-hint">Flood risk · Noise · Permits · Heritage · Real estate</div>'
+      + '</div></div>';
+  }
+  const p      = bld.properties;
+  const dist   = DISTRICTS.find(dd => String(dd.niscode) === String(p.niscode)) || null;
+  const comm   = dist ? dist.name : '—';
+  const hasAddr = !!(p.street);
+  const addr    = p.street || null;
+  const name    = p.bName  || '';
+  const type    = _resolveAssetType(p);
+  // Height: '~' prefix when estimated from floor count or defaulted
+  const heightVal = p.h != null ? Math.round(p.h) : null;
+  const height    = heightVal != null ? (p.hTag ? '' : '~') + heightVal + ' m' : '—';
+  // Floors: '~' prefix when estimated from height (not from explicit levels tag)
+  const floorsVal = p.levels != null ? p.levels
+                  : p.h      != null ? Math.max(1, Math.round(p.h / 3.2)) : null;
+  const floors    = floorsVal != null ? (p.levels != null ? '' : '~') + floorsVal : '—';
+  const sv         = id => _assetSectionOpen[id] ? '' : ' collapsed';
+  // Address span — live-update target; full text in title for hover tooltip
+  const addrSpan = hasAddr
+    ? '<span id="ac2-addr-live">' + _escHtml(addr) + '</span>'
+    : '<span id="ac2-addr-live" class="ac2-addr-resolving">Resolving…</span>';
+  // Header layout: address as primary line, name + commune as secondary
+  const displayTitle = addrSpan;
+  const displaySub   = (name ? _escHtml(name) + ' · ' : '') + _escHtml(comm);
+
+  return '<div class="ac2">'
+
+    // ── Header ──────────────────────────────────────────────────────────
+    + '<div class="ac2-header">'
+      + '<div class="ac2-header-left">'
+        + '<div class="ac2-icon">⬡</div>'
+        + '<div class="ac2-title-block">'
+          + '<div class="ac2-addr-outer" id="ac2-addr-outer">'
+            + '<div class="ac2-addr" id="ac2-addr-wrap">' + displayTitle + '</div>'
+          + '</div>'
+          + '<div class="ac2-commune">' + displaySub + '</div>'
+        + '</div>'
+      + '</div>'
+      + '<div class="ac2-header-right">'
+        + '<span class="ac2-badge ac2-badge-type" title="' + _escHtml(type) + '">' + _escHtml(_capitalise(type)) + '</span>'
+        + '<button class="ac2-close" onclick="clearBuildingHighlight();renderSimPanel();" title="Deselect">✕</button>'
+      + '</div>'
+    + '</div>'
+
+    // ══ ASSET METRICS ═══════════════════════════════════════════════════
+    + '<div class="ac2-group-hdr asset"><span class="ac2-group-dot"></span>Asset Metrics</div>'
+
+    // Physical Properties
+    + '<div class="ac2-section' + sv('physical') + '" id="ac2-sec-physical">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'physical\')">'
+        + '<span class="ac2-s-icon" style="color:#e8c84a">◈</span>'
+        + '<span class="ac2-s-label">Physical Properties</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body" style="padding:0">'
+        + '<div class="ac2-prop-name"><span class="ac2-prop-name-lbl">Name</span><span class="ac2-prop-name-val" id="ac2-name-live">' + _escHtml(name || '—') + '</span></div>'
+        + '<div class="ac2-prop-grid">'
+          + '<div class="ac2-prop-cell"><div class="ac2-prop-lbl">Type</div><div class="ac2-prop-val" title="' + _escHtml(type) + '">' + _escHtml(_capitalise(type)) + '</div></div>'
+          + '<div class="ac2-prop-cell"><div class="ac2-prop-lbl">Height</div><div class="ac2-prop-val">' + height + '</div></div>'
+          + '<div class="ac2-prop-cell"><div class="ac2-prop-lbl">Floors</div><div class="ac2-prop-val">' + floors + '</div></div>'
+          + '<div class="ac2-prop-cell"><div class="ac2-prop-lbl">Footprint</div><div class="ac2-prop-val" id="ac2-area">…</div></div>'
+        + '</div>'
+      + '</div>'
+    + '</div>'
+
+    // Risk & Environment
+    + '<div class="ac2-section' + sv('risk') + '" id="ac2-sec-risk">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'risk\')">'
+        + '<span class="ac2-s-icon" style="color:#e8c84a">⚠</span>'
+        + '<span class="ac2-s-label">Risk & Environment</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body">'
+        + '<div class="ac2-risk-row" id="ac2-risk-chips">'
+          + '<span class="ac2-risk-chip pending" id="ac2-chip-flood"><span class="ac2-rc-dot"></span>Flood…</span>'
+          + '<span class="ac2-risk-chip pending" id="ac2-chip-noise"><span class="ac2-rc-dot"></span>Noise…</span>'
+        + '</div>'
+        + '<div id="ac2-noise-detail"></div>'
+      + '</div>'
+    + '</div>'
+
+    // Permits
+    + '<div class="ac2-section' + sv('permits') + '" id="ac2-sec-permits">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'permits\')">'
+        + '<span class="ac2-s-icon" style="color:#e8c84a">⚒</span>'
+        + '<span class="ac2-s-label">Permits</span>'
+        + '<span class="ac2-s-sub">within 50 m</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body" id="ac2-permits-body">'
+        + '<div class="ac2-loading"><div class="ac2-spinner"></div>Fetching from opendata.brussels…</div>'
+      + '</div>'
+    + '</div>'
+
+    // Heritage
+    + '<div class="ac2-section' + sv('heritage') + '" id="ac2-sec-heritage">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'heritage\')">'
+        + '<span class="ac2-s-icon" style="color:#e8c84a">⬡</span>'
+        + '<span class="ac2-s-label">Heritage</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body" id="ac2-heritage-body">'
+        + '<div class="ac2-loading"><div class="ac2-spinner"></div>Checking register…</div>'
+      + '</div>'
+    + '</div>'
+
+    // ══ ZONE METRICS ════════════════════════════════════════════════════
+    + '<div class="ac2-group-hdr zone"><span class="ac2-group-dot"></span>Zone Metrics</div>'
+
+    // Real Estate
+    + '<div class="ac2-section' + sv('re') + '" id="ac2-sec-re">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'re\')">'
+        + '<span class="ac2-s-icon">◇</span>'
+        + '<span class="ac2-s-label">Real Estate</span>'
+        + '<span class="ac2-s-sub">commune avg</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body">' + _buildREHtml(p.niscode) + '</div>'
+    + '</div>'
+
+  + '</div>';
+}
+
+function _buildREHtml(niscode) {
+  const d = niscode ? DISTRICTS.find(dd => String(dd.niscode) === String(niscode)) : null;
+  if (!d) return '<div style="font-size:0.7rem;color:var(--text-dim)">No commune data.</div>';
+  const ROWS = [
+    { label: 'Median apartment price',   key: 're_apt_median',       color: 'var(--accent)' },
+    { label: 'Median house price',        key: 're_house_median',     color: 'var(--accent)' },
+    { label: 'Median terraced price',     key: 're_terraced_median',  color: 'var(--accent)' },
+    { label: 'Avg. property tax / dwell.', key: 'pri_avg_dwelling',   color: '#e8c84a' },
+    { label: 'New dwellings permitted/yr', key: 'bp_res_new_dwellings', color: '#4ae89a' },
+  ].filter(r => d[r.key] != null);
+  if (!ROWS.length) return '<div style="font-size:0.7rem;color:var(--text-dim)">No real estate data.</div>';
+  let html = '';
+  for (const r of ROWS) {
+    const v = d[r.key];
+    const cityVals = DISTRICTS.map(dd => dd[r.key]).filter(x => x != null && isFinite(x));
+    const mn = Math.min(...cityVals), mx = Math.max(...cityVals);
+    const pct = mx > mn ? Math.round((v - mn) / (mx - mn) * 100) : 50;
+    html += '<div class="ac2-data-row">'
+      + '<span class="ac2-d-label">' + r.label + '</span>'
+      + '<span class="ac2-d-val">' + fmtVal(r.key, v) + '</span>'
+      + '</div>'
+      + '<div class="ac2-bar-wrap"><div class="ac2-bar-fill" style="width:' + pct + '%;background:' + r.color + '"></div></div>';
+  }
+  html += '<div class="ac2-src-note">StatBel · Commune avg · ' + currentYear + '</div>';
+  return html;
+}
+
+// ── Async data fetches ────────────────────────────────────────────────────────
+
+// Wires up the global fixed-position address tooltip for the current asset card.
+// Called once after renderAssetCard() injects DOM. The tooltip slides from the
+// address text position across to the left, over the map.
+let _addrTipHideTimer = null;
+function initAddrTooltip() {
+  const outer = document.getElementById('ac2-addr-outer');
+  const tip   = document.getElementById('g-addr-tip');
+  if (!outer || !tip) return;
+
+  // Seed tooltip text from whatever the address element currently shows
+  const addrEl = document.getElementById('ac2-addr-live');
+  tip.textContent = addrEl ? addrEl.textContent : '';
+
+  outer.addEventListener('mouseenter', () => {
+    if (_addrTipHideTimer) { clearTimeout(_addrTipHideTimer); _addrTipHideTimer = null; }
+
+    const outerRect = outer.getBoundingClientRect();
+    const panelEl   = document.querySelector('.right-panel');
+    const panelRect = panelEl ? panelEl.getBoundingClientRect() : outerRect;
+
+    // Anchor right edge of bubble 4 px left of the panel border — works for any bubble width
+    tip.style.left       = 'auto';
+    tip.style.right      = (window.innerWidth - panelRect.left + 4) + 'px';
+    tip.style.top        = (outerRect.top + outerRect.height / 2) + 'px';
+    tip.style.transition = 'none';
+    tip.style.transform  = 'translateY(-50%) translateX(60px)';
+    tip.style.opacity    = '0';
+    tip.style.visibility = 'visible';
+
+    tip.getBoundingClientRect(); // force reflow
+    tip.style.transition = 'opacity 1s ease, transform 1s ease';
+    tip.style.transform  = 'translateY(-50%) translateX(0)';
+    tip.style.opacity    = '1';
+  });
+
+  outer.addEventListener('mouseleave', () => {
+    tip.style.transition = 'opacity 1s ease, transform 1s ease';
+    tip.style.transform  = 'translateY(-50%) translateX(60px)';
+    tip.style.opacity    = '0';
+
+    _addrTipHideTimer = setTimeout(() => {
+      tip.style.visibility = 'hidden';
+      _addrTipHideTimer = null;
+    }, 1050);
+  });
+}
+
+function _kickAssetFetches(lng, lat, ring) {
+  if (ring) {
+    const area = _polyArea(ring);
+    const el = document.getElementById('ac2-area');
+    if (el && area > 0) el.textContent = Math.round(area) + ' m²';
+  }
+  // Always reverse-geocode: resolves address when OSM has none,
+  // and also fetches building/POI name via Nominatim namedetails
+  _fetchAddress(lng, lat);
+  _fetchFloodRisk(lng, lat);
+  _fetchNoiseLevel(lng, lat);
+  _fetchPermits(lng, lat);
+  _fetchHeritage(lng, lat);
+}
+
+function _polyArea(ring) {
+  // Shoelace in degrees → approx m² via equirectangular
+  if (!ring || ring.length < 3) return 0;
+  let a = 0;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    a += ring[j][0] * ring[i][1] - ring[i][0] * ring[j][1];
+  }
+  const latRad = ring[0][1] * Math.PI / 180;
+  return Math.abs(a / 2) * (111320 * Math.cos(latRad)) * 110574;
+}
+
+async function _fetchAddress(lng, lat) {
+  const el = document.getElementById('ac2-addr-live');
+  if (!el) return;
+
+  // ── Primary: Nominatim (OpenStreetMap reverse geocoder) ──────────────
+  let resolved = null, nominatimJson = null;
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`
+              + `&zoom=18&addressdetails=1&namedetails=1&accept-language=en`
+              + `&email=susheel.nath@fari.brussels`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) throw new Error('http ' + r.status);
+    const j = await r.json();
+    if (j.error) throw new Error(j.error);
+    nominatimJson = j;
+    const a = j.address || {};
+    const road = a.road || a.pedestrian || a.footway || a.cycleway
+               || a.path || a.square || a.place || a.suburb || a.neighbourhood || '';
+    const num  = a.house_number || '';
+    resolved = (road + (num ? ' ' + num : '')).trim() || null;
+    // Last-resort: first two comma-segments of display_name
+    if (!resolved && j.display_name) {
+      resolved = j.display_name.split(',').slice(0, 2).map(s => s.trim()).join(', ');
+    }
+  } catch (e1) { /* fall through */ }
+
+  // ── Fallback: Brussels UrbIS localization service ─────────────────────
+  if (!resolved) {
+    try {
+      const r2 = await fetch(
+        `https://geoservices.irisnet.be/localization/Rest/Localize/getaddresses4point?x=${lng.toFixed(6)}&y=${lat.toFixed(6)}&`,
+        { signal: AbortSignal.timeout(6000) }
+      );
+      if (!r2.ok) throw new Error('http ' + r2.status);
+      const j2 = await r2.json();
+      const addrs = j2.adresses || [];
+      if (addrs.length) {
+        const a2 = addrs[0];
+        const rue = (a2.rue && (a2.rue.fr || a2.rue.nl)) || '';
+        const num = a2.numero || '';
+        resolved = (rue + (num ? ' ' + num : '')).trim() || null;
+      }
+    } catch (e2) { /* fall through */ }
+  }
+
+  // ── Apply result ──────────────────────────────────────────────────────
+  if (resolved) {
+    el.textContent = resolved;
+    el.classList.remove('ac2-addr-resolving');
+    const tip = document.getElementById('g-addr-tip');
+    if (tip) tip.textContent = resolved;
+  } else {
+    el.textContent = 'Address unavailable';
+    el.classList.remove('ac2-addr-resolving');
+  }
+
+  // ── Building / POI name from Nominatim namedetails ────────────────────
+  if (nominatimJson) {
+    const nameEl = document.getElementById('ac2-name-live');
+    if (nameEl && nameEl.textContent === '—') {
+      const nd   = nominatimJson.namedetails || {};
+      const road = (nominatimJson.address || {}).road || '';
+      const name = nd.name || nd['name:en'] || nd['name:fr'] || nd['name:nl'] || null;
+      if (name && name !== road) {
+        nameEl.textContent = name;
+        nameEl.style.color = '#e8c84a';
+      }
+    }
+  }
+}
+
+// ── Belgian Lambert 72 (EPSG:31370) linear approximation ─────────────────────
+// Reference: Brussels centre (4.3528°E, 50.8467°N) → Lambert 31370 (148873, 170984)
+// Accurate to ~30–50 m within Brussels — sufficient for point-in-polygon queries.
+function _wgs84ToLambert(lon, lat) {
+  const refLon = 4.3528, refLat = 50.8467;
+  const refX   = 148873, refY   = 170984;
+  const mPerLat = 111413;                          // metres per degree latitude
+  const mPerLon = 71527;                           // metres per degree longitude at 50.85°N
+  return [
+    refX + (lon - refLon) * mPerLon,
+    refY + (lat - refLat) * mPerLat
+  ];
+}
+
+// Module-level cache for the two environmental datasets
+var _floodCache = null, _floodFetch = null;
+var _noiseCache = null, _noiseFetch = null;
+// Last fetched metadata for metadata popup
+var _floodMeta = null, _noiseMeta = null;
+
+// Pre-fetch the flood polygon dataset (only 4 features — fast).
+// Called when 3D tab is first activated so it's ready before user clicks.
+function prefetchEnvData() {
+  if (_floodCache || _floodFetch) return;
+  _floodFetch = fetch(
+    'https://geodata.environnement.brussels/api/geodata/postgis/flood/alea_contour_all_25/?format=json',
+    { signal: AbortSignal.timeout(12000) }
+  ).then(r => r.ok ? r.json() : null)
+   .then(d => { if (d) _floodCache = d; _floodFetch = null; })
+   .catch(() => { _floodFetch = null; });
+}
+
+async function _fetchFloodRisk(lng, lat) {
+  const chip = document.getElementById('ac2-chip-flood');
+  if (!chip) return;
+  chip.className = 'ac2-risk-chip pending';
+  chip.innerHTML = '<span class="ac2-rc-dot"></span>Flood…';
+  chip.onclick = null;
+  _floodMeta = null;
+  try {
+    // Wait for cache if still loading, otherwise fetch now
+    if (!_floodCache) {
+      if (!_floodFetch) prefetchEnvData();
+      await _floodFetch;
+    }
+    if (!_floodCache) throw new Error('no data');
+
+    const [lx, ly] = _wgs84ToLambert(lng, lat);
+    let maxCode = -1;
+    let matchedProps = null;
+    const allZones = [];
+
+    for (const feat of (_floodCache.features || [])) {
+      const geom = feat.geometry;
+      const p    = feat.properties || {};
+      const code = parseInt(p.code_alea);
+      allZones.push({ code_alea: p.code_alea, legende_fr: p.legende_fr, legende_nl: p.legende_nl, legende_en: p.legende_en });
+      if (!geom) continue;
+      const polys = geom.type === 'Polygon'      ? [geom.coordinates]
+                  : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+      for (const poly of polys) {
+        if (_pip(lx, ly, poly[0])) {
+          const c = isNaN(code) ? 0 : code;
+          if (c > maxCode) { maxCode = c; matchedProps = p; }
+        }
+      }
+    }
+
+    const FLOOD_CODES = { '3':'High (T25)', '2':'Medium (T100)', '1':'Low (T1000)', '0':'Groundwater', '-1':'None' };
+    _floodMeta = {
+      type: 'flood',
+      resultCode: maxCode,
+      resultLabel: FLOOD_CODES[String(maxCode)] || 'Unknown',
+      matchedProps,
+      allZones,
+      totalFeatures: (_floodCache.features || []).length,
+      lambertX: Math.round(lx),
+      lambertY: Math.round(ly),
+      wgs84: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+      source: 'Brussels Environment — alea_contour_all_25',
+      nearbyWaterway: null,
+    };
+
+    let label, cls;
+    if      (maxCode === 3) { cls='high'; label='High flood risk (T25)'; }
+    else if (maxCode === 2) { cls='mod';  label='Medium flood risk (T100)'; }
+    else if (maxCode === 1) { cls='low';  label='Low flood risk (T1000)'; }
+    else if (maxCode === 0) { cls='mod';  label='Groundwater risk'; }
+    else                    { cls='ok';   label='No flood zone'; }
+    chip.className = 'ac2-risk-chip ' + cls + ' clickable';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span>' + label + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>';
+    chip.onclick = () => openRiskMeta('flood');
+
+    // Fire async waterway proximity check — updates meta + chip note
+    _checkNearbyWaterway(lng, lat, cls);
+
+  } catch(e) {
+    chip.className = 'ac2-risk-chip pending';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span>Flood: unavailable';
+  }
+}
+
+// Async waterway proximity check via Overpass API. Non-blocking — updates chip and
+// _floodMeta after the main flood result is already shown.
+// For river/canal within 150 m with no official zone: upgrades chip to amber "low" warning.
+async function _checkNearbyWaterway(lng, lat, currentCls) {
+  try {
+    const RADIUS = 150;
+    const q = `[out:json][timeout:10];(`
+            + `way["waterway"](around:${RADIUS},${lat.toFixed(6)},${lng.toFixed(6)});`
+            + `relation["waterway"](around:${RADIUS},${lat.toFixed(6)},${lng.toFixed(6)});`
+            + `);out tags;`;
+    const r = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST', body: q, signal: AbortSignal.timeout(11000)
+    });
+    if (!r.ok) return;
+    const d = await r.json();
+    const els = (d.elements || []).filter(e => e.tags && e.tags.waterway);
+    if (!els.length) return;
+
+    // Rank by significance: lower index = more significant
+    const SIG_ORDER = ['river','canal','tidal_channel','stream','brook','drain','ditch'];
+    const WTYPE = { river:'River', canal:'Canal', stream:'Stream', drain:'Drain',
+                    ditch:'Ditch', brook:'Brook', tidal_channel:'Tidal channel' };
+
+    const best = els.reduce((a, b) => {
+      const ra = SIG_ORDER.indexOf(a.tags.waterway); const rb = SIG_ORDER.indexOf(b.tags.waterway);
+      return (ra === -1 ? 99 : ra) <= (rb === -1 ? 99 : rb) ? a : b;
+    });
+
+    const wKey  = best.tags.waterway;
+    const wtype = WTYPE[wKey] || wKey;
+    const wname = best.tags.name || best.tags['name:en'] || best.tags['name:fr'] || best.tags['name:nl'] || '';
+    const wlabel = wname ? `${wtype} — ${wname}` : wtype;
+
+    // Significance weight: 2 = major (river/canal) → upgrade if no official zone
+    //                       1 = moderate (stream/brook) → note only
+    //                       0 = minor (drain/ditch) → note only
+    const weight = ['river','canal','tidal_channel'].includes(wKey) ? 2
+                 : ['stream','brook'].includes(wKey) ? 1 : 0;
+
+    if (_floodMeta) {
+      _floodMeta.nearbyWaterway = { type: wtype, name: wname, label: wlabel,
+                                    osmId: best.id, weight, radius: RADIUS };
+    }
+
+    const chip = document.getElementById('ac2-chip-flood');
+    if (!chip) return;
+    const noOfficialRisk = currentCls === 'ok';
+
+    if (noOfficialRisk && weight >= 2) {
+      // Near river or canal, no official zone — upgrade to amber informal-risk chip
+      chip.className = 'ac2-risk-chip low clickable';
+      chip.innerHTML = `<span class="ac2-rc-dot"></span>Near ${wlabel}`
+                     + `<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>`;
+      if (_floodMeta) {
+        _floodMeta.upgradedByWaterway = true;
+        _floodMeta.upgradedLabel = `Near ${wlabel}`;
+      }
+    } else {
+      // Has official zone, or minor waterway — add a compact proximity note to existing chip
+      const stripped = chip.innerHTML
+        .replace(/<span[^>]*>ⓘ<\/span>/g, '')
+        .replace(/<span[^>]*style="opacity[^"]*"[^>]*>[^<]*<\/span>/g, '');
+      chip.innerHTML = stripped
+        + `<span style="opacity:0.5;font-size:0.6rem;margin-left:0.3rem">~ ${wlabel}</span>`
+        + `<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>`;
+    }
+  } catch(e) { /* silent */ }
+}
+
+async function _fetchNoiseLevel(lng, lat) {
+  const chip   = document.getElementById('ac2-chip-noise');
+  const detail = document.getElementById('ac2-noise-detail');
+  if (!chip) return;
+  chip.className = 'ac2-risk-chip pending';
+  chip.innerHTML = '<span class="ac2-rc-dot"></span>Noise…';
+  chip.onclick = null;
+  _noiseMeta = null;
+
+  let noiseDb = null;
+  let noiseSrc = null;
+  let noiseMatchedProps = null;
+  let noiseBboxFeatCount = 0;
+  let noiseBbox = null;
+
+  try {
+    // Request a ~300 m bbox around the clicked point in Lambert 31370
+    const [lx, ly] = _wgs84ToLambert(lng, lat);
+    const M  = 300;
+    noiseBbox = `${Math.round(lx-M)},${Math.round(ly-M)},${Math.round(lx+M)},${Math.round(ly+M)}`;
+    const url = 'https://geodata.environnement.brussels/api/geodata/postgis/web_service/'
+              + `wsl_bruenvi_noise_road_lden_21/?format=json&in_bbox=${noiseBbox}`;
+    const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const feats = data.features || [];
+    noiseBboxFeatCount = feats.length;
+    // If the API returned too many features, bbox filtering didn't work — skip
+    if (feats.length > 0 && feats.length <= 500) {
+      for (const feat of feats) {
+        const geom = feat.geometry;
+        if (!geom) continue;
+        const polys = geom.type === 'Polygon'      ? [geom.coordinates]
+                    : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+        for (const poly of polys) {
+          if (_pip(lx, ly, poly[0])) {
+            const p  = feat.properties || {};
+            noiseDb  = parseFloat(p.db_lo || p.db_hi || p.DN || 0);
+            if (p.db_lo != null) noiseDb = (parseFloat(p.db_lo) + parseFloat(p.db_hi)) / 2;
+            noiseMatchedProps = p;
+            noiseSrc = 'API (point-in-polygon)';
+            break;
+          }
+        }
+        if (noiseDb != null) break;
+      }
+    }
+  } catch(e) {}
+
+  // Fallback: commune-level data
+  if (noiseDb == null && selectedBuilding) {
+    const d = DISTRICTS.find(dd => String(dd.niscode) === String(selectedBuilding.properties.niscode));
+    if (d && (d.noise_lden || d.noise_road_lden)) {
+      noiseDb = d.noise_lden || d.noise_road_lden;
+      noiseSrc = 'Commune-level fallback';
+      noiseMatchedProps = { db_lo: noiseDb, db_hi: noiseDb, source: 'brussels-data.json' };
+    }
+  }
+
+  _noiseMeta = {
+    type: 'noise',
+    resultDb: noiseDb != null ? Math.round(noiseDb) : null,
+    source: noiseSrc || 'No data',
+    bboxUsed: noiseBbox,
+    featuresInBbox: noiseBboxFeatCount,
+    matchedProps: noiseMatchedProps,
+    wgs84: `${lat.toFixed(6)}, ${lng.toFixed(6)}`,
+    dataset: 'wsl_bruenvi_noise_road_lden_21 (2021)',
+    indicator: 'Lden — day-evening-night weighted road noise',
+    apiBase: 'geodata.environnement.brussels',
+  };
+
+  if (noiseDb != null) {
+    const db    = Math.round(noiseDb);
+    const level = db >= 65 ? 'high' : db >= 55 ? 'mod' : 'low';
+    const label = db >= 65 ? 'High noise' : db >= 55 ? 'Moderate noise' : 'Quiet area';
+    chip.className = 'ac2-risk-chip ' + level + ' clickable';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span>' + label + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>';
+    chip.onclick = () => openRiskMeta('noise');
+    if (detail) detail.innerHTML =
+      '<div class="ac2-data-row" style="margin-top:0.3rem">'
+      + '<span class="ac2-d-label">Road noise (Lden)</span>'
+      + '<span class="ac2-d-val">' + db + ' dB(A)</span>'
+      + '</div>';
+  } else {
+    chip.className = 'ac2-risk-chip pending';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span>Noise: unavailable';
+  }
+}
+
+function closeRiskMeta() {
+  document.getElementById('risk-meta-overlay').classList.remove('open');
+  document.getElementById('risk-meta-popup').classList.remove('open');
+}
+
+function openRiskMeta(type) {
+  const meta = type === 'flood' ? _floodMeta : _noiseMeta;
+  if (!meta) return;
+  const titleEl = document.getElementById('rmp-title');
+  const bodyEl  = document.getElementById('rmp-body');
+  if (!titleEl || !bodyEl) return;
+
+  function row(k, v, cls) {
+    const vc = cls ? ` class="${cls}"` : '';
+    return `<div class="rmp-row"><span class="rmp-k">${k}</span><span class="rmp-v${vc ? ' '+cls : ''}">${v ?? '—'}</span></div>`;
+  }
+  function sec(label) { return `<div class="rmp-sec">${label}</div>`; }
+
+  let html = '';
+
+  if (type === 'flood') {
+    titleEl.textContent = 'Flood Risk Assessment';
+
+    // Zone descriptors: label, plain-language meaning, practical guidance
+    const ZONES = {
+      '3': { en:'High — T25 (1-in-25 year)',     fr:'Aléa élevé (T25)',          nl:'Hoog risico (T25)',
+             cls:'hi',  icon:'⬤',
+             verdict:'High flood risk',
+             meaning:'This building lies within the highest-hazard flood zone. A T25 flood occurs on average once every 25 years — roughly a 90% chance of occurring over a 60-year building lifetime. Historically these zones correspond to the lowest-lying terrain along the Senne, Maelbeek, Woluwe, and the canal.',
+             advice:'Flood insurance, ground-floor waterproofing, and dedicated flood barriers are strongly advisable. Flag in any urban planning review.' },
+      '2': { en:'Medium — T100 (1-in-100 year)', fr:'Aléa moyen (T100)',          nl:'Matig risico (T100)',
+             cls:'mod', icon:'⬤',
+             verdict:'Medium flood risk',
+             meaning:'This building is in a 100-year flood zone. While infrequent, a T100 event has roughly a 45% probability of occurring over a 60-year period. Risk rises with climate-related rainfall intensification.',
+             advice:'Worth flagging for insurance review and ground-floor resilience. Check with the commune for known flood history.' },
+      '1': { en:'Low — T1000 (1-in-1000 year)',  fr:'Aléa faible (T1000)',        nl:'Laag risico (T1000)',
+             cls:'low', icon:'⬤',
+             verdict:'Low official flood risk',
+             meaning:'This building is at the outer boundary of the official flood hazard map — the 1,000-year zone. Risk is real but statistically rare under current conditions. Extreme weather events and climate trends can shift frequency upward.',
+             advice:'No immediate structural action required. Worth noting in long-term asset planning documents.' },
+      '0': { en:'Groundwater risk',              fr:'Nappe phréatique',           nl:'Grondwater',
+             cls:'mod', icon:'⬤',
+             verdict:'Groundwater flooding risk',
+             meaning:'This location is susceptible to rising water tables (phreatic flooding). Prolonged or heavy rain saturates Brussels\'s clay-heavy soils and pushes groundwater into basements and foundations. This risk is widespread in lower-lying parts of the city and is separate from surface water flooding.',
+             advice:'Basement waterproofing and drainage checks are advisable. Consult the commune on groundwater monitoring data for this area.' },
+     '-1': { en:'Not in a designated flood zone', fr:'Hors zone inondable',        nl:'Buiten overstromingszone',
+             cls:'ok',  icon:'⬤',
+             verdict:'No official flood zone',
+             meaning:'This building does not fall within any officially mapped flood hazard zone (T25, T100, T1000, or groundwater). This reflects the current Brussels Environment delineation only.',
+             advice:'No specific flood mitigation required based on official zone data. If a nearby waterway was detected, see the proximity warning below.' },
+    };
+
+    const zd = ZONES[String(meta.resultCode)] || ZONES['-1'];
+    const wasUpgraded = meta.upgradedByWaterway;
+    const ww = meta.nearbyWaterway;
+
+    // Display overrides when proximity upgraded the result
+    const dispCls     = wasUpgraded ? 'low' : zd.cls;
+    const dispVerdict = wasUpgraded ? `Near ${ww?.label || 'waterway'} — check flood risk` : zd.verdict;
+    const dispSub     = wasUpgraded ? 'Not in an official flood zone, but within '+(ww?.radius||150)+' m of a waterway — informal exposure applies.' : zd.en;
+
+    // ── 1. Verdict banner ──────────────────────────────────────────────
+    html += `<div class="rmp-verdict ${dispCls}">
+      <span class="rmp-verdict-icon" style="color:${dispCls==='hi'?'#f95c7a':dispCls==='mod'?'#f9c93a':dispCls==='low'?'#f9aa3a':'#3af9a0'}">${zd.icon}</span>
+      <div>
+        <div class="rmp-verdict-label">${dispVerdict}</div>
+        <div class="rmp-verdict-sub">${dispSub}</div>
+      </div>
+    </div>`;
+
+    // ── 2. What this means (plain language) ───────────────────────────
+    html += sec('What This Means');
+    if (wasUpgraded) {
+      html += `<div class="rmp-plain-text">This building is not within any official flood hazard polygon. However, it is within ${ww?.radius||150} m of a mapped ${(ww?.type||'waterway').toLowerCase()}${ww?.name ? ' (' + ww.name + ')' : ''}. Buildings near rivers and canals face informal flood exposure from overflow during heavy rain, drainage system failures, and high-water events — risks not always captured by official zone boundaries.</div>`;
+    } else {
+      html += `<div class="rmp-plain-text">${zd.meaning}</div>`;
+    }
+
+    // ── 3. Waterway proximity (prominent if present) ───────────────────
+    if (ww) {
+      const wwColor = ww.weight >= 2 ? '#f9aa3a' : '#f9c93a';
+      html += `<div class="rmp-waterway-alert">
+        <strong style="color:${wwColor}">Nearby waterway: ${ww.label || ww.type}</strong>
+        Detected within ${ww.radius||150} m via OpenStreetMap — a mapped ${(ww.type||'waterway').toLowerCase()}${ww.name ? ' (' + ww.name + ')' : ''}.
+        ${ww.weight >= 2
+          ? 'Rivers and canals carry meaningful overflow risk during high-water events. Even outside official zones, proximity increases informal flood exposure.'
+          : 'Streams and minor waterways indicate drainage activity in the area. Risk is typically lower but worth noting for basement-level spaces.'}
+        ${wasUpgraded ? '<br><span style="color:'+wwColor+';font-weight:700">This waterway is the basis for the risk flag above.</span>' : ''}
+      </div>`;
+    }
+
+    // ── 4. Practical guidance ──────────────────────────────────────────
+    if (!wasUpgraded) {
+      html += `<div class="rmp-plain-text" style="font-size:0.64rem;border-top:1px solid var(--border);padding-top:0.45rem;margin-top:0;">${zd.advice}</div>`;
+    } else {
+      html += `<div class="rmp-plain-text" style="font-size:0.64rem;border-top:1px solid var(--border);padding-top:0.45rem;margin-top:0;">Recommended: check local drainage conditions with the commune and consult the Brussels Environment flood viewer for informal risk context.</div>`;
+    }
+
+    // ── 5. Official zone data ──────────────────────────────────────────
+    html += sec('Official Flood Hazard Data');
+    if (meta.resultCode >= 0) {
+      const mp = meta.matchedProps || {};
+      html += row('Hazard category', zd.en, zd.cls);
+      html += row('EN / FR / NL', `${mp.legende_en||zd.en} · ${mp.legende_fr||zd.fr} · ${mp.legende_nl||zd.nl}`);
+      html += row('code_alea', String(meta.resultCode));
+    } else {
+      html += row('Result', 'Not in any official zone', 'ok');
+      html += `<div style="font-size:0.63rem;color:var(--text-dim);padding:0.15rem 0 0.35rem;line-height:1.6;">All four hazard levels checked (T25 · T100 · T1000 · Groundwater). None matched this location.</div>`;
+    }
+    html += row('Source', 'Brussels Environment / Leefmilieu Brussel');
+    html += row('Dataset', 'alea_contour_all_25');
+
+    // ── 6. Return period reference ─────────────────────────────────────
+    html += sec('Hazard Levels — Reference');
+    [
+      { code:3, label:'High    T25',   sub:'~1-in-25 yrs — 90% chance over 60 yrs',  cls:'hi'  },
+      { code:2, label:'Medium  T100',  sub:'~1-in-100 yrs — 45% chance over 60 yrs', cls:'mod' },
+      { code:1, label:'Low     T1000', sub:'~1-in-1,000 yrs — rare but real',         cls:'low' },
+      { code:0, label:'Groundwater',   sub:'Rising water table — widespread in BCR',  cls:'mod' },
+    ].forEach(z => {
+      const isMatch = z.code === meta.resultCode;
+      html += `<div class="rmp-row" style="${isMatch?'background:rgba(255,255,255,0.04);border-radius:4px;':''}">
+        <span class="rmp-k" style="${isMatch?'font-weight:700;color:var(--text)':''}">${z.label}</span>
+        <span class="rmp-v ${z.cls}" style="${isMatch?'font-weight:800':'opacity:0.55'}">${z.sub}${isMatch?' ◀':''}</span>
+      </div>`;
+    });
+
+    // ── 7. Technical details ───────────────────────────────────────────
+    html += sec('Technical Details');
+    html += row('Coordinates (WGS84)', meta.wgs84);
+    html += row('Lambert 31370', `${meta.lambertX}, ${meta.lambertY}`);
+    html += row('Features in dataset', meta.totalFeatures);
+
+    html += `<div class="rmp-note">
+      <strong style="color:var(--text)">Coverage note:</strong> Official zones follow mapped corridors along the Senne, Maelbeek, and Woluwe rivers and the Brussels–Charleroi canal. Pluvial flooding (intense rain runoff), drainage network failures, and informal overflow are not captured by this dataset and can affect buildings outside official zones — particularly near waterways and in low-lying terrain.
+    </div>`;
+
+  } else {
+    titleEl.textContent = 'Road Noise — Data';
+    const dbVal = meta.resultDb;
+    const cls   = dbVal != null ? (dbVal >= 65 ? 'hi' : dbVal >= 55 ? 'mod' : 'ok') : '';
+    const lvlDesc = dbVal == null ? '—'
+      : dbVal >= 65 ? 'High — significant sleep/health risk'
+      : dbVal >= 55 ? 'Moderate — noticeable, above WHO guideline'
+      : 'Low — within comfortable range';
+
+    html += sec('Assessment');
+    html += row('Road noise (Lden)', dbVal != null ? `${dbVal} dB(A)` : 'No data available', cls);
+    if (dbVal != null) html += `<div style="font-size:0.68rem;color:var(--text-dim);padding:0.2rem 0 0.5rem;line-height:1.6;">${lvlDesc}</div>`;
+    html += row('Data source', meta.source);
+
+    if (meta.matchedProps) {
+      html += sec('Raw Feature Values');
+      const mp = meta.matchedProps;
+      if (mp.db_lo != null) html += row('Band lower (db_lo)', `${mp.db_lo} dB(A)`);
+      if (mp.db_hi != null) html += row('Band upper (db_hi)', `${mp.db_hi} dB(A)`);
+      if (mp.DN != null)    html += row('DN value', mp.DN);
+      const skip = ['db_lo','db_hi','DN','source'];
+      const extra = Object.entries(mp).filter(([k]) => !skip.includes(k));
+      if (extra.length) extra.forEach(([k,v]) => { html += row(k, String(v)); });
+    }
+
+    html += sec('Query Details');
+    html += row('Coordinates (lat, lon)', meta.wgs84);
+    html += row('Lambert bbox used (±300 m)', meta.bboxUsed);
+    html += row('Features in bbox', meta.featuresInBbox);
+
+    html += sec('Dataset');
+    html += row('Name', meta.dataset);
+    html += row('Indicator', 'Lden — day-evening-night weighted road noise');
+    html += row('Publisher', 'Brussels Environment (Leefmilieu Brussel)');
+
+    html += `<div class="rmp-note">
+      <strong style="color:var(--text)">How Lden works:</strong> EU standard noise metric weighted
+      +5 dB for evening (19–23h) and +10 dB for night (23–7h) relative to daytime levels.
+      WHO guideline: &lt;53 dB Lden for road traffic noise. Brussels threshold:
+      &lt;55 dB quiet · 55–65 dB moderate · &gt;65 dB high (health risk).
+    </div>`;
+  }
+
+  bodyEl.innerHTML = html;
+  document.getElementById('risk-meta-overlay').classList.add('open');
+  document.getElementById('risk-meta-popup').classList.add('open');
+}
+
+async function _fetchPermits(lng, lat) {
+  const el = document.getElementById('ac2-permits-body');
+  if (!el) return;
+  try {
+    const url = 'https://opendata.brussels.be/api/explore/v2.1/catalog/datasets/permis-urbanisme-delivres-vbx/records'
+      + '?where=' + encodeURIComponent(`within_distance(geo_point_2d,geom'POINT(${lng.toFixed(6)} ${lat.toFixed(6)})',50m)`)
+      + '&limit=4&order_by=date_delivrance%20desc';
+    const r = await fetch(url, { signal: AbortSignal.timeout(9000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const data = await r.json();
+    const recs = data.results || [];
+    if (!recs.length) {
+      el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">No permits found within 50 m.</div>'
+        + '<div class="ac2-src-note">opendata.brussels · Urban permits register</div>';
+      return;
+    }
+    const items = recs.map(f => {
+      const date = (f.date_delivrance || '').slice(0, 7);
+      const ref  = _escHtml(f.numero_dossier || f.dossier || '—');
+      const desc = _escHtml(f.objet_du_permis || f.objet || f.type_travaux || '—');
+      const stat = _escHtml(f.statut || f.etat || '');
+      return '<div class="ac2-permit-item">'
+        + '<div class="ac2-permit-ref">' + ref + '</div>'
+        + '<div class="ac2-permit-desc">' + desc + '</div>'
+        + '<div class="ac2-permit-meta">' + (date || '—') + (stat ? ' · ' + stat : '') + '</div>'
+        + '</div>';
+    }).join('');
+    el.innerHTML = items + '<div class="ac2-src-note">opendata.brussels · Urban permits within 50 m</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">'
+      + 'Permits fetch failed. '
+      + '<a href="https://opendata.brussels.be/explore/dataset/permis-urbanisme-delivres-vbx/" target="_blank" style="color:var(--accent)">Browse permits ↗</a>'
+      + '</div>';
+  }
+}
+
+async function _fetchHeritage(lng, lat) {
+  const el = document.getElementById('ac2-heritage-body');
+  if (!el) return;
+  try {
+    // UrbIS WFS — heritage buildings within ~25 m
+    const url = 'https://geoservices-urbis.irisnet.be/geoserver/urbisvector/wfs'
+      + '?service=WFS&version=2.0.0&request=GetFeature'
+      + '&typeNames=urbisvector:Adm_HeritageBuildings&srsName=EPSG%3A4326'
+      + '&CQL_FILTER=' + encodeURIComponent(`DWITHIN(the_geom,POINT(${lng.toFixed(6)} ${lat.toFixed(6)}),0.0003,degrees)`)
+      + '&outputFormat=application%2Fjson&count=3';
+    const r = await fetch(url, { signal: AbortSignal.timeout(7000) });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const gj = await r.json();
+    const feats = gj.features || [];
+    if (!feats.length) {
+      el.innerHTML = '<div class="ac2-risk-row"><span class="ac2-risk-chip ok"><span class="ac2-rc-dot"></span>Not in heritage register</span></div>'
+        + '<div class="ac2-src-note">UrbIS · Brussels heritage register</div>';
+      return;
+    }
+    const items = feats.map(f => {
+      const p = f.properties || {};
+      const n    = _escHtml(p.naam || p.name || p.denominatie || '—');
+      const prot = _escHtml(p.protection || p.bescherming || 'Listed');
+      return '<div class="ac2-data-row"><span class="ac2-d-label">' + n + '</span><span class="ac2-d-val" style="color:#e8c84a">' + prot + '</span></div>';
+    }).join('');
+    el.innerHTML = '<div class="ac2-risk-row"><span class="ac2-risk-chip mod"><span class="ac2-rc-dot"></span>Heritage listed</span></div>'
+      + items + '<div class="ac2-src-note">UrbIS · Brussels heritage register</div>';
+  } catch(e) {
+    el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">'
+      + 'Heritage data unavailable. '
+      + '<a href="https://monument.heritage.brussels/" target="_blank" style="color:var(--accent)">Check manually ↗</a>'
+      + '</div>';
+  }
+}
+
+// =====================================================================
 // DIGITAL TWIN PANEL
 // =====================================================================
 function renderSimPanel() {
@@ -3109,45 +4673,63 @@ function renderSimPanel() {
   if (!d) {
     spotHtml = '<div class="dt-no-sel"><div style="font-size:1.6rem;margin-bottom:0.5rem">⬡</div>Click a commune on the 3D map to explore its profile</div>';
   } else {
-    const status   = getStatusInfo(nis, ch.primaryVar, ch.worseIsLower, ch.statusLabels);
-    const trend    = computeTrend(nis, ch.primaryVar, ch.worseIsLower);
-    const ARROWS   = { worse: '↑', better: '↓', stable: '→' };
-    const CLSES    = { worse: 'arr-worse', better: 'arr-better', stable: 'arr-stable' };
-    const tArrow   = ARROWS[trend.verdict];
-    const tCls     = CLSES[trend.verdict];
-    const sparkPts = getLastNYears(nis, ch.primaryVar, Infinity);
-
-    const extraKpis = (ch.drivers || []).slice(0, 2).map((drvKey, i) => {
-      const lbl = ch.driverLabels && ch.driverLabels[i] ? ch.driverLabels[i] : (PLAIN_LABELS[drvKey] || drvKey);
-      const dt2 = computeTrend(nis, drvKey, false);
-      return '<div class="dt-kpi-row">'
-        + '<span class="dt-kpi-label">' + lbl + '</span>'
-        + '<span class="dt-kpi-val">' + fmtVal(drvKey, d[drvKey]) + '</span>'
-        + '<span class="dt-kpi-arr ' + CLSES[dt2.verdict] + '">' + ARROWS[dt2.verdict] + '</span>'
-        + '</div>'
-        + '<div class="dt-kpi-avg">Brussels avg: ' + fmtVal(drvKey, getCityAvg(drvKey)) + '</div>';
-    }).join('');
-
-    const sparkBlock = sparkPts.length > 1
-      ? '<div class="dt-spark-wrap"><div class="dt-spark-lbl">Trend ' + sparkPts[0][0] + '–' + sparkPts[sparkPts.length-1][0] + '</div>'
-        + '<canvas class="sparkline-canvas" id="dt-spark-' + nis + '" style="height:52px"></canvas></div>'
-      : '';
+    const status = getStatusInfo(nis, ch.primaryVar, ch.worseIsLower, ch.statusLabels);
+    const trend  = computeTrend(nis, ch.primaryVar, ch.worseIsLower);
+    const ARROWS = { worse: '↑', better: '↓', stable: '→' };
+    const CLSES  = { worse: 'arr-worse', better: 'arr-better', stable: 'arr-stable' };
+    const tArrow = ARROWS[trend.verdict];
+    const tCls   = CLSES[trend.verdict];
 
     spotHtml = '<div class="dt-spot-head">'
       + '<div class="dt-spot-name">' + d.name + '</div>'
       + '<span class="status-badge ' + status.cls + '">' + status.label + '</span>'
       + '</div>'
-      + '<div class="dt-spot-kpis">'
-      + '<div class="dt-kpi-row">'
-      + '<span class="dt-kpi-label" style="font-weight:600;color:var(--text)">' + ch.kpiLabel + '</span>'
-      + '<span class="dt-kpi-val">' + fmtVal(ch.primaryVar, d[ch.primaryVar]) + '</span>'
-      + '<span class="dt-kpi-arr ' + tCls + '">' + tArrow + '</span>'
-      + '</div>'
+      // Active challenge KPI
+      + '<div class="dt-zone-sec">'
+      + '<div class="dt-zone-hdr" style="border-top:none;padding-top:0">' + ch.label + '</div>'
+      + '<div class="dt-kpi-row"><span class="dt-kpi-label" style="font-weight:600;color:var(--text)">' + ch.kpiLabel + '</span>'
+        + '<span class="dt-kpi-val">' + fmtVal(ch.primaryVar, d[ch.primaryVar]) + '</span>'
+        + '<span class="dt-kpi-arr ' + tCls + '">' + tArrow + '</span></div>'
       + '<div class="dt-kpi-avg">Brussels avg: ' + fmtVal(ch.primaryVar, getCityAvg(ch.primaryVar)) + '</div>'
-      + extraKpis
       + '</div>'
-      + sparkBlock
-      + '<button class="dt-view-btn" onclick="switchTab(\'district\'); selectDistrict(\'' + nis + '\')">' + 'View full profile →' + '</button>';
+      // 3D-unique zone datasets — not shown elsewhere in the app
+      + _dtZoneSection('Built Form', [
+          { label: 'Closed block (row houses)', key: 'hq_type_closed' },
+          { label: 'Semi-detached',             key: 'hq_type_halfopen' },
+          { label: 'Detached / open',           key: 'hq_type_open' },
+        ], d)
+      + _dtZoneSection('Building Era', [
+          { label: 'Interwar 1900–1940',        key: 'hq_build_1900_1940' },
+          { label: 'Post-war 1941–1960',        key: 'hq_build_1941_1960' },
+          { label: 'Late modern 1961–1990',     key: 'hq_build_1961_1990' },
+          { label: '1991–2010',                 key: 'hq_build_1991_2010' },
+          { label: 'Post-2011 (recent)',         key: 'hq_build_post2011' },
+        ], d)
+      + _dtZoneSection('Cadastral & Land Value', [
+          { label: 'Cadastral income / ha (built parcels)', key: 'rc_per_ha' },
+          { label: 'Avg parcel tax',            key: 'pri_avg_parcel' },
+          { label: 'Low cadastral (< €600)',    key: 'rc_pct_low' },
+          { label: 'High cadastral (≥ €2 000)', key: 'rc_pct_high' },
+        ], d)
+      + _dtZoneSection('Construction Detail', [
+          { label: 'New apartments / yr',       key: 'bp_res_apartments' },
+          { label: 'New surface area / yr',     key: 'bp_res_new_surface' },
+          { label: 'Non-res. renovations / yr', key: 'bp_nonres_renov' },
+        ], d)
+      + '<button class="dt-view-btn" style="margin-top:1.1rem;margin-bottom:1rem" onclick="switchTab(\'district\'); selectDistrict(\'' + nis + '\')">View Commune Key Drivers →</button>';
+  }
+
+  function _dtZoneSection(title, rows, district) {
+    const valid = rows.filter(r => district[r.key] != null);
+    if (!valid.length) return '';
+    let h = '<div class="dt-zone-sec"><div class="dt-zone-hdr">' + title + '</div>';
+    for (const r of valid) {
+      h += '<div class="dt-kpi-row">'
+        + '<span class="dt-kpi-label">' + r.label + '</span>'
+        + '<span class="dt-kpi-val">' + fmtVal(r.key, district[r.key]) + '</span>'
+        + '</div>';
+    }
+    return h + '</div>';
   }
 
   const sorted = DISTRICTS.filter(dd => dd[ch.primaryVar] != null)
@@ -3160,19 +4742,49 @@ function renderSimPanel() {
     return '<div class="dt-sc-item"><div class="dt-sc-n" style="color:' + bColors[band] + '">' + cnt + '</div><div class="dt-sc-lbl">' + bLabels[band] + '</div></div>';
   }).join('');
 
-  pane.innerHTML =
-    '<div class="dt-metric-strip"><div class="dt-metric-label">Indicator</div><div class="dt-metric-chips">' + chipsHtml + '</div></div>'
+  // Building selected in asset mode → show only the asset card
+  if (assetMode && selectedBuilding) {
+    pane.innerHTML = renderAssetCard();
+    requestAnimationFrame(() => {
+      const ring = selectedBuilding.geometry && selectedBuilding.geometry.coordinates
+        ? selectedBuilding.geometry.coordinates[0] : null;
+      _kickAssetFetches(selectedBuilding.lngLat.lng, selectedBuilding.lngLat.lat, ring);
+      initAddrTooltip();
+    });
+    return;
+  }
 
+  // ── Flood zone legend (right panel) — shown only when overlay is active ───────
+  const _floodLegendHtml = (() => {
+    if (!_floodOverlay) return '';
+    const C = FLOOD_MAP_COLORS;
+    let label = '';
+    if (_showAllBuildings) {
+      label = 'All communes';
+    } else {
+      const nis = dtCommune || selectedDistrict;
+      const d   = nis && DISTRICTS.find(dd => String(dd.niscode) === String(nis));
+      if (d) label = d.name;
+    }
+    return `<div id="flood-sim-legend">
+      <div class="fsl-header">
+        <span class="fsl-title">Flood Zone</span>
+        ${label ? `<span class="fsl-commune">${label}</span>` : ''}
+      </div>
+      <div class="fsl-rows">
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[3]}"></span>High risk — T25</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[2]}"></span>Possible — T100</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[1]}"></span>Slight — T1000</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[0]}"></span>Groundwater</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C['-1']}"></span>No official zone</div>
+      </div>
+    </div>`;
+  })();
+
+  // Commune view (or asset mode with nothing selected)
+  pane.innerHTML = _floodLegendHtml + (assetMode ? renderAssetCard() : '')
     + '<div class="dt-spotlight">' + spotHtml + '</div>'
     + '<div class="dt-status-strip"><div class="dt-metric-label" style="margin-bottom:0.35rem">BCR — ' + ch.label + '</div><div class="dt-status-counts">' + statusHtml + '</div></div>';
-
-  if (d) {
-    const sparkPts = getLastNYears(nis, ch.primaryVar, Infinity);
-    requestAnimationFrame(function() {
-      const canvas = document.getElementById('dt-spark-' + nis);
-      if (canvas && sparkPts.length > 1) drawSparkline(canvas, sparkPts, ch.color, ch.worseIsLower, -1, currentYear);
-    });
-  }
 }
 
 function switchDTChallenge(chId) {
@@ -3346,5 +4958,16 @@ function toggleRightPanel() {
 </script>
 <div id="spark-tooltip"><span class="sp-year"></span><span class="sp-val"></span><span class="sp-hint">↵ set year</span></div>
 <div id="cmp-slot-tooltip"></div>
+<!-- Global address tooltip — position:fixed so it escapes panel overflow -->
+<div id="g-addr-tip"></div>
+<!-- Risk metadata popup -->
+<div id="risk-meta-overlay" onclick="closeRiskMeta()"></div>
+<div id="risk-meta-popup">
+  <div class="rmp-hdr">
+    <span class="rmp-title" id="rmp-title">Risk Data</span>
+    <button class="rmp-close" onclick="closeRiskMeta()">✕</button>
+  </div>
+  <div id="rmp-body"></div>
+</div>
 </body>
 </html>
