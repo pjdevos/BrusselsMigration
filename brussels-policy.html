@@ -616,9 +616,11 @@ input[type=range].whatif-slider {
   position: absolute; bottom: 0.75rem; left: 0.75rem; z-index: 1000;
   display: flex; flex-direction: column; gap: 0.45rem; align-items: stretch;
 }
-/* "Show All Buildings" toggle — only shown in 3D mode */
+/* 3D mode button row — hidden until dtMode=true */
+#bld-mode-row { display: none; flex-direction: row; align-items: flex-start; gap: 0.45rem; }
+.bld-controls-col { display: flex; flex-direction: column; gap: 0.35rem; }
+/* Shared button base — visible by default since parent row controls visibility */
 .bld-all-btn {
-  display: none; /* shown via JS when dtMode=true */
   font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
   letter-spacing: 0.04em; padding: 0.42rem 0.75rem;
   background: rgba(0,222,255,0.07); border: 1px solid rgba(0,222,255,0.4);
@@ -634,6 +636,9 @@ input[type=range].whatif-slider {
 .flood-map-btn { background: rgba(74,157,232,0.07); border-color: rgba(74,157,232,0.4); color: rgba(74,157,232,0.85); }
 .flood-map-btn:hover { background: rgba(74,157,232,0.18); border-color: rgba(74,157,232,0.7); color: #4a9de8; }
 .flood-map-btn.active { background: #4a9de8; border-color: #4a9de8; color: #050f18; }
+.noise-map-btn { background: rgba(160,102,232,0.07); border-color: rgba(160,102,232,0.4); color: rgba(160,102,232,0.85); }
+.noise-map-btn:hover { background: rgba(160,102,232,0.18); border-color: rgba(160,102,232,0.7); color: #a066e8; }
+.noise-map-btn.active { background: #a066e8; border-color: #a066e8; color: #050f18; }
 /* Asset panel */
 .asset-card { padding: 0.85rem 1rem; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .asset-card-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.55rem; gap: 0.5rem; }
@@ -678,6 +683,7 @@ input[type=range].whatif-slider {
 .ac2-close:hover { color: var(--text); }
 .ac2-badge { font-size: 0.58rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; padding: 0.15rem 0.48rem; border-radius: 99px; line-height: 1.5; border: 1px solid; white-space: nowrap; }
 .ac2-badge-type { background: rgba(58,192,249,0.1); color: #3ac0f9; border-color: rgba(58,192,249,0.28); }
+.ac2-badge-noise { background: rgba(255,255,255,0.04); color: var(--text-dim); border-color: rgba(255,255,255,0.1); transition: background 0.3s, color 0.3s, border-color 0.3s; }
 /* Group dividers — ASSET METRICS / ZONE METRICS */
 .ac2-group-hdr {
   display: flex; align-items: center; gap: 0.5rem;
@@ -725,12 +731,21 @@ input[type=range].whatif-slider {
 .ac2-src-note a:hover { color: var(--accent); text-decoration: underline; }
 /* Risk chips */
 .ac2-risk-row { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.2rem 0 0.15rem; }
-/* Flood map overlay toggle button */
-/* Flood zone progress bar — floating in the 3D map while computing */
-#fml-progress-wrap { position:absolute; bottom:2.8rem; left:50%; transform:translateX(-50%); z-index:6; background:rgba(10,14,26,0.9); border:1px solid rgba(255,255,255,0.12); border-radius:6px; padding:0.45rem 0.7rem; min-width:160px; backdrop-filter:blur(4px); pointer-events:none; }
-#fml-progress-label { font-size:0.6rem; color:var(--text-dim); margin-bottom:0.22rem; text-align:center; }
-#fml-progress-track { background:rgba(255,255,255,0.08); border-radius:99px; height:3px; overflow:hidden; }
-#fml-progress-fill  { background:#4a9de8; height:100%; width:0%; transition:width 0.12s linear; border-radius:99px; }
+.ac2-rc-sub { display:block; font-size:0.57rem; color:var(--text-dim); margin-top:0.08rem; font-weight:400; line-height:1.3; letter-spacing:0; }
+/* Environment overlay dropdown */
+.env-dropdown-wrap { position: relative; }
+#env-dropdown-panel { display:none; position:absolute; bottom:calc(100% + 0.45rem); left:0; flex-direction:column; gap:0.35rem; background:rgba(10,14,26,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:7px; padding:0.5rem; backdrop-filter:blur(10px); z-index:1001; min-width:168px; }
+#env-dropdown-panel.open { display:flex; }
+.env-btn-slot { display:flex; flex-direction:column; gap:0.2rem; }
+.env-progress-wrap { background:rgba(16,20,36,0.9); border:1px solid rgba(255,255,255,0.1); border-radius:4px; padding:0.28rem 0.5rem 0.32rem; }
+.env-progress-label { font-size:0.58rem; font-family:'IBM Plex Mono',monospace; color:var(--text-dim); margin-bottom:0.14rem; white-space:nowrap; }
+.env-progress-track { background:rgba(255,255,255,0.08); border-radius:99px; height:3px; overflow:hidden; }
+.env-progress-fill  { height:100%; width:0%; transition:width 0.12s linear; border-radius:99px; }
+#fml-progress-fill  { background:#4a9de8; }
+#nml-progress-fill  { background:#a066e8; }
+.env-toggle-btn { background:rgba(50,200,100,0.22); border-color:rgba(50,200,100,0.6); color:#3de878; }
+.env-toggle-btn:hover { background:rgba(50,200,100,0.38); border-color:rgba(50,200,100,0.9); color:#32c864; }
+.env-toggle-btn.active { background:rgba(50,200,100,0.38); border-color:rgba(50,200,100,0.9); color:#32c864; }
 /* Flood zone legend — rendered inside the right-panel 3D View tab */
 #flood-sim-legend { flex-shrink:0; border-bottom:1px solid var(--border); padding:0.6rem 1rem 0.65rem; background:var(--surface2); }
 #flood-sim-legend .fsl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.38rem; }
@@ -739,7 +754,14 @@ input[type=range].whatif-slider {
 #flood-sim-legend .fsl-rows   { display:flex; flex-wrap:wrap; gap:0.22rem 0.9rem; }
 #flood-sim-legend .fsl-row    { display:flex; align-items:center; gap:0.35rem; font-size:0.65rem; color:var(--text-sub); white-space:nowrap; }
 #flood-sim-legend .fsl-dot    { width:0.55rem; height:0.55rem; border-radius:50%; flex-shrink:0; }
-.ac2-risk-chip { display: inline-flex; align-items: center; gap: 0.28rem; padding: 0.24rem 0.6rem 0.24rem 0.44rem; border-radius: 99px; font-size: 0.63rem; font-weight: 600; border: 1px solid; transition: all 0.2s; }
+#noise-sim-legend { flex-shrink:0; border-bottom:1px solid var(--border); padding:0.6rem 1rem 0.65rem; background:var(--surface2); }
+#noise-sim-legend .fsl-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:0.38rem; }
+#noise-sim-legend .fsl-title  { font-size:0.57rem; font-weight:700; color:var(--text-dim); letter-spacing:0.1em; text-transform:uppercase; }
+#noise-sim-legend .fsl-commune { font-size:0.62rem; font-weight:600; color:var(--text-sub); }
+#noise-sim-legend .fsl-rows   { display:flex; flex-wrap:wrap; gap:0.22rem 0.9rem; }
+#noise-sim-legend .fsl-row    { display:flex; align-items:center; gap:0.35rem; font-size:0.65rem; color:var(--text-sub); white-space:nowrap; }
+#noise-sim-legend .fsl-dot    { width:0.55rem; height:0.55rem; border-radius:50%; flex-shrink:0; }
+.ac2-risk-chip { display: inline-flex; align-items: flex-start; gap: 0.28rem; padding: 0.24rem 0.6rem 0.24rem 0.44rem; border-radius: 99px; font-size: 0.63rem; font-weight: 600; border: 1px solid; transition: all 0.2s; }
 .ac2-rc-dot { width: 0.42rem; height: 0.42rem; border-radius: 50%; flex-shrink: 0; }
 .ac2-risk-chip.ok    { background: rgba(58,249,160,0.08);  border-color: rgba(58,249,160,0.3);  color: #3af9a0; }
 .ac2-risk-chip.ok   .ac2-rc-dot { background: #3af9a0; }
@@ -988,18 +1010,36 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
     <div class="bld-label">Loading buildings…</div>
     <div class="bld-track"><div class="bld-fill"></div></div>
   </div>
-  <!-- Flood zone computation progress bar — shown in map centre while computing -->
-  <div id="fml-progress-wrap" style="display:none">
-    <div id="fml-progress-label">Computing…</div>
-    <div id="fml-progress-track"><div id="fml-progress-fill"></div></div>
-  </div>
 </div>
 <button class="panel-toggle left-toggle"  id="left-toggle"  onclick="toggleLeftPanel()"  title="Hide / show left panel"><span class="tog-arrow"></span></button>
 <button class="panel-toggle right-toggle" id="right-toggle" onclick="toggleRightPanel()" title="Hide / show right panel"><span class="tog-arrow"></span></button>
 <div id="map-legend">
-  <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
-  <button id="asset-mode-btn" class="bld-all-btn asset-mode-btn" onclick="toggleAssetMode()" style="display:none" title="Click a building to view its metadata">⬡ Asset Mode</button>
-  <button id="flood-map-btn" class="bld-all-btn flood-map-btn" onclick="toggleFloodOverlay()" style="display:none" title="Color all buildings by flood risk zone">⬡ Flood Map</button>
+  <div id="bld-mode-row">
+    <div class="bld-controls-col">
+      <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
+      <button id="asset-mode-btn" class="bld-all-btn asset-mode-btn" onclick="toggleAssetMode()" title="Click a building to view its metadata">⬡ Asset Mode</button>
+    </div>
+    <!-- Environment overlays dropdown -->
+    <div class="env-dropdown-wrap" id="env-dropdown-wrap">
+      <div id="env-dropdown-panel">
+        <div class="env-btn-slot">
+          <div class="env-progress-wrap" id="fml-progress-wrap" style="display:none">
+            <div class="env-progress-label" id="fml-progress-label">Computing…</div>
+            <div class="env-progress-track"><div class="env-progress-fill" id="fml-progress-fill"></div></div>
+          </div>
+          <button id="flood-map-btn" class="bld-all-btn flood-map-btn" onclick="toggleFloodOverlay()" title="Color all buildings by flood risk zone">⬡ Flood Map</button>
+        </div>
+        <div class="env-btn-slot">
+          <div class="env-progress-wrap" id="nml-progress-wrap" style="display:none">
+            <div class="env-progress-label" id="nml-progress-label">Computing…</div>
+            <div class="env-progress-track"><div class="env-progress-fill" id="nml-progress-fill"></div></div>
+          </div>
+          <button id="noise-map-btn" class="bld-all-btn noise-map-btn" onclick="toggleNoiseMap()" title="Overlay noise levels on buildings">⬡ Noise Map</button>
+        </div>
+      </div>
+      <button id="env-toggle-btn" class="bld-all-btn env-toggle-btn" onclick="toggleEnvDropdown()" title="Environment overlays">⬡ Env ▾</button>
+    </div>
+  </div>
   <div class="map-legend">
     <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
     <div class="legend-title" id="legend-title">Select a challenge</div>
@@ -1013,8 +1053,8 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
 <div class="right-panel">
   <div class="tab-bar">
     <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">Commune Info</button>
-    <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare</button>
-    <button class="tab-btn"        id="btn-simulate" onclick="switchTab('simulate')" style="display:none">3D View</button>
+    <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare Communes</button>
+    <button class="tab-btn"        id="btn-simulate" onclick="switchTab('simulate')" style="display:none">Asset View</button>
 
   </div>
   <!-- District tab -->
@@ -1994,6 +2034,7 @@ function selectDistrict(niscode) {
     selectedDistrict = niscode;
     dtCommune = niscode;          // keep 3D state in sync
     refreshFloodOverlayIfActive();
+    refreshNoiseOverlayIfActive();
     whatIfOverrides = {};         // clear stale overrides from previous commune
     renderDetailPanel(niscode);
     // Update ranking highlight
@@ -2940,7 +2981,15 @@ var _showAllBuildings    = false;
 var _floodOverlay            = false;      // flood zone color overlay active
 var _floodComputedNiscodes   = new Set();  // communes whose _fc has been tagged + pushed
 var _floodFlatZones          = null;       // pre-flattened flood polygons (cached)
-var _floodOverlayComputing   = false;      // guard against re-entrant calls
+var _floodOverlayComputing   = false;      // true while chunk loop is running
+var _floodToken              = 0;          // incremented on every toggle; chunk loops self-cancel on mismatch
+var _noiseOverlay            = false;      // noise map overlay active
+var _noiseComputedNiscodes   = new Set();  // communes whose _nc has been tagged + pushed
+var _noiseFlatZones          = null;       // pre-flattened noise polygons (cached)
+var _noiseOverlayComputing   = false;      // true while chunk loop is running
+var _noiseToken              = 0;          // incremented on every toggle; chunk loops self-cancel on mismatch
+var _floodGrid               = null;       // spatial grid index over _floodFlatZones
+var _noiseGrid               = null;       // spatial grid index over _noiseFlatZones
 var dt3DPulseWraps = [];
 // Asset mode
 var assetMode        = false;
@@ -2989,6 +3038,10 @@ function toggleAllBuildings() {
   if (_floodOverlay) {
     _computeAndColor(_getVisibleCommuneNis());
   }
+  // When noise is active, color any newly visible communes
+  if (_noiseOverlay) {
+    _computeAndColorNoise(_getVisibleCommuneNis());
+  }
 }
 
 // ── Asset Mode ──────────────────────────────────────────────────────────────
@@ -3011,8 +3064,51 @@ function toggleAssetMode() {
       const floodBtn = document.getElementById('flood-map-btn');
       if (floodBtn) floodBtn.classList.remove('active');
     }
+    // Turn off noise overlay when exiting asset mode
+    if (_noiseOverlay) {
+      _noiseOverlay = false;
+      _clearNoiseColors();
+      const noiseBtn = document.getElementById('noise-map-btn');
+      if (noiseBtn) noiseBtn.classList.remove('active');
+    }
   }
   renderSimPanel();
+}
+
+// ── Environment dropdown ──────────────────────────────────────────────────────
+function toggleEnvDropdown() {
+  const panel = document.getElementById('env-dropdown-panel');
+  const btn   = document.getElementById('env-toggle-btn');
+  if (!panel) return;
+  const isOpen = panel.classList.toggle('open');
+  if (btn) btn.classList.toggle('active', isOpen);
+}
+
+// ── Noise Map ────────────────────────────────────────────────────────────────
+async function toggleNoiseMap() {
+  // Increment token — any in-flight chunk loop will see the mismatch and bail.
+  const myToken = ++_noiseToken;
+  _noiseOverlay = !_noiseOverlay;
+
+  const btn = document.getElementById('noise-map-btn');
+  if (btn) btn.classList.toggle('active', _noiseOverlay);
+
+  if (_noiseOverlay) {
+    // Mutual exclusion: turn flood map off before starting noise map.
+    if (_floodOverlay) {
+      ++_floodToken;           // cancel any in-flight flood computation
+      _floodOverlay = false;
+      const fbtn = document.getElementById('flood-map-btn');
+      if (fbtn) { fbtn.classList.remove('active'); fbtn.textContent = '⬡ Flood Map'; fbtn.disabled = false; }
+      const fw = document.getElementById('fml-progress-wrap');
+      if (fw) fw.style.display = 'none';
+      _clearFloodColors();
+    }
+    await _computeAndColorNoise(_getVisibleCommuneNis(), myToken);
+  } else {
+    _clearNoiseColors();
+    renderSimPanel();
+  }
 }
 
 function clearBuildingHighlight() {
@@ -3113,23 +3209,29 @@ function findSector(lng, lat) {
 function toggleDigitalTwin() {
   dtMode = !dtMode;
   const btn3d     = document.getElementById('legend-3d-btn');
-  const btnAll    = document.getElementById('bld-all-toggle');
+  const btnRow    = document.getElementById('bld-mode-row');
   const btnAsset  = document.getElementById('asset-mode-btn');
   const btnFlood  = document.getElementById('flood-map-btn');
+  const btnNoise  = document.getElementById('noise-map-btn');
   const btnSim    = document.getElementById('btn-simulate');
-  if (btn3d)    { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
-  if (btnAll)   btnAll.style.display  = dtMode ? 'block' : 'none';
-  if (btnAsset) btnAsset.style.display = dtMode ? 'block' : 'none';
-  if (btnFlood) btnFlood.style.display = dtMode ? 'block' : 'none';
-  if (btnSim)   btnSim.style.display  = dtMode ? '' : 'none';
-  // When entering 3D mode: switch to 3D View tab; when leaving: go back to district
+  if (btn3d)  { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
+  if (btnRow) btnRow.style.display = dtMode ? 'flex' : 'none';
+  if (btnSim) btnSim.style.display = dtMode ? '' : 'none';
+  // When entering 3D mode: switch to Asset View tab; when leaving: go back to district
   if (dtMode) {
     switchTab('simulate');
   } else {
-    // Deactivate asset mode too
+    // Deactivate asset mode
     if (assetMode) { assetMode = false; if (btnAsset) btnAsset.classList.remove('active'); clearBuildingHighlight(); }
-    // Deactivate flood overlay too
+    // Deactivate flood overlay
     if (_floodOverlay) { _floodOverlay = false; _clearFloodColors(); if (btnFlood) btnFlood.classList.remove('active'); }
+    // Deactivate noise overlay
+    if (_noiseOverlay) { _noiseOverlay = false; _clearNoiseColors(); if (btnNoise) btnNoise.classList.remove('active'); }
+    // Close env dropdown
+    const envPanel = document.getElementById('env-dropdown-panel');
+    const envBtn   = document.getElementById('env-toggle-btn');
+    if (envPanel) envPanel.classList.remove('open');
+    if (envBtn)   envBtn.classList.remove('active');
     switchTab('district');
   }
   const mapEl = document.getElementById('map');
@@ -3186,7 +3288,8 @@ function initMapLibre() {
     sync3DHighlight();
     renderSimPanel();
     tryLoadSectorData();
-    prefetchEnvData(); // warm flood cache before user clicks a building
+    prefetchEnvData();   // warm flood cache before user clicks a building
+    prefetchNoiseData(); // warm noise cache before user clicks noise map
   });
   mlMap.on('move', reposition3DPulseRings);
   mlMap.on('move', () => {
@@ -3202,6 +3305,7 @@ function initMapLibre() {
       const nis = e.features[0].properties.niscode;
       dtCommune = nis;
       refreshFloodOverlayIfActive();
+      refreshNoiseOverlayIfActive();
       dtSimDone = false;
       renderSimPanel();
       if (mlMap.getLayer('communes-highlight')) {
@@ -3438,6 +3542,38 @@ const FLOOD_COLOR_EXPR = ['match', ['get', '_fc'],
   FLOOD_MAP_COLORS['-1']   // default: no official zone (green)
 ];
 
+// Noise level dB → integer code stored in _nc property.
+// Zones sorted highest-first so first PIP match gives the worst zone.
+// -1 = outside all noise zones (no road noise data)
+// 0 = < 45 dB (very quiet)   1 = 45–55   2 = 55–60   3 = 60–65   4 = 65–70   5 = ≥ 70
+const NOISE_MAP_COLORS = {
+  5:  '#c82828',   // ≥ 70 dB — very loud     (red)
+  4:  '#e85020',   // 65–70 dB — loud          (orange-red)
+  3:  '#e8a020',   // 60–65 dB — moderate-high (orange)
+  2:  '#c8c820',   // 55–60 dB — moderate      (yellow)
+  1:  '#60c840',   // 45–55 dB — low           (lime)
+  0:  '#289c50',   // < 45 dB  — quiet         (green)
+ '-1':'#1a4060',   // no data                  (dark blue-grey)
+};
+const NOISE_COLOR_EXPR = ['match', ['get', '_nc'],
+  5, NOISE_MAP_COLORS[5],
+  4, NOISE_MAP_COLORS[4],
+  3, NOISE_MAP_COLORS[3],
+  2, NOISE_MAP_COLORS[2],
+  1, NOISE_MAP_COLORS[1],
+  0, NOISE_MAP_COLORS[0],
+  NOISE_MAP_COLORS['-1']
+];
+function _noiseDbToCode(db) {
+  if (db === null || db === undefined || isNaN(db)) return -1;
+  if (db >= 70) return 5;
+  if (db >= 65) return 4;
+  if (db >= 60) return 3;
+  if (db >= 55) return 2;
+  if (db >= 45) return 1;
+  return 0;
+}
+
 // Returns niscodes of all building layers currently set to visible.
 function _getVisibleCommuneNis() {
   if (!mlMap || !GEOJSON) return [];
@@ -3452,6 +3588,148 @@ function _getVisibleCommuneNis() {
   return result;
 }
 
+// ── Web Worker for background flood/noise PIP computation ────────────────────
+// Defined as an inline Blob so no separate .js file is needed.
+// The worker receives pre-computed Lambert sample points for all unprocessed
+// buildings + the flat zone array. It builds its own spatial grid and returns
+// {type:'progress', done, total} messages while processing, then a final
+// {type:'result', results:[{idx,fc}]} message.
+const _PIP_WORKER_SRC = `
+function _pip(px, py, ring) {
+  let inside = false;
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1], xj = ring[j][0], yj = ring[j][1];
+    if (((yi > py) !== (yj > py)) && (px < (xj - xi) * (py - yi) / (yj - yi) + xi))
+      inside = !inside;
+  }
+  return inside;
+}
+function _buildGrid(zones, cellSize) {
+  if (!zones || !zones.length) return null;
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  for (const z of zones) {
+    if (z.minX<minX) minX=z.minX; if (z.minY<minY) minY=z.minY;
+    if (z.maxX>maxX) maxX=z.maxX; if (z.maxY>maxY) maxY=z.maxY;
+  }
+  const cols = Math.ceil((maxX-minX)/cellSize)+1;
+  const rows = Math.ceil((maxY-minY)/cellSize)+1;
+  const cells = new Array(cols*rows).fill(null).map(()=>[]);
+  for (const z of zones) {
+    const c0=Math.max(0,Math.floor((z.minX-minX)/cellSize));
+    const c1=Math.min(cols-1,Math.floor((z.maxX-minX)/cellSize));
+    const r0=Math.max(0,Math.floor((z.minY-minY)/cellSize));
+    const r1=Math.min(rows-1,Math.floor((z.maxY-minY)/cellSize));
+    for (let r=r0;r<=r1;r++) for (let c=c0;c<=c1;c++) cells[r*cols+c].push(z);
+  }
+  for (const cell of cells) cell.sort((a,b)=>b.code-a.code);
+  return { cells, minX, minY, cols, rows, cellSize };
+}
+function _cands(grid, zones, px, py) {
+  if (!grid) return zones;
+  const c=Math.floor((px-grid.minX)/grid.cellSize);
+  const r=Math.floor((py-grid.minY)/grid.cellSize);
+  if (c<0||c>=grid.cols||r<0||r>=grid.rows) return [];
+  return grid.cells[r*grid.cols+c];
+}
+onmessage = function(e) {
+  const { buildings, zones, maxCode, chunkSize } = e.data;
+  const grid = _buildGrid(zones, 500);
+  const results = [];
+  const total = buildings.length;
+  const CHUNK = chunkSize || 3000;
+  let i = 0;
+  function next() {
+    const end = Math.min(i + CHUNK, total);
+    for (; i < end; i++) {
+      const { idx, pts } = buildings[i];
+      if (!pts) { results.push({ idx, fc: -1 }); continue; }
+      let fc = -1;
+      for (const [px, py] of pts) {
+        for (const zone of _cands(grid, zones, px, py)) {
+          if (zone.code <= fc) continue;
+          if (px<zone.minX||px>zone.maxX||py<zone.minY||py>zone.maxY) continue;
+          if (_pip(px, py, zone.ring)) { fc = zone.code; break; }
+        }
+        if (fc === (maxCode||3)) break;
+      }
+      results.push({ idx, fc });
+    }
+    postMessage({ type: 'progress', done: i, total });
+    if (i < total) setTimeout(next, 0);
+    else postMessage({ type: 'result', results });
+  }
+  setTimeout(next, 0);
+};
+`;
+let _pipWorkerUrl = null;
+function _getPipWorkerUrl() {
+  if (!_pipWorkerUrl) {
+    const blob = new Blob([_PIP_WORKER_SRC], { type: 'application/javascript' });
+    _pipWorkerUrl = URL.createObjectURL(blob);
+  }
+  return _pipWorkerUrl;
+}
+
+// ── Spatial grid index for fast zone lookup ──────────────────────────────────
+// Builds a 2-D grid over the given flat zone array (Lambert 31370 coords).
+// Each cell stores all zones whose bbox overlaps that cell — sorted highest
+// code first so the first PIP hit is the worst-case zone.
+// cellSize: metres (500 is a good balance for Brussels).
+function _buildSpatialGrid(zones, cellSize) {
+  if (!zones || zones.length === 0) return null;
+  let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+  for (const z of zones) {
+    if (z.minX<minX) minX=z.minX; if (z.minY<minY) minY=z.minY;
+    if (z.maxX>maxX) maxX=z.maxX; if (z.maxY>maxY) maxY=z.maxY;
+  }
+  const cols = Math.ceil((maxX - minX) / cellSize) + 1;
+  const rows = Math.ceil((maxY - minY) / cellSize) + 1;
+  const cells = new Array(cols * rows).fill(null).map(() => []);
+  for (const z of zones) {
+    const c0 = Math.max(0, Math.floor((z.minX - minX) / cellSize));
+    const c1 = Math.min(cols - 1, Math.floor((z.maxX - minX) / cellSize));
+    const r0 = Math.max(0, Math.floor((z.minY - minY) / cellSize));
+    const r1 = Math.min(rows - 1, Math.floor((z.maxY - minY) / cellSize));
+    for (let r = r0; r <= r1; r++) {
+      for (let c = c0; c <= c1; c++) {
+        cells[r * cols + c].push(z);
+      }
+    }
+  }
+  // Sort each cell highest-code first so first PIP match is worst zone
+  for (const cell of cells) cell.sort((a, b) => b.code - a.code);
+  return { cells, minX, minY, cols, rows, cellSize };
+}
+
+// Return candidate zones for point (px, py) from the grid.
+// Falls back to the full zone array if the grid is null (shouldn't happen).
+function _gridCandidates(grid, allZones, px, py) {
+  if (!grid) return allZones;
+  const c = Math.floor((px - grid.minX) / grid.cellSize);
+  const r = Math.floor((py - grid.minY) / grid.cellSize);
+  if (c < 0 || c >= grid.cols || r < 0 || r >= grid.rows) return [];
+  return grid.cells[r * grid.cols + c];
+}
+
+// Remove ring vertices that are within minDist metres of the previous kept vertex.
+// Uses squared distance to avoid sqrt. Lambert 31370 units = metres.
+// At 5 m tolerance a complex watercourse ring shrinks 20-100x with no meaningful
+// change to PIP results for building-sized features (≥ 5 m across).
+function _simplifyRing(ring, minDistSq) {
+  if (ring.length <= 4) return ring;
+  const out = [ring[0]];
+  let lx = ring[0][0], ly = ring[0][1];
+  for (let i = 1; i < ring.length - 1; i++) {
+    const dx = ring[i][0] - lx, dy = ring[i][1] - ly;
+    if (dx * dx + dy * dy >= minDistSq) {
+      out.push(ring[i]);
+      lx = ring[i][0]; ly = ring[i][1];
+    }
+  }
+  out.push(ring[ring.length - 1]); // always keep closing vertex
+  return out;
+}
+
 // Reset all commune layers back to the default height-gradient color.
 // Does NOT clear _floodComputedNiscodes — _fc tags are preserved so that
 // re-enabling flood can skip PIP re-computation and just re-apply colors.
@@ -3464,6 +3742,168 @@ function _clearFloodColors() {
       mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', BLD_DEFAULT_COLOR);
     }
   }
+}
+
+// Reset all commune layers back to default color — clears noise coloring.
+// _nc tags and _noiseComputedNiscodes are preserved so re-enable skips PIP.
+function _clearNoiseColors() {
+  if (!mlMap || !GEOJSON) return;
+  for (const f of GEOJSON.features) {
+    const lyrId = `3d-buildings-${f.properties.niscode}`;
+    if (mlMap.getLayer(lyrId)) {
+      mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', BLD_DEFAULT_COLOR);
+    }
+  }
+}
+
+async function _computeAndColorNoise(nisCodes) {
+  if (_noiseOverlayComputing || !mlMap || !_osmBuildingsCache) return;
+  if (!nisCodes || nisCodes.length === 0) return;
+  _noiseOverlayComputing = true;
+
+  const btn      = document.getElementById('noise-map-btn');
+  const progWrap = document.getElementById('nml-progress-wrap');
+  const progFill = document.getElementById('nml-progress-fill');
+  const progLbl  = document.getElementById('nml-progress-label');
+
+  if (btn) { btn.textContent = '⟳ …'; btn.disabled = true; }
+
+  // Ensure noise zone polygons are loaded
+  if (!_noiseCache) {
+    if (!_noiseFetch) prefetchNoiseData();
+    await _noiseFetch;
+  }
+  if (!_noiseCache) {
+    _noiseOverlayComputing = false;
+    if (progWrap) progWrap.style.display = 'none';
+    if (btn) { btn.textContent = '⬡ Noise Map'; btn.disabled = false; }
+    alert('Noise data could not be loaded. Check your connection and try again.');
+    return;
+  }
+
+  // Pre-flatten noise zones once — sorted highest dB first so first PIP hit = loudest zone.
+  if (!_noiseFlatZones) {
+    _noiseFlatZones = [];
+    for (const f of (_noiseCache.features || [])) {
+      const p    = f.properties || {};
+      const dbLo = parseFloat(p.db_lo);
+      const dbHi = parseFloat(p.db_hi);
+      const db   = (!isNaN(dbLo) && !isNaN(dbHi)) ? (dbLo + dbHi) / 2
+                 : (!isNaN(dbHi) ? dbHi : (!isNaN(dbLo) ? dbLo : NaN));
+      if (isNaN(db)) continue;
+      const code = _noiseDbToCode(db);
+      if (code < 0) continue;
+      const geom = f.geometry;
+      const polys = geom?.type === 'Polygon'      ? [geom.coordinates]
+                  : geom?.type === 'MultiPolygon' ? geom.coordinates : [];
+      for (const poly of polys) {
+        const ring = poly[0];
+        let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
+        for (const pt of ring) {
+          if (pt[0]<minX) minX=pt[0]; if (pt[0]>maxX) maxX=pt[0];
+          if (pt[1]<minY) minY=pt[1]; if (pt[1]>maxY) maxY=pt[1];
+        }
+        _noiseFlatZones.push({ code, ring, minX, minY, maxX, maxY });
+      }
+    }
+    _noiseFlatZones.sort((a, b) => b.code - a.code); // highest dB first
+    _noiseGrid = _buildSpatialGrid(_noiseFlatZones, 500);
+  }
+
+  // Collect unprocessed buildings
+  const toProcess = [];
+  const newNis    = new Set();
+  for (const nis of nisCodes) {
+    const nisStr = String(nis);
+    if (!_noiseComputedNiscodes.has(nisStr)) {
+      const feats = _osmBuildingsCache.features.filter(f => String(f.properties.niscode) === nisStr);
+      toProcess.push(...feats);
+      newNis.add(nisStr);
+    }
+  }
+
+  const total = toProcess.length;
+  const CHUNK = 1000;
+  const nz    = _noiseFlatZones;
+  const ng    = _noiseGrid;
+
+  if (total > 0) {
+    if (progWrap) progWrap.style.display = 'block';
+    if (progFill) progFill.style.width = '0%';
+    if (progLbl)  progLbl.textContent = `0 / ${total} buildings…`;
+
+    await new Promise(resolve => {
+      let i = 0;
+      function next() {
+        const end = Math.min(i + CHUNK, total);
+        for (; i < end; i++) {
+          const feat = toProcess[i];
+          const geom = feat.geometry;
+          const ring0 = geom.type === 'Polygon'      ? geom.coordinates[0]
+                      : geom.type === 'MultiPolygon' ? geom.coordinates[0][0] : null;
+          if (!ring0) { feat.properties._nc = -1; continue; }
+          // Centroid
+          let cx=0, cy=0, n=ring0.length;
+          for (let k=0; k<n; k++) { cx+=ring0[k][0]; cy+=ring0[k][1]; }
+          cx/=n; cy/=n;
+          // Sample centroid + up to 8 evenly-spaced vertices for accuracy near zone edges
+          const samplePts = [_wgs84ToLambert(cx, cy)];
+          const vstep = Math.max(1, Math.floor((ring0.length - 1) / 8));
+          for (let k=0; k<ring0.length-1; k+=vstep) {
+            samplePts.push(_wgs84ToLambert(ring0[k][0], ring0[k][1]));
+          }
+          let nc = -1;
+          for (const [px, py] of samplePts) {
+            const candidates = _gridCandidates(ng, nz, px, py);
+            for (const zone of candidates) {
+              if (zone.code <= nc) continue;           // can't improve
+              if (px<zone.minX||px>zone.maxX||py<zone.minY||py>zone.maxY) continue;
+              if (_pip(px, py, zone.ring)) { nc = zone.code; break; }
+            }
+            if (nc === 5) break;                       // maximum noise code — stop early
+          }
+          feat.properties._nc = nc;
+        }
+        const pct = Math.round(i / total * 100);
+        if (progFill) progFill.style.width = pct + '%';
+        if (progLbl)  progLbl.textContent  = i >= total ? `${total} buildings mapped` : `${i} / ${total}…`;
+        if (i < total) setTimeout(next, 0);
+        else           resolve();
+      }
+      setTimeout(next, 0);
+    });
+  }
+
+  // Push updated GeoJSON + apply noise color expression per commune
+  for (const nis of nisCodes) {
+    const nisStr = String(nis);
+    const srcId  = `bld-${nisStr}`;
+    const lyrId  = `3d-buildings-${nisStr}`;
+    if (newNis.has(nisStr) && mlMap.getSource(srcId)) {
+      const feats = _osmBuildingsCache.features.filter(f => String(f.properties.niscode) === nisStr);
+      mlMap.getSource(srcId).setData({ type: 'FeatureCollection', features: feats });
+    }
+    if (mlMap.getLayer(lyrId)) {
+      mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', NOISE_COLOR_EXPR);
+    }
+    _noiseComputedNiscodes.add(nisStr);
+  }
+
+  bringHighlightToTop();
+  _noiseOverlayComputing = false;
+  if (btn) { btn.textContent = '⬡ Noise Map'; btn.disabled = false; btn.classList.add('active'); }
+
+  if (total > 0) {
+    setTimeout(() => { if (progWrap) progWrap.style.display = 'none'; }, 1200);
+  } else {
+    if (progWrap) progWrap.style.display = 'none';
+  }
+  renderSimPanel();
+}
+
+function refreshNoiseOverlayIfActive() {
+  if (!_noiseOverlay || !dtCommune) return;
+  _computeAndColorNoise([String(dtCommune)]);
 }
 
 async function toggleFloodOverlay() {
@@ -3526,7 +3966,10 @@ async function _computeAndColor(nisCodes) {
       const polys = geom?.type === 'Polygon'      ? [geom.coordinates]
                   : geom?.type === 'MultiPolygon' ? geom.coordinates : [];
       for (const poly of polys) {
-        const ring = poly[0];
+        // Simplify before storing: flood zones trace watercourses with thousands
+        // of vertices. 5 m tolerance (minDistSq=25) cuts them 20-100x while
+        // keeping accuracy well within building footprint size (≥5 m).
+        const ring = _simplifyRing(poly[0], 25);
         let minX=Infinity, minY=Infinity, maxX=-Infinity, maxY=-Infinity;
         for (const pt of ring) {
           if (pt[0]<minX) minX=pt[0]; if (pt[0]>maxX) maxX=pt[0];
@@ -3536,6 +3979,9 @@ async function _computeAndColor(nisCodes) {
       }
     }
     _floodFlatZones.sort((a, b) => b.code - a.code);
+    // 200 m grid cells (tighter than noise) — flood zones are contiguous large
+    // polygons so a smaller cell reduces candidates per lookup more aggressively.
+    _floodGrid = _buildSpatialGrid(_floodFlatZones, 200);
   }
 
   // Collect features that still need PIP computation (not yet tagged)
@@ -3551,33 +3997,45 @@ async function _computeAndColor(nisCodes) {
   }
 
   const total = toProcess.length;
-  const CHUNK = 200;
+  const CHUNK = 300;   // ~5–10 ms per tick so the UI stays interactive during load
   const fz    = _floodFlatZones;
+  const fg    = _floodGrid;
 
   if (total > 0) {
     if (progWrap) progWrap.style.display = 'block';
     if (progFill) progFill.style.width = '0%';
     if (progLbl)  progLbl.textContent = `0 / ${total} buildings…`;
 
+    // Direct chunk-based loop — yields to the event loop between chunks so the
+    // UI stays responsive. The spatial grid makes each chunk fast enough that
+    // the Worker postMessage serialisation overhead is not worth paying.
     await new Promise(resolve => {
       let i = 0;
       function next() {
         const end = Math.min(i + CHUNK, total);
         for (; i < end; i++) {
-          const feat = toProcess[i];
-          const geom = feat.geometry;
+          const feat  = toProcess[i];
+          const geom  = feat.geometry;
           const ring0 = geom.type === 'Polygon'      ? geom.coordinates[0]
                       : geom.type === 'MultiPolygon' ? geom.coordinates[0][0] : null;
           if (!ring0) { feat.properties._fc = -1; continue; }
-          let cx=0, cy=0, n=ring0.length;
-          for (let k=0; k<n; k++) { cx+=ring0[k][0]; cy+=ring0[k][1]; }
-          cx/=n; cy/=n;
-          const [lx, ly] = _wgs84ToLambert(cx, cy);
+          let cx = 0, cy = 0;
+          for (const pt of ring0) { cx += pt[0]; cy += pt[1]; }
+          cx /= ring0.length; cy /= ring0.length;
+          const samplePts = [_wgs84ToLambert(cx, cy)];
+          const vstep = Math.max(1, Math.floor((ring0.length - 1) / 8));
+          for (let k = 0; k < ring0.length - 1; k += vstep) {
+            samplePts.push(_wgs84ToLambert(ring0[k][0], ring0[k][1]));
+          }
           let fc = -1;
-          for (let z=0; z<fz.length; z++) {
-            const zone = fz[z];
-            if (lx<zone.minX||lx>zone.maxX||ly<zone.minY||ly>zone.maxY) continue;
-            if (_pip(lx, ly, zone.ring)) { fc = zone.code; break; }
+          for (const [px, py] of samplePts) {
+            const candidates = _gridCandidates(fg, fz, px, py);
+            for (const zone of candidates) {
+              if (zone.code <= fc) continue;
+              if (px < zone.minX || px > zone.maxX || py < zone.minY || py > zone.maxY) continue;
+              if (_pip(px, py, zone.ring)) { fc = zone.code; break; }
+            }
+            if (fc === 3) break;
           }
           feat.properties._fc = fc;
         }
@@ -3876,6 +4334,7 @@ function renderAssetCard() {
         + '</div>'
       + '</div>'
       + '<div class="ac2-header-right">'
+        + '<span class="ac2-badge ac2-badge-noise" id="ac2-badge-noise" title="Road noise (Lden)">· · ·</span>'
         + '<span class="ac2-badge ac2-badge-type" title="' + _escHtml(type) + '">' + _escHtml(_capitalise(type)) + '</span>'
         + '<button class="ac2-close" onclick="clearBuildingHighlight();renderSimPanel();" title="Deselect">✕</button>'
       + '</div>'
@@ -4045,8 +4504,8 @@ function _kickAssetFetches(lng, lat, ring) {
   // Always reverse-geocode: resolves address when OSM has none,
   // and also fetches building/POI name via Nominatim namedetails
   _fetchAddress(lng, lat);
-  _fetchFloodRisk(lng, lat);
-  _fetchNoiseLevel(lng, lat);
+  _fetchFloodRisk(lng, lat, ring);   // ring enables centroid+vertex PIP for accuracy
+  _fetchNoiseLevel(lng, lat, ring);  // ring enables centroid+vertex PIP for accuracy
   _fetchPermits(lng, lat);
   _fetchHeritage(lng, lat);
 }
@@ -4165,7 +4624,19 @@ function prefetchEnvData() {
    .catch(() => { _floodFetch = null; });
 }
 
-async function _fetchFloodRisk(lng, lat) {
+// Pre-fetch noise road Lden contour polygons for Brussels.
+// Dataset: wsl_bruenvi_noise_road_lden_21 — Lden (day-evening-night) road noise contours.
+function prefetchNoiseData() {
+  if (_noiseCache || _noiseFetch) return;
+  _noiseFetch = fetch(
+    'https://geodata.environnement.brussels/api/geodata/postgis/web_service/wsl_bruenvi_noise_road_lden_21/?format=json',
+    { signal: AbortSignal.timeout(25000) }
+  ).then(r => r.ok ? r.json() : null)
+   .then(d => { if (d && d.features && d.features.length > 0) _noiseCache = d; _noiseFetch = null; })
+   .catch(() => { _noiseFetch = null; });
+}
+
+async function _fetchFloodRisk(lng, lat, ring) {
   const chip = document.getElementById('ac2-chip-flood');
   if (!chip) return;
   chip.className = 'ac2-risk-chip pending';
@@ -4180,24 +4651,63 @@ async function _fetchFloodRisk(lng, lat) {
     }
     if (!_floodCache) throw new Error('no data');
 
-    const [lx, ly] = _wgs84ToLambert(lng, lat);
+    // Build the same centroid + sampled-vertex points used by the bulk overlay,
+    // so the asset-mode chip always matches the building's flood map colour.
+    const checkPts = [];
+    if (ring && ring.length >= 3) {
+      let cx = 0, cy = 0;
+      for (const pt of ring) { cx += pt[0]; cy += pt[1]; }
+      cx /= ring.length; cy /= ring.length;
+      checkPts.push(_wgs84ToLambert(cx, cy));           // centroid
+      const vstep = Math.max(1, Math.floor((ring.length - 1) / 8));
+      for (let k = 0; k < ring.length - 1; k += vstep) {
+        checkPts.push(_wgs84ToLambert(ring[k][0], ring[k][1]));
+      }
+    } else {
+      checkPts.push(_wgs84ToLambert(lng, lat));         // click point fallback
+    }
+    const [lx, ly] = checkPts[0];                      // centroid (for metadata display)
+
     let maxCode = -1;
     let matchedProps = null;
     const allZones = [];
 
-    for (const feat of (_floodCache.features || [])) {
-      const geom = feat.geometry;
-      const p    = feat.properties || {};
-      const code = parseInt(p.code_alea);
-      allZones.push({ code_alea: p.code_alea, legende_fr: p.legende_fr, legende_nl: p.legende_nl, legende_en: p.legende_en });
-      if (!geom) continue;
-      const polys = geom.type === 'Polygon'      ? [geom.coordinates]
-                  : geom.type === 'MultiPolygon' ? geom.coordinates : [];
-      for (const poly of polys) {
-        if (_pip(lx, ly, poly[0])) {
-          const c = isNaN(code) ? 0 : code;
-          if (c > maxCode) { maxCode = c; matchedProps = p; }
+    // If the spatial grid is available (flood overlay was already computed), use it
+    // for speed; otherwise iterate raw features.
+    if (_floodFlatZones && _floodFlatZones.length > 0) {
+      // Collect allZones metadata from raw cache
+      for (const feat of (_floodCache.features || [])) {
+        const p = feat.properties || {};
+        allZones.push({ code_alea: p.code_alea, legende_fr: p.legende_fr, legende_nl: p.legende_nl, legende_en: p.legende_en });
+      }
+      // PIP via pre-flattened zones + grid
+      for (const [px, py] of checkPts) {
+        const candidates = _gridCandidates(_floodGrid, _floodFlatZones, px, py);
+        for (const zone of candidates) {
+          if (zone.code <= maxCode) continue;
+          if (px < zone.minX || px > zone.maxX || py < zone.minY || py > zone.maxY) continue;
+          if (_pip(px, py, zone.ring)) { maxCode = zone.code; matchedProps = { code_alea: zone.code }; break; }
         }
+        if (maxCode === 3) break;
+      }
+    } else {
+      // Flat zones not yet built — iterate raw API features
+      for (const feat of (_floodCache.features || [])) {
+        const geom = feat.geometry;
+        const p    = feat.properties || {};
+        const code = parseInt(p.code_alea);
+        allZones.push({ code_alea: p.code_alea, legende_fr: p.legende_fr, legende_nl: p.legende_nl, legende_en: p.legende_en });
+        if (!geom) continue;
+        const polys = geom.type === 'Polygon'      ? [geom.coordinates]
+                    : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+        for (const poly of polys) {
+          const c = isNaN(code) ? 0 : code;
+          if (c <= maxCode) continue;
+          for (const [px, py] of checkPts) {
+            if (_pip(px, py, poly[0])) { maxCode = c; matchedProps = p; break; }
+          }
+        }
+        if (maxCode === 3) break;
       }
     }
 
@@ -4216,14 +4726,18 @@ async function _fetchFloodRisk(lng, lat) {
       nearbyWaterway: null,
     };
 
-    let label, cls;
-    if      (maxCode === 3) { cls='high'; label='High flood risk (T25)'; }
-    else if (maxCode === 2) { cls='mod';  label='Medium flood risk (T100)'; }
-    else if (maxCode === 1) { cls='low';  label='Low flood risk (T1000)'; }
-    else if (maxCode === 0) { cls='mod';  label='Groundwater risk'; }
-    else                    { cls='ok';   label='No flood zone'; }
+    let label, cls, causeSub;
+    if      (maxCode === 3) { cls='high'; label='High flood risk (T25)';   causeSub='1-in-25 yr zone · highest hazard'; }
+    else if (maxCode === 2) { cls='mod';  label='Medium flood risk (T100)'; causeSub='1-in-100 yr zone · significant hazard'; }
+    else if (maxCode === 1) { cls='low';  label='Low flood risk (T1000)';   causeSub='1-in-1000 yr zone · outer boundary'; }
+    else if (maxCode === 0) { cls='mod';  label='Groundwater risk';          causeSub='Saturated subsoil · water table'; }
+    else                    { cls='ok';   label='No flood zone';             causeSub=''; }
     chip.className = 'ac2-risk-chip ' + cls + ' clickable';
-    chip.innerHTML = '<span class="ac2-rc-dot"></span>' + label + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+      + '<span style="display:block">' + label + '</span>'
+      + (causeSub ? '<span class="ac2-rc-sub">' + causeSub + '</span>' : '')
+      + '</span>'
+      + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
     chip.onclick = () => openRiskMeta('flood');
 
     // Fire async waterway proximity check — updates meta + chip note
@@ -4286,25 +4800,32 @@ async function _checkNearbyWaterway(lng, lat, currentCls) {
     if (noOfficialRisk && weight >= 2) {
       // Near river or canal, no official zone — upgrade to amber informal-risk chip
       chip.className = 'ac2-risk-chip low clickable';
-      chip.innerHTML = `<span class="ac2-rc-dot"></span>Near ${wlabel}`
-                     + `<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>`;
+      chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+        + `<span style="display:block">Near ${wlabel}</span>`
+        + `<span class="ac2-rc-sub">Within 150 m — informal flood exposure</span>`
+        + '</span>'
+        + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
       if (_floodMeta) {
         _floodMeta.upgradedByWaterway = true;
         _floodMeta.upgradedLabel = `Near ${wlabel}`;
       }
     } else {
-      // Has official zone, or minor waterway — add a compact proximity note to existing chip
-      const stripped = chip.innerHTML
-        .replace(/<span[^>]*>ⓘ<\/span>/g, '')
-        .replace(/<span[^>]*style="opacity[^"]*"[^>]*>[^<]*<\/span>/g, '');
-      chip.innerHTML = stripped
-        + `<span style="opacity:0.5;font-size:0.6rem;margin-left:0.3rem">~ ${wlabel}</span>`
-        + `<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>`;
+      // Has official zone + waterway nearby — append waterway as secondary cause line
+      // Rebuild chip cleanly rather than string-patching the existing HTML
+      const existingLabel = chip.querySelector('span[style*="display:block"]');
+      const existingCause = chip.querySelector('.ac2-rc-sub');
+      const labelText = existingLabel ? existingLabel.textContent : chip.textContent.replace('ⓘ','').trim();
+      const causeText = (existingCause ? existingCause.textContent + ' · ' : '') + `${wlabel} nearby`;
+      chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+        + `<span style="display:block">${labelText}</span>`
+        + `<span class="ac2-rc-sub">${causeText}</span>`
+        + '</span>'
+        + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
     }
   } catch(e) { /* silent */ }
 }
 
-async function _fetchNoiseLevel(lng, lat) {
+async function _fetchNoiseLevel(lng, lat, ring) {
   const chip   = document.getElementById('ac2-chip-noise');
   const detail = document.getElementById('ac2-noise-detail');
   if (!chip) return;
@@ -4313,6 +4834,23 @@ async function _fetchNoiseLevel(lng, lat) {
   chip.onclick = null;
   _noiseMeta = null;
 
+  // Build centroid + sampled vertices — same points as the bulk noise overlay
+  // so the chip always matches the building colour.
+  const checkPts = [];
+  if (ring && ring.length >= 3) {
+    let cx = 0, cy = 0;
+    for (const pt of ring) { cx += pt[0]; cy += pt[1]; }
+    cx /= ring.length; cy /= ring.length;
+    checkPts.push(_wgs84ToLambert(cx, cy));
+    const vstep = Math.max(1, Math.floor((ring.length - 1) / 8));
+    for (let k = 0; k < ring.length - 1; k += vstep) {
+      checkPts.push(_wgs84ToLambert(ring[k][0], ring[k][1]));
+    }
+  } else {
+    checkPts.push(_wgs84ToLambert(lng, lat));
+  }
+  const [lx, ly] = checkPts[0];
+
   let noiseDb = null;
   let noiseSrc = null;
   let noiseMatchedProps = null;
@@ -4320,35 +4858,60 @@ async function _fetchNoiseLevel(lng, lat) {
   let noiseBbox = null;
 
   try {
-    // Request a ~300 m bbox around the clicked point in Lambert 31370
-    const [lx, ly] = _wgs84ToLambert(lng, lat);
-    const M  = 300;
-    noiseBbox = `${Math.round(lx-M)},${Math.round(ly-M)},${Math.round(lx+M)},${Math.round(ly+M)}`;
-    const url = 'https://geodata.environnement.brussels/api/geodata/postgis/web_service/'
-              + `wsl_bruenvi_noise_road_lden_21/?format=json&in_bbox=${noiseBbox}`;
-    const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
-    if (!r.ok) throw new Error('HTTP ' + r.status);
-    const data = await r.json();
-    const feats = data.features || [];
-    noiseBboxFeatCount = feats.length;
-    // If the API returned too many features, bbox filtering didn't work — skip
-    if (feats.length > 0 && feats.length <= 500) {
-      for (const feat of feats) {
-        const geom = feat.geometry;
-        if (!geom) continue;
-        const polys = geom.type === 'Polygon'      ? [geom.coordinates]
-                    : geom.type === 'MultiPolygon' ? geom.coordinates : [];
-        for (const poly of polys) {
-          if (_pip(lx, ly, poly[0])) {
-            const p  = feat.properties || {};
-            noiseDb  = parseFloat(p.db_lo || p.db_hi || p.DN || 0);
-            if (p.db_lo != null) noiseDb = (parseFloat(p.db_lo) + parseFloat(p.db_hi)) / 2;
-            noiseMatchedProps = p;
-            noiseSrc = 'API (point-in-polygon)';
-            break;
-          }
+    // Fast path: if the bulk noise overlay has already been computed, use the
+    // pre-flattened zones + spatial grid for an instant, consistent result.
+    if (_noiseFlatZones && _noiseFlatZones.length > 0) {
+      let bestCode = -1;
+      for (const [px, py] of checkPts) {
+        const candidates = _gridCandidates(_noiseGrid, _noiseFlatZones, px, py);
+        for (const zone of candidates) {
+          if (zone.code <= bestCode) continue;
+          if (px < zone.minX || px > zone.maxX || py < zone.minY || py > zone.maxY) continue;
+          if (_pip(px, py, zone.ring)) { bestCode = zone.code; break; }
         }
-        if (noiseDb != null) break;
+        if (bestCode === 5) break;
+      }
+      if (bestCode >= 0) {
+        // Convert code back to approximate midpoint dB for display
+        const DB_MID = { 5: 72, 4: 67, 3: 62, 2: 57, 1: 50, 0: 40 };
+        noiseDb = DB_MID[bestCode] ?? null;
+        noiseSrc = 'Pre-computed (noise overlay)';
+        noiseMatchedProps = { db_lo: noiseDb, db_hi: noiseDb, source: 'noise overlay cache' };
+      }
+    }
+
+    // Slow path: fetch via bbox API (used when bulk overlay hasn't been run yet)
+    if (noiseDb == null) {
+      const M  = 300;
+      noiseBbox = `${Math.round(lx-M)},${Math.round(ly-M)},${Math.round(lx+M)},${Math.round(ly+M)}`;
+      const url = 'https://geodata.environnement.brussels/api/geodata/postgis/web_service/'
+                + `wsl_bruenvi_noise_road_lden_21/?format=json&in_bbox=${noiseBbox}`;
+      const r = await fetch(url, { signal: AbortSignal.timeout(10000) });
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      const data = await r.json();
+      const feats = data.features || [];
+      noiseBboxFeatCount = feats.length;
+      if (feats.length > 0 && feats.length <= 500) {
+        for (const feat of feats) {
+          const geom = feat.geometry;
+          if (!geom) continue;
+          const polys = geom.type === 'Polygon'      ? [geom.coordinates]
+                      : geom.type === 'MultiPolygon' ? geom.coordinates : [];
+          for (const poly of polys) {
+            for (const [px, py] of checkPts) {
+              if (_pip(px, py, poly[0])) {
+                const p = feat.properties || {};
+                noiseDb = parseFloat(p.db_lo || p.db_hi || p.DN || 0);
+                if (p.db_lo != null) noiseDb = (parseFloat(p.db_lo) + parseFloat(p.db_hi)) / 2;
+                noiseMatchedProps = p;
+                noiseSrc = 'API (centroid+vertex PIP)';
+                break;
+              }
+            }
+            if (noiseDb != null) break;
+          }
+          if (noiseDb != null) break;
+        }
       }
     }
   } catch(e) {}
@@ -4377,20 +4940,49 @@ async function _fetchNoiseLevel(lng, lat) {
   };
 
   if (noiseDb != null) {
-    const db    = Math.round(noiseDb);
-    const level = db >= 65 ? 'high' : db >= 55 ? 'mod' : 'low';
-    const label = db >= 65 ? 'High noise' : db >= 55 ? 'Moderate noise' : 'Quiet area';
+    const db       = Math.round(noiseDb);
+    const level    = db >= 65 ? 'high' : db >= 55 ? 'mod' : 'low';
+    const label    = db >= 65 ? 'High noise' : db >= 55 ? 'Moderate noise' : 'Quiet area';
+    const causeSub = db >= 65 ? `Road traffic · ${db} dB(A) Lden · health risk`
+                   : db >= 55 ? `Road traffic · ${db} dB(A) Lden · above WHO guideline`
+                   :            `Road traffic · ${db} dB(A) Lden · below threshold`;
     chip.className = 'ac2-risk-chip ' + level + ' clickable';
-    chip.innerHTML = '<span class="ac2-rc-dot"></span>' + label + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.25rem">ⓘ</span>';
+    chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+      + '<span style="display:block">' + label + '</span>'
+      + '<span class="ac2-rc-sub">' + causeSub + '</span>'
+      + '</span>'
+      + '<span style="opacity:0.5;font-size:0.58rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
     chip.onclick = () => openRiskMeta('noise');
     if (detail) detail.innerHTML =
       '<div class="ac2-data-row" style="margin-top:0.3rem">'
       + '<span class="ac2-d-label">Road noise (Lden)</span>'
       + '<span class="ac2-d-val">' + db + ' dB(A)</span>'
       + '</div>';
+    // ── Update header badge with noise level colour ────────────────────
+    const badge = document.getElementById('ac2-badge-noise');
+    if (badge) {
+      const badgeStyle = db >= 70
+        ? { bg:'rgba(200,40,40,0.16)',   border:'rgba(200,40,40,0.50)',   color:'#c82828' }  // ≥70 very loud
+        : db >= 65
+        ? { bg:'rgba(232,80,32,0.15)',   border:'rgba(232,80,32,0.48)',   color:'#e85020' }  // 65–70 loud
+        : db >= 60
+        ? { bg:'rgba(232,160,32,0.15)',  border:'rgba(232,160,32,0.48)',  color:'#e8a020' }  // 60–65 moderate-high
+        : db >= 55
+        ? { bg:'rgba(200,200,32,0.15)',  border:'rgba(200,200,32,0.48)',  color:'#c8c820' }  // 55–60 moderate
+        : db >= 45
+        ? { bg:'rgba(96,200,64,0.14)',   border:'rgba(96,200,64,0.42)',   color:'#60c840' }  // 45–55 low
+        : { bg:'rgba(40,156,80,0.14)',   border:'rgba(40,156,80,0.40)',   color:'#289c50' }; // <45 quiet
+      badge.textContent = db + ' dB';
+      badge.title       = label + ' — ' + db + ' dB(A) Lden';
+      badge.style.background  = badgeStyle.bg;
+      badge.style.borderColor = badgeStyle.border;
+      badge.style.color       = badgeStyle.color;
+    }
   } else {
     chip.className = 'ac2-risk-chip pending';
     chip.innerHTML = '<span class="ac2-rc-dot"></span>Noise: unavailable';
+    const badge = document.getElementById('ac2-badge-noise');
+    if (badge) { badge.textContent = 'No data'; badge.title = 'Noise data unavailable'; }
   }
 }
 
@@ -4464,10 +5056,50 @@ function openRiskMeta(type) {
       </div>
     </div>`;
 
-    // ── 2. What this means (plain language) ───────────────────────────
+    // ── 2. Primary Cause — what specifically puts this building at risk ────
+    html += sec('Primary Cause');
+    if (wasUpgraded) {
+      const wwType = (ww?.type || 'waterway').toLowerCase();
+      const wwName = ww?.name ? ` (${ww.name})` : '';
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Proximity to a ${wwType}${wwName}.</strong>
+        This building is not within any officially mapped flood hazard polygon, but lies within ${ww?.radius||150} m of a ${wwType}. Rivers and canals can overflow during heavy precipitation, drainage system failures, and high-water events — risks that official zone boundaries do not always capture.
+        The ${wwType} was identified via OpenStreetMap. This represents informal flood exposure rather than an official designation.
+      </div>`;
+    } else if (meta.resultCode === 3) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Official T25 flood hazard zone.</strong>
+        A T25 return period means this area is expected to flood on average once every 25 years — roughly a 90 % probability over a 60-year building lifetime. These zones follow the lowest-lying terrain along the Senne, Maelbeek, Woluwe, and the Brussels–Charleroi canal. The boundary is set by Brussels Environment based on hydraulic modelling of watercourse capacity.
+        ${ww ? `A ${(ww.type||'waterway').toLowerCase()}${ww.name ? ' (' + ww.name + ')' : ''} was also detected within ${ww.radius||150} m — likely the direct source of the mapped risk.` : ''}
+      </div>`;
+    } else if (meta.resultCode === 2) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Official T100 flood hazard zone.</strong>
+        A 1-in-100 year event has roughly a 45 % probability of occurring over a 60-year period. Risk rises with climate-related rainfall intensification. The zone boundary is defined by Brussels Environment hydraulic modelling.
+        ${ww ? `A ${(ww.type||'waterway').toLowerCase()}${ww.name ? ' (' + ww.name + ')' : ''} was also detected within ${ww.radius||150} m.` : ''}
+      </div>`;
+    } else if (meta.resultCode === 1) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Official T1000 flood hazard zone — outer boundary.</strong>
+        The 1-in-1000 year zone represents the statistical outer limit of official hazard mapping. Risk is real but infrequent under current rainfall patterns. Extreme climate events can shift effective frequency upward over time.
+        ${ww ? `A ${(ww.type||'waterway').toLowerCase()}${ww.name ? ' (' + ww.name + ')' : ''} was detected within ${ww.radius||150} m.` : ''}
+      </div>`;
+    } else if (meta.resultCode === 0) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Groundwater flood hazard zone.</strong>
+        This risk is caused by rising water tables (phreatic flooding) rather than surface watercourse overflow. Brussels's clay-heavy soils retain saturation after prolonged or intense rainfall, pushing groundwater into basements and foundations. This hazard is widespread in lower-lying parts of the city and is mapped separately from surface water zones by Brussels Environment.
+      </div>`;
+    } else {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">No identified flood cause.</strong>
+        This building does not fall within any of the four official hazard levels (T25, T100, T1000, groundwater) and no significant waterway was detected within 150 m. Based on available data, there is no mapped flood risk at this location.
+      </div>`;
+    }
+
+    // ── 3. What this means (context) ──────────────────────────────────
     html += sec('What This Means');
     if (wasUpgraded) {
-      html += `<div class="rmp-plain-text">This building is not within any official flood hazard polygon. However, it is within ${ww?.radius||150} m of a mapped ${(ww?.type||'waterway').toLowerCase()}${ww?.name ? ' (' + ww.name + ')' : ''}. Buildings near rivers and canals face informal flood exposure from overflow during heavy rain, drainage system failures, and high-water events — risks not always captured by official zone boundaries.</div>`;
+      html += `<div class="rmp-plain-text">Buildings near rivers and canals face informal flood exposure from overflow during heavy rain, drainage system failures, and high-water events — risks not always captured by official zone boundaries.</div>`;
     } else {
       html += `<div class="rmp-plain-text">${zd.meaning}</div>`;
     }
@@ -4532,45 +5164,108 @@ function openRiskMeta(type) {
     </div>`;
 
   } else {
-    titleEl.textContent = 'Road Noise — Data';
+    titleEl.textContent = 'Noise Risk Assessment';
     const dbVal = meta.resultDb;
-    const cls   = dbVal != null ? (dbVal >= 65 ? 'hi' : dbVal >= 55 ? 'mod' : 'ok') : '';
-    const lvlDesc = dbVal == null ? '—'
-      : dbVal >= 65 ? 'High — significant sleep/health risk'
-      : dbVal >= 55 ? 'Moderate — noticeable, above WHO guideline'
-      : 'Low — within comfortable range';
+    const dispCls    = dbVal == null ? 'ok'  : dbVal >= 65 ? 'hi' : dbVal >= 55 ? 'mod' : 'ok';
+    const dispVerdict= dbVal == null ? 'No noise data available'
+                     : dbVal >= 65   ? 'High road noise — health risk'
+                     : dbVal >= 55   ? 'Moderate road noise — above WHO guideline'
+                     :                 'Low road noise — within comfortable range';
+    const dispSub    = dbVal == null ? 'No noise contour data matched this location.'
+                     : `Lden ${dbVal} dB(A) · day-evening-night weighted road traffic noise`;
+    const dispIcon   = dbVal == null ? '⬤' : dbVal >= 65 ? '⬤' : dbVal >= 55 ? '⬤' : '⬤';
+    const iconColor  = dispCls === 'hi' ? '#f95c7a' : dispCls === 'mod' ? '#f9c93a' : '#3af9a0';
 
-    html += sec('Assessment');
-    html += row('Road noise (Lden)', dbVal != null ? `${dbVal} dB(A)` : 'No data available', cls);
-    if (dbVal != null) html += `<div style="font-size:0.68rem;color:var(--text-dim);padding:0.2rem 0 0.5rem;line-height:1.6;">${lvlDesc}</div>`;
-    html += row('Data source', meta.source);
+    // ── 1. Verdict banner ─────────────────────────────────────────────
+    html += `<div class="rmp-verdict ${dispCls}">
+      <span class="rmp-verdict-icon" style="color:${iconColor}">${dispIcon}</span>
+      <div>
+        <div class="rmp-verdict-label">${dispVerdict}</div>
+        <div class="rmp-verdict-sub">${dispSub}</div>
+      </div>
+    </div>`;
 
-    if (meta.matchedProps) {
-      html += sec('Raw Feature Values');
-      const mp = meta.matchedProps;
-      if (mp.db_lo != null) html += row('Band lower (db_lo)', `${mp.db_lo} dB(A)`);
-      if (mp.db_hi != null) html += row('Band upper (db_hi)', `${mp.db_hi} dB(A)`);
-      if (mp.DN != null)    html += row('DN value', mp.DN);
-      const skip = ['db_lo','db_hi','DN','source'];
-      const extra = Object.entries(mp).filter(([k]) => !skip.includes(k));
-      if (extra.length) extra.forEach(([k,v]) => { html += row(k, String(v)); });
+    // ── 2. Primary Cause ──────────────────────────────────────────────
+    html += sec('Primary Cause');
+    if (dbVal == null) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">No noise contour matched this location.</strong>
+        The Brussels Environment road noise dataset (wsl_bruenvi_noise_road_lden_21) did not return a matching polygon for this building. The building may lie outside all mapped noise contours — typically areas with very low traffic exposure. Commune-level fallback data was also unavailable.
+      </div>`;
+    } else if (dbVal >= 65) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Road traffic — sustained high exposure.</strong>
+        This building is mapped within a noise contour of ${dbVal} dB(A) Lden. At this level, road traffic noise is the dominant environmental stressor. Lden accounts for the greater sensitivity of people during evening (+5 dB penalty) and night (+10 dB penalty) hours, so ${dbVal} dB represents a weighted average across the full 24-hour cycle. Proximity to primary roads, ring roads, or high-frequency urban routes is the primary driver.
+      </div>`;
+    } else if (dbVal >= 55) {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Road traffic — moderate exposure.</strong>
+        This building is mapped within a ${dbVal} dB(A) Lden contour. Noise at this level is noticeable and exceeds the WHO recommended guideline of 53 dB Lden for road traffic. The source is road traffic on nearby streets, with the evening and night weighting applied. Buildings in this range typically experience some sleep disruption and elevated annoyance.
+      </div>`;
+    } else {
+      html += `<div class="rmp-plain-text">
+        <strong style="color:var(--text)">Road traffic — low exposure.</strong>
+        This building is mapped at ${dbVal} dB(A) Lden, within the quieter end of the Brussels noise map. This level is below the 55 dB threshold used in Brussels's noise action plans and close to the WHO recommended limit of 53 dB. Road traffic is still the source, but volume and proximity are relatively low.
+      </div>`;
     }
 
-    html += sec('Query Details');
-    html += row('Coordinates (lat, lon)', meta.wgs84);
-    html += row('Lambert bbox used (±300 m)', meta.bboxUsed);
-    html += row('Features in bbox', meta.featuresInBbox);
+    // ── 3. What this means ────────────────────────────────────────────
+    html += sec('What This Means');
+    if (dbVal == null) {
+      html += `<div class="rmp-plain-text">No mapped noise exposure was found. This may indicate a genuinely quiet location or a data gap in the Brussels Environment contour dataset.</div>`;
+    } else if (dbVal >= 65) {
+      html += `<div class="rmp-plain-text">Chronic exposure above 65 dB(A) Lden is associated with increased cardiovascular risk, persistent sleep disturbance, and reduced cognitive performance in children (WHO Environmental Noise Guidelines, 2018). Façade insulation, double glazing, and acoustic screening are standard mitigations for buildings in this range.</div>`;
+    } else if (dbVal >= 55) {
+      html += `<div class="rmp-plain-text">Exposure between 55–65 dB(A) Lden causes annoyance, intermittent sleep disturbance, and reduced quality of life — particularly for bedroom-facing façades toward the noise source. Brussels's noise action plans prioritise mitigation in this band.</div>`;
+    } else {
+      html += `<div class="rmp-plain-text">Noise below 55 dB(A) Lden is generally considered acceptable for residential use. Light traffic noise may still be perceptible in quiet conditions but is unlikely to cause significant health impacts under standard exposure assumptions.</div>`;
+    }
 
-    html += sec('Dataset');
-    html += row('Name', meta.dataset);
+    // ── 4. Practical guidance ─────────────────────────────────────────
+    if (dbVal != null) {
+      const advice = dbVal >= 65
+        ? 'Acoustic assessment recommended for any renovation or planning application. Consider noise-insulating glazing (Rw ≥ 35 dB), ventilation with acoustic attenuation, and positioning of sleeping rooms on the quieter façade. Flag in environmental impact reviews.'
+        : dbVal >= 55
+        ? 'Worth noting in renovation plans. Upgraded glazing and improved façade sealing are cost-effective measures. Commune noise action plans may offer subsidy schemes for affected properties.'
+        : 'No acoustic intervention required under current noise guidelines. Standard glazing and ventilation are sufficient.';
+      html += `<div class="rmp-plain-text" style="font-size:0.64rem;border-top:1px solid var(--border);padding-top:0.45rem;margin-top:0;">${advice}</div>`;
+    }
+
+    // ── 5. Noise level reference ──────────────────────────────────────
+    html += sec('Noise Levels — Reference');
+    [
+      { min: 70, label: '≥ 70 dB(A)',  sub: 'Very loud — major road / motorway proximity', cls: 'hi'  },
+      { min: 65, label: '65–70 dB(A)', sub: 'Loud — significant health risk threshold',    cls: 'hi'  },
+      { min: 60, label: '60–65 dB(A)', sub: 'Moderate-high — noticeable disruption',       cls: 'mod' },
+      { min: 55, label: '55–60 dB(A)', sub: 'Moderate — above WHO guideline (53 dB)',      cls: 'mod' },
+      { min: 45, label: '45–55 dB(A)', sub: 'Low — within acceptable range',               cls: 'low' },
+      { min:  0, label: '< 45 dB(A)',  sub: 'Very quiet — minimal traffic exposure',       cls: 'ok'  },
+    ].forEach(z => {
+      const isMatch = dbVal != null && dbVal >= z.min && (z.min === 70 ? true : dbVal < z.min + (z.min === 65 ? 5 : z.min === 60 ? 5 : z.min === 55 ? 5 : z.min === 45 ? 10 : 45));
+      html += `<div class="rmp-row" style="${isMatch ? 'background:rgba(255,255,255,0.04);border-radius:4px;' : ''}">
+        <span class="rmp-k" style="${isMatch ? 'font-weight:700;color:var(--text)' : ''}">${z.label}</span>
+        <span class="rmp-v ${z.cls}" style="${isMatch ? 'font-weight:800' : 'opacity:0.55'}">${z.sub}${isMatch ? ' ◀' : ''}</span>
+      </div>`;
+    });
+
+    // ── 6. Technical details ──────────────────────────────────────────
+    html += sec('Technical Details');
+    html += row('Coordinates (WGS84)', meta.wgs84);
+    html += row('Data source', meta.source);
+    html += row('Dataset', meta.dataset);
     html += row('Indicator', 'Lden — day-evening-night weighted road noise');
     html += row('Publisher', 'Brussels Environment (Leefmilieu Brussel)');
+    if (meta.matchedProps) {
+      const mp = meta.matchedProps;
+      if (mp.db_lo != null && mp.db_hi != null && mp.db_lo !== mp.db_hi)
+        html += row('Contour band', `${mp.db_lo}–${mp.db_hi} dB(A)`);
+    }
 
     html += `<div class="rmp-note">
-      <strong style="color:var(--text)">How Lden works:</strong> EU standard noise metric weighted
-      +5 dB for evening (19–23h) and +10 dB for night (23–7h) relative to daytime levels.
-      WHO guideline: &lt;53 dB Lden for road traffic noise. Brussels threshold:
-      &lt;55 dB quiet · 55–65 dB moderate · &gt;65 dB high (health risk).
+      <strong style="color:var(--text)">How Lden works:</strong> EU standard noise metric (END Directive 2002/49/EC) weighted
+      +5 dB for evening (19–23 h) and +10 dB for night (23–7 h) relative to daytime levels.
+      WHO guideline: &lt;53 dB Lden for road traffic noise. Brussels action plan threshold: 55 dB.
+      Data: Brussels Environment 2021 strategic noise map — road traffic only. Rail, air, and industrial noise are mapped separately.
     </div>`;
   }
 
@@ -4781,8 +5476,37 @@ function renderSimPanel() {
     </div>`;
   })();
 
+  // ── Noise map legend (right panel) — shown only when overlay is active ────────
+  const _noiseLegendHtml = (() => {
+    if (!_noiseOverlay) return '';
+    const C = NOISE_MAP_COLORS;
+    let label = '';
+    if (_showAllBuildings) {
+      label = 'All communes';
+    } else {
+      const nis = dtCommune || selectedDistrict;
+      const d   = nis && DISTRICTS.find(dd => String(dd.niscode) === String(nis));
+      if (d) label = d.name;
+    }
+    return `<div id="noise-sim-legend">
+      <div class="fsl-header">
+        <span class="fsl-title">Road Noise (Lden)</span>
+        ${label ? `<span class="fsl-commune">${label}</span>` : ''}
+      </div>
+      <div class="fsl-rows">
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[5]}"></span>≥ 70 dB — Very loud</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[4]}"></span>65–70 dB — Loud</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[3]}"></span>60–65 dB — Moderate</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[2]}"></span>55–60 dB — Low</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[1]}"></span>45–55 dB — Quiet</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C[0]}"></span>&lt; 45 dB — Very quiet</div>
+        <div class="fsl-row"><span class="fsl-dot" style="background:${C['-1']}"></span>No data</div>
+      </div>
+    </div>`;
+  })();
+
   // Commune view (or asset mode with nothing selected)
-  pane.innerHTML = _floodLegendHtml + (assetMode ? renderAssetCard() : '')
+  pane.innerHTML = _floodLegendHtml + _noiseLegendHtml + (assetMode ? renderAssetCard() : '')
     + '<div class="dt-spotlight">' + spotHtml + '</div>'
     + '<div class="dt-status-strip"><div class="dt-metric-label" style="margin-bottom:0.35rem">BCR — ' + ch.label + '</div><div class="dt-status-counts">' + statusHtml + '</div></div>';
 }
