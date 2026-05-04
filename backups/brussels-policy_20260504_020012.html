@@ -715,8 +715,6 @@ input[type=range].whatif-slider {
 .ac2-section:last-child { border-bottom: none; }
 .ac2-section-hdr { display: flex; align-items: center; gap: 0.4rem; padding: 0.52rem 1rem; cursor: pointer; user-select: none; transition: background 0.1s; }
 .ac2-section-hdr:hover { background: var(--surface2); }
-.ac2-section-hdr.ac2-hdr-disabled { pointer-events: none; cursor: default; opacity: 0.32; }
-.ac2-section-hdr.ac2-hdr-disabled:hover { background: transparent; }
 .ac2-s-icon { font-size: 0.88rem; color: var(--accent); width: 1rem; text-align: center; flex-shrink: 0; }
 .ac2-s-label { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-sub); flex: 1; }
 .ac2-s-sub { font-size: 0.59rem; color: var(--text-dim); }
@@ -2524,8 +2522,6 @@ function showSourcesInfo() {
         <span class="src-tag">Building use types</span>
         <span class="src-tag">Building height &amp; floor count</span>
         <span class="src-tag">Live asset selection layer</span>
-        <span class="src-tag">Address lookup (Nominatim fallback)</span>
-        <span class="src-tag">Waterway proximity detection</span>
       </div>
     </div>
     <div class="src-entry">
@@ -2556,29 +2552,9 @@ function showSourcesInfo() {
         <a class="src-url" href="https://environnement.brussels" target="_blank" rel="noopener">environnement.brussels ↗</a>
       </div>
       <div class="src-tags">
-        <span class="src-tag">Flood hazard zones — alea contour (GeoJSON API)</span>
-        <span class="src-tag">Road traffic noise — Lden contours 2021 (GeoJSON API)</span>
-        <span class="src-tag">Per-building noise &amp; flood risk (point-in-polygon)</span>
-      </div>
-    </div>
-    <div class="src-entry">
-      <div class="src-entry-hdr">
-        <span class="src-institution">CARTO</span>
-        <a class="src-url" href="https://carto.com" target="_blank" rel="noopener">carto.com ↗</a>
-      </div>
-      <div class="src-tags">
-        <span class="src-tag">Dark basemap tiles — 2D choropleth view</span>
-        <span class="src-tag">Dark Matter GL style — 3D digital twin view</span>
-      </div>
-    </div>
-    <div class="src-entry">
-      <div class="src-entry-hdr">
-        <span class="src-institution">Esri / ArcGIS Online</span>
-        <a class="src-url" href="https://www.esri.com" target="_blank" rel="noopener">esri.com ↗</a>
-      </div>
-      <div class="src-tags">
-        <span class="src-tag">World Imagery satellite tiles</span>
-        <span class="src-tag">Satellite basemap option</span>
+        <span class="src-tag">Flood hazard zones (WMS GetFeatureInfo)</span>
+        <span class="src-tag">Traffic noise exposure — Lden (dB)</span>
+        <span class="src-tag">Night-time noise — Ln (dB)</span>
       </div>
     </div>`;
   document.getElementById('modal-overlay').style.display = 'flex';
@@ -4525,12 +4501,12 @@ function renderAssetCard() {
       + '</div>'
     + '</div>'
 
-    // Heritage — header disabled (coming soon)
-    + '<div class="ac2-section collapsed" id="ac2-sec-heritage">'
-      + '<div class="ac2-section-hdr ac2-hdr-disabled">'
+    // Heritage
+    + '<div class="ac2-section' + sv('heritage') + '" id="ac2-sec-heritage">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'heritage\')">'
         + '<span class="ac2-s-icon" style="color:#e8c84a">⬡</span>'
         + '<span class="ac2-s-label">Heritage</span>'
-        + '<span style="font-size:0.55rem;color:var(--text-dim);letter-spacing:0.06em;margin-left:0.3rem;text-transform:uppercase">Unavailable</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
       + '</div>'
       + '<div class="ac2-section-body" id="ac2-heritage-body">'
         + '<div class="ac2-loading"><div class="ac2-spinner"></div>Checking register…</div>'
