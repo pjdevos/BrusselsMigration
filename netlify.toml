@@ -1,0 +1,8 @@
+[build]
+  command   = "npm run build || true"
+  publish   = "."
+
+[[redirects]]
+  from   = "/"
+  to     = "/brussels-policy.html"
+  status = 200
