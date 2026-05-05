@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "node scripts/prepare-data.mjs",
+    "build": "node scripts/prepare-data.mjs && node scripts/prepare-permits.mjs && node scripts/prepare-buildings.mjs",
+    "build:buildings": "node scripts/prepare-buildings.mjs",
+    "geocode:permits": "node scripts/geocode-permits.mjs",
+    "translate:permits": "node scripts/translate-permits.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

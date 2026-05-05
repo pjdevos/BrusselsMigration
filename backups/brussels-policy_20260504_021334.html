@@ -275,11 +275,11 @@ body.right-collapsed .right-panel { width: 0; border-left-color: transparent; }
   background: var(--surface2);
 }
 .tab-btn {
-  flex: 1; padding: 0.55rem 0.3rem;
-  font-family: var(--sans); font-size: 0.63rem; font-weight: 700;
+  flex: 1; padding: 0.75rem 0.5rem;
+  font-family: var(--sans); font-size: 0.78rem; font-weight: 700;
   color: var(--text-dim); background: transparent;
   border: none; border-bottom: 2px solid transparent;
-  cursor: pointer; letter-spacing: 0.04em; text-transform: uppercase;
+  cursor: pointer; letter-spacing: 0.06em; text-transform: uppercase;
   transition: color 0.12s, border-color 0.12s;
 }
 .tab-btn:hover  { color: var(--text); }
@@ -620,9 +620,8 @@ input[type=range].whatif-slider {
   display: flex; flex-direction: column; gap: 0.45rem; align-items: stretch;
 }
 /* 3D mode button row — hidden until dtMode=true */
-#bld-mode-row { display: none; flex-direction: column; align-items: flex-start; gap: 0.35rem; }
-.bld-top-row { display: flex; flex-direction: row; align-items: flex-start; gap: 0.45rem; }
-.bld-controls-col { display: flex; flex-direction: row; gap: 0.45rem; }
+#bld-mode-row { display: none; flex-direction: row; align-items: flex-start; gap: 0.45rem; }
+.bld-controls-col { display: flex; flex-direction: column; gap: 0.35rem; }
 /* Shared button base — visible by default since parent row controls visibility */
 .bld-all-btn {
   font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
@@ -637,9 +636,6 @@ input[type=range].whatif-slider {
 .asset-mode-btn { background: rgba(232,200,74,0.22); border-color: rgba(232,200,74,0.6); color: #e8c84a; }
 .asset-mode-btn:hover { background: rgba(232,200,74,0.35); border-color: rgba(232,200,74,0.85); color: #e8c84a; }
 .asset-mode-btn.active { background: #e8c84a; border-color: #e8c84a; color: #070b13; }
-.permits-btn { background: rgba(168,85,247,0.15); border-color: rgba(168,85,247,0.55); color: #c084fc; }
-.permits-btn:hover { background: rgba(168,85,247,0.28); border-color: rgba(168,85,247,0.85); color: #c084fc; }
-.permits-btn.active { background: #a855f7; border-color: #a855f7; color: #fff; }
 .flood-map-btn { background: rgba(74,157,232,0.07); border-color: rgba(74,157,232,0.4); color: rgba(74,157,232,0.85); }
 .flood-map-btn:hover { background: rgba(74,157,232,0.18); border-color: rgba(74,157,232,0.7); color: #4a9de8; }
 .flood-map-btn.active { background: #4a9de8; border-color: #4a9de8; color: #050f18; }
@@ -741,7 +737,6 @@ input[type=range].whatif-slider {
 /* Risk chips */
 .ac2-risk-row { display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.2rem 0 0.15rem; }
 .ac2-rc-sub { display:block; font-size:0.57rem; color:var(--text-dim); margin-top:0.08rem; font-weight:400; line-height:1.3; letter-spacing:0; }
-#ac2-flood-reason { font-size:0.67rem; color:var(--text-sub); line-height:1.45; margin:0.35rem 0 0.1rem; padding:0.3rem 0.55rem; border-left:2px solid var(--border2); display:none; }
 /* Environment overlay dropdown */
 .env-dropdown-wrap { position: relative; }
 #env-dropdown-panel { display:flex; flex-direction:column; position:absolute; bottom:calc(100% + 0.45rem); left:0; gap:0.35rem; background:rgba(10,14,26,0.95); border:1px solid rgba(255,255,255,0.1); border-radius:7px; padding:0.5rem; backdrop-filter:blur(10px); z-index:1001; min-width:168px; overflow:hidden; max-height:0; opacity:0; transform:translateY(8px); pointer-events:none; transition:max-height 0.24s cubic-bezier(0.4,0,0.2,1), opacity 0.18s ease, transform 0.18s ease; }
@@ -967,251 +962,10 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
 .legend-3d-btn:hover { background: rgba(74,157,232,0.12); }
 .legend-3d-btn.active { background: #4a9de8; color: #070b13; border-color: #4a9de8; }
 
-/* Permit geo-pin markers (unmatched permits with stored lat/lng) */
-.permit-geo-pin {
-  width: 14px; height: 14px;
-  border-radius: 50% 50% 50% 0;
-  transform: rotate(-45deg) translate(-50%, -50%);
-  background: var(--pin-color, #a855f7);
-  border: 2px solid rgba(255,255,255,0.85);
-  box-shadow: 0 0 0 2px rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.6);
-  cursor: pointer;
-  transition: transform 0.1s;
-}
-.permit-geo-pin:hover { transform: rotate(-45deg) translate(-50%, -50%) scale(1.35); }
-/* Active/upcoming pins are larger and have a pulsing ring so they stand out */
-.permit-geo-pin[data-cat="active"] {
-  width: 18px; height: 18px;
-  border: 2.5px solid rgba(255,255,255,1);
-  box-shadow: 0 0 0 3px rgba(168,85,247,0.5), 0 0 12px rgba(168,85,247,0.7), 0 2px 8px rgba(0,0,0,0.7);
-}
-.permit-geo-pin[data-cat="upcoming"] {
-  width: 18px; height: 18px;
-  border: 2.5px solid rgba(255,255,255,1);
-  box-shadow: 0 0 0 3px rgba(250,204,21,0.5), 0 0 12px rgba(250,204,21,0.7), 0 2px 8px rgba(0,0,0,0.7);
-}
-.permit-geo-pin-wrap { position: relative; }
-
-/* ── Permit popup ── */
-.permit-popup .maplibregl-popup-content {
-  background: #0d1320;
-  border: 1px solid #1e2d47;
-  border-radius: 10px;
-  padding: 0;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(58,192,249,0.08);
-  min-width: 260px;
-  max-width: 300px;
-  z-index: 9999;
-}
-.permit-popup .maplibregl-popup-tip {
-  border-top-color: #1e2d47;
-}
-.permit-popup .maplibregl-popup-close-button { display: none; }
-/* ensure the popup floats above all map elements */
-.permit-popup { z-index: 9999 !important; }
-.permit-popup-inner {
-  font-family: 'Montserrat', sans-serif;
-  padding: 0.85rem 1rem 0.9rem;
-  color: #edf2ff;
-}
-.permit-popup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.55rem;
-}
-.permit-popup-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.18em 0.6em;
-  border-radius: 4px;
-  border: 1px solid;
-}
-.permit-popup-close {
-  background: #131b2e;
-  border: 1px solid #1e2d47;
-  color: #7090b8;
-  border-radius: 5px;
-  width: 22px; height: 22px;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.65rem;
-  cursor: pointer;
-  line-height: 1;
-  transition: background 0.15s, color 0.15s;
-  flex-shrink: 0;
-}
-.permit-popup-close:hover { background: #1a2440; color: #edf2ff; }
-.permit-popup-address {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #edf2ff;
-  line-height: 1.35;
-  margin-bottom: 0.2rem;
-}
-.permit-popup-commune {
-  font-size: 0.65rem;
-  color: #7090b8;
-  margin-bottom: 0.55rem;
-}
-.permit-popup-ref { font-family: 'IBM Plex Mono', monospace; color: #3ac0f9; }
-.permit-popup-desc {
-  font-size: 0.68rem;
-  color: #b0c4e0;
-  line-height: 1.45;
-  border-left: 2px solid #1e2d47;
-  padding-left: 0.55rem;
-  margin-bottom: 0.65rem;
-}
-.permit-popup-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.35rem 0.5rem;
-  border-top: 1px solid #1e2d47;
-  padding-top: 0.55rem;
-}
-.permit-popup-kv {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-}
-.permit-popup-kv--full { grid-column: 1 / -1; }
-.permit-popup-k {
-  font-size: 0.58rem;
-  font-weight: 600;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: #7090b8;
-}
-.permit-popup-v {
-  font-size: 0.72rem;
-  color: #edf2ff;
-  font-family: 'IBM Plex Mono', monospace;
-}
-
 /* MapLibre attribution override for dark theme */
 .maplibregl-ctrl-attrib { background: rgba(7,11,19,0.7) !important; color: var(--text-dim) !important; font-size: 0.62rem !important; }
 .maplibregl-ctrl-attrib a { color: var(--accent) !important; }
 .maplibregl-ctrl-bottom-right { bottom: 2.5rem !important; }
-
-/* ── PERMITS LAYER ── */
-.permits-map-btn {
-  font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; font-weight: 600;
-  letter-spacing: 0.04em; padding: 0.42rem 0.85rem;
-  background: rgba(168,85,247,0.12); border: 1px solid rgba(168,85,247,0.45);
-  border-radius: 0.4rem; color: #c084fc; cursor: pointer;
-  transition: background 0.18s, color 0.18s, border-color 0.18s;
-  white-space: nowrap; display: flex; align-items: center; gap: 0.5rem;
-}
-.permits-map-btn:hover { background: rgba(168,85,247,0.25); border-color: rgba(168,85,247,0.75); }
-.permits-map-btn.active { background: #a855f7; border-color: #a855f7; color: #fff; }
-.permits-map-btn-dot {
-  width: 0.45rem; height: 0.45rem; border-radius: 50%;
-  background: currentColor; flex-shrink: 0;
-}
-/* Permits tab pane */
-#pane-permits { flex-direction: column; overflow-y: auto; }
-.permits-pane-empty { padding: 2rem 1.25rem; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; text-align: center; }
-/* ── Permit filter bar ── */
-#permits-filter-bar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 0.55rem 0.9rem 0.5rem;
-  display: flex; flex-direction: column; gap: 0.38rem;
-  position: sticky; top: 0; z-index: 10;
-  flex-shrink: 0;
-}
-.pf-row { display: flex; align-items: center; gap: 0.5rem; }
-.pf-row--year { align-items: center; }
-.pf-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-dim); width: 2.8rem; flex-shrink: 0; }
-.pf-chips { display: flex; flex-wrap: wrap; gap: 0.28rem; }
-/* Year row: scrollable strip with edge-hover scroll zones */
-.pf-year-wrap {
-  position: relative; flex: 1; min-width: 0;
-}
-.pf-chips--year {
-  display: flex; flex-wrap: nowrap; gap: 0.28rem;
-  overflow-x: auto; scroll-behavior: smooth;
-  padding: 2px 1px; scrollbar-width: none;
-}
-.pf-chips--year::-webkit-scrollbar { display: none; }
-/* Fade-out edges to hint scrollability */
-.pf-year-wrap::before, .pf-year-wrap::after {
-  content: ''; position: absolute; top: 0; bottom: 0; width: 28px;
-  pointer-events: none; z-index: 1; transition: opacity 0.2s;
-}
-.pf-year-wrap::before { left: 0; background: linear-gradient(to right, var(--surface), transparent); }
-.pf-year-wrap::after  { right: 0; background: linear-gradient(to left,  var(--surface), transparent); }
-/* Hover zones that trigger auto-scroll */
-.pf-year-scroll-left, .pf-year-scroll-right {
-  position: absolute; top: 0; bottom: 0; width: 32px;
-  cursor: w-resize; z-index: 2;
-}
-.pf-year-scroll-left  { left: 0; cursor: w-resize; }
-.pf-year-scroll-right { right: 0; cursor: e-resize; }
-.pf-chip {
-  font-family: var(--sans); font-size: 0.63rem; font-weight: 600;
-  padding: 0.2em 0.65em; border-radius: 4px;
-  border: 1px solid var(--border2); background: var(--surface2);
-  color: var(--text-dim); cursor: pointer; white-space: nowrap;
-  transition: background 0.12s, color 0.12s, border-color 0.12s;
-  flex-shrink: 0;
-}
-.pf-chip:hover { background: var(--surface3); color: var(--text); }
-.pf-chip--active { background: var(--surface3); color: var(--accent); border-color: var(--accent); }
-.pf-chip[data-cat="completed"].pf-chip--active { color: #4ade80; border-color: #4ade80; }
-.pf-chip[data-cat="active"].pf-chip--active    { color: #a855f7; border-color: #a855f7; }
-.pf-chip[data-cat="upcoming"].pf-chip--active  { color: #facc15; border-color: #facc15; }
-.permits-commune-hdr {
-  padding: 0.5rem 1rem 0.45rem; background: var(--surface2);
-  border-bottom: 1px solid var(--border);
-  position: sticky; top: 0; z-index: 2;
-  display: flex; flex-direction: column; gap: 0.35rem;
-}
-.permits-commune-hdr > span {
-  font-size: 0.62rem; font-weight: 700; letter-spacing: 0.1em;
-  text-transform: uppercase; color: #c084fc;
-}
-/* Permit category legend row */
-.perm-legend {
-  display: flex; align-items: center; gap: 0.45rem;
-  font-size: 0.6rem; font-weight: 600; letter-spacing: 0.04em;
-  text-transform: uppercase; color: var(--text-sub);
-  flex-wrap: wrap;
-}
-.perm-legend-dot {
-  display: inline-block; width: 0.5rem; height: 0.5rem;
-  border-radius: 50%; flex-shrink: 0; vertical-align: middle;
-  margin-right: 0.18rem;
-}
-.perm-legend-sep { width: 1px; height: 0.65rem; background: var(--border); flex-shrink: 0; }
-.permits-sub-hdr {
-  padding: 0.38rem 1rem; background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  font-size: 0.58rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
-}
-.permit-card {
-  padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
-}
-.permit-card:hover { background: var(--surface2); }
-.permit-card-ref { font-size: 0.64rem; font-weight: 700; color: #c084fc; margin-bottom: 0.18rem; letter-spacing: 0.03em; }
-.permit-card-addr { font-size: 0.82rem; font-weight: 600; color: var(--text); margin-bottom: 0.3rem; }
-.permit-card-status {
-  display: inline-block; font-size: 0.6rem; font-weight: 700;
-  letter-spacing: 0.1em; text-transform: uppercase;
-  padding: 0.15rem 0.55rem; border-radius: 99px;
-  margin-bottom: 0.35rem; border: 1px solid;
-}
-.permit-card-desc { font-size: 0.7rem; color: var(--text-sub); line-height: 1.45; margin-bottom: 0.28rem; }
-.permit-card-meta { font-size: 0.6rem; color: var(--text-dim); }
-.permit-card--flyable { cursor: pointer; }
-.permit-card--flyable:hover { background: var(--surface3); border-color: var(--border2); }
-.permit-card--flyable:hover .permit-card-fly-hint { opacity: 1; }
-.permit-card-fly-hint {
-  font-size: 0.58rem; color: var(--accent); margin-top: 0.3rem;
-  opacity: 0; transition: opacity 0.15s; letter-spacing: 0.02em;
-}
 
 </style>
 <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css"/>
@@ -1270,7 +1024,6 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
 <div id="map"></div>
 <div id="maplibre-container">
   <div id="dt-pulse-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:10;"></div>
-  <div id="dt-commune-label-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:11;"></div>
   <div id="bld-loading-bar" class="bld-hidden">
     <div class="bld-header">
       <span class="bld-label" id="bld-label-text">Fetching buildings…</span>
@@ -1283,11 +1036,12 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
 <button class="panel-toggle right-toggle" id="right-toggle" onclick="toggleRightPanel()" title="Hide / show right panel"><span class="tog-arrow"></span></button>
 <div id="map-legend">
   <div id="bld-mode-row">
-    <!-- Top row: Permits + Env -->
-    <div class="bld-top-row">
-      <button id="permits-map-btn" class="bld-all-btn permits-btn" onclick="togglePermits()">⬡ Permits</button>
-      <!-- Environment overlays dropdown -->
-      <div class="env-dropdown-wrap" id="env-dropdown-wrap">
+    <div class="bld-controls-col">
+      <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
+      <button id="asset-mode-btn" class="bld-all-btn asset-mode-btn" onclick="toggleAssetMode()" title="Click a building to view its metadata">⬡ Asset Mode</button>
+    </div>
+    <!-- Environment overlays dropdown -->
+    <div class="env-dropdown-wrap" id="env-dropdown-wrap">
       <div id="env-dropdown-panel">
         <div class="env-btn-slot">
           <div class="env-progress-wrap" id="fml-progress-wrap" style="display:none">
@@ -1305,14 +1059,8 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
         </div>
       </div>
       <button id="env-toggle-btn" class="bld-all-btn env-toggle-btn" onclick="toggleEnvDropdown()" title="Environment overlays">⬡ Env ▾</button>
-    </div><!-- /env-dropdown-wrap -->
-    </div><!-- /bld-top-row -->
-    <!-- Bottom row: Show All Buildings + Asset Mode -->
-    <div class="bld-controls-col">
-      <button id="bld-all-toggle" class="bld-all-btn" onclick="toggleAllBuildings()">⬡ Show All Buildings</button>
-      <button id="asset-mode-btn" class="bld-all-btn asset-mode-btn" onclick="toggleAssetMode()" title="Click a building to view its metadata">⬡ Asset Mode</button>
-    </div><!-- /bld-controls-col -->
-  </div><!-- /bld-mode-row -->
+    </div>
+  </div>
   <div class="map-legend">
     <button class="legend-3d-btn" id="legend-3d-btn" onclick="toggleDigitalTwin()" title="Toggle 3D map">⬡ 3D</button>
     <div class="legend-title" id="legend-title">Select a challenge</div>
@@ -1327,21 +1075,13 @@ body.right-collapsed .right-toggle .tog-arrow { transform: rotate(-135deg); } /*
   <div class="tab-bar">
     <button class="tab-btn active" id="btn-district" onclick="switchTab('district')">Commune Info</button>
     <button class="tab-btn"        id="btn-compare"  onclick="switchTab('compare')">Compare Communes</button>
-    <button class="tab-btn"        id="btn-simulate" onclick="switchTab('simulate')" style="display:none">Asset View</button>
-    <button class="tab-btn" id="btn-permits" onclick="switchTab('permits')" style="display:none">Permits</button>
+    <button class="tab-btn"        id="btn-simulate" onclick="switchTab('simulate')" style="display:none">INDIVIDUAL ASSET VIEW</button>
 
   </div>
   <!-- District tab -->
   <div class="tab-pane" id="pane-district">
     <div id="district-content">
       <div class="no-selection">Select a challenge, then click a commune on the map or in the ranking list.</div>
-    </div>
-  </div>
-  <!-- Permits tab -->
-  <div class="tab-pane" id="pane-permits" style="display:none">
-    <div id="permits-filter-bar" style="display:none"></div>
-    <div id="permits-pane-content">
-      <div class="permits-pane-empty">Enable the Permits layer on the map,<br>then click a commune to inspect its permits.</div>
     </div>
   </div>
   <!-- Compare tab -->
@@ -2303,15 +2043,6 @@ function renderRankingList() {
 // SELECT DISTRICT
 // =====================================================================
 function selectDistrict(niscode) {
-  if (currentTab === 'permits') {
-    selectedDistrict = niscode;
-    dtCommune = niscode;
-    renderPermitsPane(niscode);
-    updateMapColors();
-    updateBuildingFilter();
-    sync3DHighlight();
-    return;
-  }
   if (currentTab === 'compare') {
     // Compare mode: fill slots
     if (compareSlots.includes(niscode)) return;
@@ -2919,17 +2650,12 @@ function switchTab(tab) {
   document.getElementById('pane-compare').style.display  = tab === 'compare'  ? 'flex' : 'none';
   const simPane = document.getElementById('pane-simulate');
   if (simPane) simPane.style.display = tab === 'simulate' ? 'flex' : 'none';
-  const permPane = document.getElementById('pane-permits');
-  if (permPane) permPane.style.display = tab === 'permits' ? 'flex' : 'none';
   document.getElementById('btn-district').classList.toggle('active', tab === 'district');
   document.getElementById('btn-compare').classList.toggle('active',  tab === 'compare');
   const simBtn = document.getElementById('btn-simulate');
   if (simBtn) simBtn.classList.toggle('active', tab === 'simulate');
-  const permBtn = document.getElementById('btn-permits');
-  if (permBtn) permBtn.classList.toggle('active', tab === 'permits');
   if (tab === 'compare') { renderCompareSlots(); renderCompareTable(); }
   if (tab === 'simulate') renderSimPanel();
-  if (tab === 'permits') { renderPermitsFilterBar(); renderPermitsPane(selectedDistrict); }
   updateMapColors();
   updateBuildingFilter();
   sync3DHighlight();
@@ -3271,8 +2997,8 @@ async function loadData() {
   buildChallengeCards();
   selectChallenge('leaving');
 
-  // Prefetch manifest in the background so 3D view opens instantly
-  _fetchManifest().catch(() => {});
+  // Prefetch buildings in the background so 3D view opens instantly
+  fetchOSMBuildings().catch(() => {});
 }
 
 window.addEventListener('resize', () => { if (map) map.invalidateSize(); });
@@ -3309,12 +3035,11 @@ var _noiseToken              = 0;          // incremented on every toggle; chunk
 var _floodGrid               = null;       // spatial grid index over _floodFlatZones
 var _noiseGrid               = null;       // spatial grid index over _noiseFlatZones
 var dt3DPulseWraps = [];
-var dt3DCommLabelWraps = [];
 // Asset mode
 var assetMode        = false;
 var selectedBuilding = null; // { properties, lngLat, geometry }
 var sectorData       = null; // loaded from data/brussels-sectors.geojson if available
-var _assetSectionOpen = { physical: true, risk: false, heritage: false, re: false };
+var _assetSectionOpen = { physical: true, risk: false, permits: false, heritage: false, re: false };
 
 
 function updatePulseMarkers() {
@@ -3361,7 +3086,6 @@ function toggleAllBuildings() {
   if (_noiseOverlay) {
     _computeAndColorNoise(_getVisibleCommuneNis());
   }
-  if (permitsActive) _updatePermitMarkerVisibility();
 }
 
 // ── Asset Mode ──────────────────────────────────────────────────────────────
@@ -3474,11 +3198,8 @@ function addBuildingHighlightLayer() {
   }
 }
 
-// Bring outline and label layers to the top of the render stack above all 3D buildings.
-// Order: commune fill → commune stroke → highlight → selected buildings → labels (topmost).
+// Bring both highlight layers to the top of the render stack, keeping labels above everything.
 function bringHighlightToTop() {
-  if (mlMap.getLayer('communes-stroke'))             mlMap.moveLayer('communes-stroke');
-  if (mlMap.getLayer('communes-highlight'))          mlMap.moveLayer('communes-highlight');
   if (mlMap.getLayer('3d-buildings-selected-glow')) mlMap.moveLayer('3d-buildings-selected-glow');
   if (mlMap.getLayer('3d-buildings-selected'))      mlMap.moveLayer('3d-buildings-selected');
   if (mlMap.getLayer('communes-labels'))             mlMap.moveLayer('communes-labels');
@@ -3540,11 +3261,7 @@ function toggleDigitalTwin() {
   if (btn3d)  { btn3d.classList.toggle('active', dtMode); btn3d.textContent = dtMode ? '⬡ 2D' : '⬡ 3D'; }
   if (btnRow) btnRow.style.display = dtMode ? 'flex' : 'none';
   if (btnSim) btnSim.style.display = dtMode ? '' : 'none';
-  const btnPermTab = document.getElementById('btn-permits');
-  if (btnPermTab) btnPermTab.style.display = dtMode ? '' : 'none';
   // When entering 3D mode: switch to Asset View tab; when leaving: go back to district
-  // Commune labels are DOM-based (dt-commune-label-overlay) — no symbol layer toggle needed.
-
   if (dtMode) {
     switchTab('simulate');
   } else {
@@ -3554,8 +3271,6 @@ function toggleDigitalTwin() {
     if (_floodOverlay) { _floodOverlay = false; _clearFloodColors(); if (btnFlood) btnFlood.classList.remove('active'); }
     // Deactivate noise overlay
     if (_noiseOverlay) { _noiseOverlay = false; _clearNoiseColors(); if (btnNoise) btnNoise.classList.remove('active'); }
-    // Deactivate permits overlay
-    if (permitsActive) { clearPermitGeoMarkers(); }   // markers are 3D-only; re-built on next 3D entry
     // Close env dropdown
     const envPanel = document.getElementById('env-dropdown-panel');
     const envBtn   = document.getElementById('env-toggle-btn');
@@ -3646,7 +3361,6 @@ function initMapLibre() {
     addCommuneLayer();
     addBuildingHighlightLayer();
     sync3DHighlight();
-    if (permitsActive) _buildAllPermitMarkers();  // re-build pins when re-entering 3D
     renderSimPanel();
     tryLoadSectorData();
     prefetchEnvData();   // warm flood cache before user clicks a building
@@ -3657,7 +3371,6 @@ function initMapLibre() {
                    easing: t => t < 0.5 ? 2*t*t : -1+(4-2*t)*t });
   });
   mlMap.on('move', reposition3DPulseRings);
-  mlMap.on('move', reposition3DCommuneLabels);
   mlMap.on('move', () => {
     document.querySelectorAll('.dt-sim-badge').forEach(dot => {
       const pt = mlMap.project([parseFloat(dot.dataset.lng), parseFloat(dot.dataset.lat)]);
@@ -3708,59 +3421,101 @@ function initMapLibre() {
   });
 }
 
-// ── Per-commune building cache ───────────────────────────────────────────────
-// Buildings are pre-baked into data/buildings/buildings-{niscode}.json
-// (one file per commune, generated by `npm run build:buildings`).
-// The active commune loads immediately; all others stream in the background
-// so buildings appear in < 1 s instead of 30-60 s.
+// Cached OSM building GeoJSON — fetched once, reused on 3D re-init
+var _osmBuildingsCache = null;
+var _osmBuildingsFetch = null; // in-progress promise — reused on concurrent calls
+// Bump this string whenever the bbox or query changes to invalidate sessionStorage cache
+const _OSM_CACHE_KEY = 'osm_buildings_v6'; // bumped: amenity/shop/office/brand/operator/tourism/leisure
 
-var _osmBuildingsCache = null;  // merged FeatureCollection — built progressively
-var _bldCache    = {};          // niscode → features[] for loaded communes
-var _bldLoading  = {};          // niscode → Promise for in-flight fetches
-var _bldManifest = null;        // {niscode: count} from manifest.json
+function fetchOSMBuildings() {
+  if (_osmBuildingsCache) return Promise.resolve(_osmBuildingsCache);
+  if (_osmBuildingsFetch) return _osmBuildingsFetch; // already in flight
 
-function _fetchManifest() {
-  if (_bldManifest) return Promise.resolve(_bldManifest);
-  return fetch('data/buildings/manifest.json')
-    .then(r => { if (!r.ok) throw new Error('manifest.json not found'); return r.json(); })
-    .then(m => { _bldManifest = m; return m; });
-}
+  // Try sessionStorage so a page-refresh skips the Overpass round-trip
+  try {
+    const stored = sessionStorage.getItem(_OSM_CACHE_KEY);
+    if (stored) {
+      _osmBuildingsCache = JSON.parse(stored);
+      return Promise.resolve(_osmBuildingsCache);
+    }
+  } catch(e) {}
 
-function _addBldSourceLayer(nis, feats) {
-  if (!mlMap) return;
-  const srcId = `bld-${nis}`, lyrId = `3d-buildings-${nis}`;
-  const paint = {
-    'fill-extrusion-color':             BLD_DEFAULT_COLOR,
-    'fill-extrusion-height':            ['get', 'h'],
-    'fill-extrusion-base':              ['get', 'minH'],
-    'fill-extrusion-opacity':           0.92,
-    'fill-extrusion-vertical-gradient': true,
-  };
-  if (!mlMap.getSource(srcId))
-    mlMap.addSource(srcId, { type: 'geojson',
-      data: { type: 'FeatureCollection', features: feats }, buffer: 64 });
-  if (!mlMap.getLayer(lyrId))
-    mlMap.addLayer({ id: lyrId, source: srcId, type: 'fill-extrusion',
-      layout: { visibility: 'none' }, paint });
-}
+  // Full BCR extent + buffer — covers all 19 communes incl. Ukkel / Watermaal /
+  // Sint-Pieters-Woluwe / Oudergem whose polygons extend beyond the old bbox.
+  const q = `[out:json][timeout:60];(way["building"](50.755,4.235,50.925,4.495););out body geom qt;`;
 
-function _loadCommuneBuildings(nis) {
-  if (_bldCache[nis]) return Promise.resolve(_bldCache[nis]);
-  if (_bldLoading[nis]) return _bldLoading[nis];
+  _osmBuildingsFetch = fetch('https://overpass-api.de/api/interpreter', {
+    method: 'POST',
+    body: 'data=' + encodeURIComponent(q),
+  })
+  .then(r => r.json())
+  .then(osm => {
+    const features = [];
+    for (const el of (osm.elements || [])) {
+      if (el.type !== 'way' || !el.geometry || el.geometry.length < 4) continue;
+      const coords = el.geometry.map(n => [n.lon, n.lat]);
+      const f = coords[0], l = coords[coords.length - 1];
+      if (f[0] !== l[0] || f[1] !== l[1]) coords.push(coords[0]);
+      const tags = el.tags || {};
+      let h = 8, hTag = false;
+      // Strip any unit suffix from height tag (e.g. "12 m" → 12)
+      if (tags.height)                  { h = parseFloat(String(tags.height).replace(/[^\d.]/g, '')) || 8; hTag = true; }
+      else if (tags['building:levels']) { h = (parseInt(tags['building:levels']) || 2) * 3.2; }
+      const levels   = tags['building:levels'] ? parseInt(tags['building:levels']) || null : null;
+      const bType    = tags.building   || null;
+      // Address: street then housenumber (Belgian convention)
+      const houseNum = tags['addr:housenumber'] || '';
+      const streetNm = tags['addr:street']      || '';
+      const street   = (streetNm + (houseNum ? ' ' + houseNum : '')).trim() || null;
+      // Name: prefer explicit name, then localised variants, then brand/operator for commercial
+      const bName    = tags.name || tags['name:fr'] || tags['name:nl'] || tags['name:en']
+                     || tags.brand || tags.operator || null;
+      // Use/function tags for richer type classification
+      const amenity  = tags.amenity  || null;
+      const shop     = tags.shop     || null;
+      const office   = tags.office   || null;
+      const tourism  = tags.tourism  || null;
+      const leisure  = tags.leisure  || null;
+      const osmId    = el.id || null;
+      features.push({ type: 'Feature', geometry: { type: 'Polygon', coordinates: [coords] },
+        properties: { h, minH: 0, hTag, levels, bType, street, bName, amenity, shop, office, tourism, leisure, osmId } });
+    }
+    // Tag each building with its BCR commune niscode via point-in-polygon
+    if (GEOJSON) {
+      const communes = GEOJSON.features.map(f => {
+        const geom = f.geometry;
+        const rings = geom.type === 'Polygon'
+          ? [geom.coordinates[0]]
+          : geom.type === 'MultiPolygon' ? geom.coordinates.map(p => p[0]) : [];
+        let minLat=90, maxLat=-90, minLon=180, maxLon=-180;
+        for (const r of rings) for (const [ln, lt] of r) {
+          if (lt < minLat) minLat=lt; if (lt > maxLat) maxLat=lt;
+          if (ln < minLon) minLon=ln; if (ln > maxLon) maxLon=ln;
+        }
+        return { niscode: String(f.properties.niscode), rings, minLat, maxLat, minLon, maxLon };
+      });
 
-  _bldLoading[nis] = fetch(`data/buildings/buildings-${nis}.json`)
-    .then(r => { if (!r.ok) throw new Error(`buildings-${nis}.json not found`); return r.json(); })
-    .then(geojson => {
-      const feats = geojson.features || [];
-      _bldCache[nis] = feats;
-      if (!_osmBuildingsCache) _osmBuildingsCache = { type: 'FeatureCollection', features: [] };
-      _osmBuildingsCache.features.push(...feats);
-      _addBldSourceLayer(nis, feats);
-      return feats;
-    })
-    .finally(() => { delete _bldLoading[nis]; });
+      for (const feat of features) {
+        const ring = feat.geometry.coordinates[0];
+        let cx=0, cy=0;
+        for (const [ln, lt] of ring) { cx+=ln; cy+=lt; }
+        cx /= ring.length; cy /= ring.length;
+        for (const c of communes) {
+          if (cy < c.minLat || cy > c.maxLat || cx < c.minLon || cx > c.maxLon) continue;
+          for (const r of c.rings) {
+            if (_pip(cx, cy, r)) { feat.properties.niscode = c.niscode; break; }
+          }
+          if (feat.properties.niscode) break;
+        }
+      }
+    }
 
-  return _bldLoading[nis];
+    _osmBuildingsCache = { type: 'FeatureCollection', features };
+    try { sessionStorage.setItem(_OSM_CACHE_KEY, JSON.stringify(_osmBuildingsCache)); } catch(e) {}
+    return _osmBuildingsCache;
+  });
+
+  return _osmBuildingsFetch;
 }
 
 // ── Building filter helpers + 3D↔2D sync ────────────────────────────────────
@@ -3788,7 +3543,6 @@ function sync3DHighlight() {
     }
     if (dtMode) renderSimPanel();
   }
-  if (permitsActive) _updatePermitMarkerVisibility();
 }
 
 // Ray-casting point-in-polygon for a coordinate ring [[lon,lat],…]
@@ -3821,7 +3575,6 @@ function getActiveBuildingNiscodes() {
 
 // Toggle visibility on per-commune building layers — O(19) instant ops,
 // no filter evaluation over thousands of polygons.
-// Permit colors live on the same layers via setPaintProperty — no extra layers needed.
 function updateBuildingFilter() {
   if (!mlMap || !GEOJSON) return;
   const active = _showAllBuildings ? null : new Set(getActiveBuildingNiscodes());
@@ -3831,13 +3584,6 @@ function updateBuildingFilter() {
     if (mlMap.getLayer(lyrId)) {
       mlMap.setLayoutProperty(lyrId, 'visibility',
         (active === null || active.has(nis)) ? 'visible' : 'none');
-    } else if (dtMode && active && active.has(nis) && !_bldLoading[nis]) {
-      // User selected a commune not yet loaded — fetch it now
-      _loadCommuneBuildings(nis).then(() => {
-        updateBuildingFilter();
-        if (permitsActive) applyPermitBuildingColors();
-        bringHighlightToTop();
-      });
     }
   });
 }
@@ -3851,27 +3597,9 @@ function updateBuildingFilter() {
 
 // Default building color expression — height-based cyan gradient.
 // Used both in inject3DBuildings() and by _clearFloodColors() to restore default.
-// Landmark / POI criteria — buildings matching any of these render in dark navy blue
-const _LANDMARK_AMENITY = ['theatre','cinema','library','place_of_worship','arts_centre',
-  'community_centre','conference_centre','events_venue','concerthall','courthouse',
-  'exhibition_centre','monastery','hospital','school','college','social_facility',
-  'police','fire_station'];
-const _LANDMARK_TOURISM = ['attraction','museum','gallery'];
-const _LANDMARK_BTYPE   = ['church','cathedral','chapel','theatre','hospital','university',
-  'stadium','civic','government','temple','convent','train_station','sports_centre',
-  'public','religious'];
-
 const BLD_DEFAULT_COLOR = [
-  'case',
-  ['match', ['get', 'amenity'], _LANDMARK_AMENITY, true, false],
-    ['interpolate', ['linear'], ['get', 'h'], 0,'#0d1f55', 5,'#132870', 20,'#1a3590', 50,'#2040aa', 100,'#2b50cc'],
-  ['match', ['get', 'tourism'], _LANDMARK_TOURISM, true, false],
-    ['interpolate', ['linear'], ['get', 'h'], 0,'#0d1f55', 5,'#132870', 20,'#1a3590', 50,'#2040aa', 100,'#2b50cc'],
-  ['match', ['get', 'bType'],   _LANDMARK_BTYPE,   true, false],
-    ['interpolate', ['linear'], ['get', 'h'], 0,'#0d1f55', 5,'#132870', 20,'#1a3590', 50,'#2040aa', 100,'#2b50cc'],
-  // Default: height-based teal gradient
-  ['interpolate', ['linear'], ['get', 'h'],
-    0,'#005566', 5,'#007a8a', 20,'#00a8c0', 50,'#00ccee', 100,'#00e8ff'],
+  'interpolate', ['linear'], ['get', 'h'],
+  0, '#005566', 5, '#007a8a', 20, '#00a8c0', 50, '#00ccee', 100, '#00e8ff',
 ];
 
 // Canonical flood zone colors — used in map paint AND right-panel legend dots.
@@ -4475,66 +4203,69 @@ async function inject3DBuildings() {
     .filter(l => l.type === 'fill-extrusion')
     .forEach(l => { try { mlMap.removeLayer(l.id); } catch(e) {} });
 
-  const bar = document.getElementById('bld-loading-bar');
+  const bar          = document.getElementById('bld-loading-bar');
+  const showProgress = !_osmBuildingsCache;
 
-  // Priority: load the active commune(s) first for immediate visual feedback,
-  // then stream remaining communes in the background.
-  const activeNis = new Set(getActiveBuildingNiscodes().map(String));
-
-  let allNis;
-  try {
-    const manifest = await _fetchManifest();
-    allNis = Object.keys(manifest);
-  } catch(e) {
-    console.warn('[Buildings] manifest not found — using GEOJSON commune list');
-    allNis = GEOJSON ? GEOJSON.features.map(f => String(f.properties.niscode)) : [];
-  }
-
-  // When show-all is on or nothing is selected, load all communes progressively
-  const firstBatch = (_showAllBuildings || activeNis.size === 0)
-    ? allNis
-    : allNis.filter(n => activeNis.has(n));
-  const restBatch  = allNis.filter(n => !firstBatch.includes(n));
-
-  const needsProgress = firstBatch.some(n => !_bldCache[n]);
-  if (needsProgress && bar) {
-    _bldProgress(0, 'Loading buildings…');
+  if (showProgress && bar) {
+    _bldProgress(0, 'Fetching buildings…');
     bar.classList.remove('bld-hidden');
-    requestAnimationFrame(() => _bldProgress(10, 'Loading buildings…'));
+    // Kick fill to 10% on the next frame so the transition plays
+    requestAnimationFrame(() => _bldProgress(10, 'Fetching buildings…'));
   }
 
   try {
-    for (let i = 0; i < firstBatch.length; i++) {
-      await _loadCommuneBuildings(firstBatch[i]);
-      if (needsProgress) {
-        const pct = 10 + ((i + 1) / firstBatch.length) * 85;
-        _bldProgress(pct, `Loading commune ${i + 1} of ${firstBatch.length}…`);
-        await new Promise(r => requestAnimationFrame(r));
+    const geojson = await fetchOSMBuildings();
+
+    if (showProgress) _bldProgress(40, 'Processing…');
+
+    // Group buildings by commune niscode
+    const groups = {};
+    for (const feat of geojson.features) {
+      const nis = feat.properties.niscode;
+      if (!nis) continue;
+      (groups[nis] = groups[nis] || []).push(feat);
+    }
+
+    const PAINT = {
+      'fill-extrusion-color':             BLD_DEFAULT_COLOR,
+      'fill-extrusion-height':            ['get', 'h'],
+      'fill-extrusion-base':              ['get', 'minH'],
+      'fill-extrusion-opacity':           0.92,
+      'fill-extrusion-vertical-gradient': true,
+    };
+
+    const entries = Object.entries(groups);
+    const total   = entries.length;
+
+    // One small GeoJSON source + layer per commune — visibility toggle is instant
+    for (let i = 0; i < entries.length; i++) {
+      const [nis, feats] = entries[i];
+      const srcId = `bld-${nis}`;
+      const lyrId = `3d-buildings-${nis}`;
+      if (!mlMap.getSource(srcId)) {
+        mlMap.addSource(srcId, { type: 'geojson', data: { type: 'FeatureCollection', features: feats }, buffer: 64 });
+      }
+      if (!mlMap.getLayer(lyrId)) {
+        mlMap.addLayer({ id: lyrId, source: srcId, type: 'fill-extrusion',
+          layout: { visibility: 'none' }, paint: PAINT });
+      }
+      if (showProgress) {
+        const pct = 40 + ((i + 1) / total) * 57;
+        _bldProgress(pct, `Adding layers… (${i + 1}/${total})`);
+        await new Promise(r => requestAnimationFrame(r)); // yield so bar updates
       }
     }
-    if (needsProgress) _bldProgress(100, 'Done');
+
+    if (showProgress) _bldProgress(100, 'Done');
 
     updateBuildingFilter();
-    bringHighlightToTop();
-  
+    bringHighlightToTop(); // keep selection above all newly-added building layers
+
   } catch(e) {
     console.warn('3D buildings load failed:', e);
   } finally {
     if (bar) bar.classList.add('bld-hidden');
   }
-
-  // Stream remaining communes in the background
-  (async () => {
-    for (const nis of restBatch) {
-      try {
-        await _loadCommuneBuildings(nis);
-        updateBuildingFilter();
-        bringHighlightToTop();
-      } catch(e) {
-        console.warn(`[Buildings] failed to load commune ${nis}:`, e);
-      }
-    }
-  })();
 }
 
 function addCommuneLayer() {
@@ -4557,7 +4288,6 @@ function addCommuneLayer() {
     filter: ['==', ['get', 'niscode'], -1]
   });
 
-  // Labels are hidden in 3D mode — they clip into pitched buildings
   mlMap.addLayer({
     id: 'communes-labels', type: 'symbol', source: 'communes',
     layout: {
@@ -4568,7 +4298,6 @@ function addCommuneLayer() {
       'text-allow-overlap': true,
       'text-ignore-placement': true,
       'symbol-placement': 'point',
-      'visibility': 'none',
     },
     paint: {
       'text-color': 'rgba(255,255,255,0.92)',
@@ -4577,7 +4306,6 @@ function addCommuneLayer() {
     }
   });
 
-  rebuild3DCommuneLabels();
   rebuild3DPulseRings();
 }
 
@@ -4780,8 +4508,20 @@ function renderAssetCard() {
           + '<span class="ac2-risk-chip pending" id="ac2-chip-flood"><span class="ac2-rc-dot"></span>Flood…</span>'
           + '<span class="ac2-risk-chip pending" id="ac2-chip-noise"><span class="ac2-rc-dot"></span>Noise…</span>'
         + '</div>'
-        + '<div id="ac2-flood-reason"></div>'
         + '<div id="ac2-noise-detail"></div>'
+      + '</div>'
+    + '</div>'
+
+    // Permits
+    + '<div class="ac2-section' + sv('permits') + '" id="ac2-sec-permits">'
+      + '<div class="ac2-section-hdr" onclick="toggleAssetSection(\'permits\')">'
+        + '<span class="ac2-s-icon" style="color:#e8c84a">⚒</span>'
+        + '<span class="ac2-s-label">Permits</span>'
+        + '<span class="ac2-s-sub">within 50 m</span>'
+        + '<span class="ac2-s-chevron">▾</span>'
+      + '</div>'
+      + '<div class="ac2-section-body" id="ac2-permits-body">'
+        + '<div class="ac2-loading"><div class="ac2-spinner"></div>Fetching from opendata.brussels…</div>'
       + '</div>'
     + '</div>'
 
@@ -5064,8 +4804,6 @@ async function _fetchFloodRisk(lng, lat, ring) {
   chip.innerHTML = '<span class="ac2-rc-dot"></span>Flood…';
   chip.onclick = null;
   _floodMeta = null;
-  const reasonEl = document.getElementById('ac2-flood-reason');
-  if (reasonEl) { reasonEl.style.display = 'none'; reasonEl.innerHTML = ''; }
   try {
     // Wait for cache if still loading, otherwise fetch now
     if (!_floodCache) {
@@ -5149,30 +4887,20 @@ async function _fetchFloodRisk(lng, lat, ring) {
       nearbyWaterway: null,
     };
 
-    let label, cls, causeSub, reasonHtml;
-    if      (maxCode === 3) { cls='high'; label='High flood risk';   causeSub='T25 — 1-in-25 year zone';
-      reasonHtml = '<strong>T25 zone</strong> — highest hazard. Roughly a <strong>90% probability</strong> of flooding over a 60-year building lifetime. These zones follow the lowest-lying terrain along the Senne, Maelbeek, Woluwe, and the Brussels–Charleroi canal.'; }
-    else if (maxCode === 2) { cls='mod';  label='Medium flood risk'; causeSub='T100 — 1-in-100 year zone';
-      reasonHtml = '<strong>T100 zone</strong> — significant hazard. Roughly a <strong>45% probability</strong> over 60 years. Risk increases with climate-driven rainfall intensification. Zone boundary set by Brussels Environment hydraulic modelling.'; }
-    else if (maxCode === 1) { cls='low';  label='Low flood risk';    causeSub='T1000 — 1-in-1000 year zone';
-      reasonHtml = '<strong>T1000 zone</strong> — outer hazard boundary. Statistically rare under current conditions, but extreme weather trends can shift frequency upward. No immediate structural action required.'; }
-    else if (maxCode === 0) { cls='mod';  label='Groundwater risk';  causeSub='Saturated subsoil · rising water table';
-      reasonHtml = '<strong>Groundwater flooding</strong> — prolonged or heavy rain saturates Brussels\'s clay-heavy soils and pushes water into basements and foundations. Widespread in lower-lying areas; separate from surface flooding.'; }
-    else                    { cls='ok';   label='No flood zone';     causeSub='Not in any official hazard zone'; reasonHtml = ''; }
-
-    if (_floodMeta) _floodMeta.causeSub = causeSub;
-
+    let label, cls, causeSub;
+    if      (maxCode === 3) { cls='high'; label='High flood risk (T25)';   causeSub='1-in-25 yr zone · highest hazard'; }
+    else if (maxCode === 2) { cls='mod';  label='Medium flood risk (T100)'; causeSub='1-in-100 yr zone · significant hazard'; }
+    else if (maxCode === 1) { cls='low';  label='Low flood risk (T1000)';   causeSub='1-in-1000 yr zone · outer boundary'; }
+    else if (maxCode === 0) { cls='mod';  label='Groundwater risk';          causeSub='Saturated subsoil · water table'; }
+    else                    { cls='ok';   label='No flood zone';             causeSub=''; }
+    if (_floodMeta) _floodMeta.causeSub = causeSub; // stored so _checkNearbyWaterway never reads from the DOM
     chip.className = 'ac2-risk-chip ' + cls + ' clickable';
-    chip.innerHTML = '<span class="ac2-rc-dot"></span>' + label
+    chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+      + '<span style="display:block">' + label + '</span>'
+      + (causeSub ? '<span class="ac2-rc-sub">' + causeSub + '</span>' : '')
+      + '</span>'
       + '<span style="opacity:0.5;font-size:0.72rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
     chip.onclick = () => openRiskMeta('flood');
-
-    // Flood reason line — shown below the chips row
-    const reasonEl = document.getElementById('ac2-flood-reason');
-    if (reasonEl) {
-      if (reasonHtml) { reasonEl.innerHTML = reasonHtml; reasonEl.style.display = 'block'; }
-      else { reasonEl.style.display = 'none'; }
-    }
 
     // Fire async waterway proximity check — updates meta + chip note
     _checkNearbyWaterway(lng, lat, cls);
@@ -5231,24 +4959,30 @@ async function _checkNearbyWaterway(lng, lat, currentCls) {
     if (!chip) return;
     const noOfficialRisk = currentCls === 'ok';
 
-    const reasonEl = document.getElementById('ac2-flood-reason');
     if (noOfficialRisk && weight >= 2) {
       // Near river or canal, no official zone — upgrade to amber informal-risk chip
       chip.className = 'ac2-risk-chip low clickable';
-      chip.innerHTML = `<span class="ac2-rc-dot"></span>Near ${wlabel}`
+      chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+        + `<span style="display:block">Near ${wlabel}</span>`
+        + `<span class="ac2-rc-sub">Within 150 m — informal flood exposure</span>`
+        + '</span>'
         + '<span style="opacity:0.5;font-size:0.72rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
-      if (_floodMeta) { _floodMeta.upgradedByWaterway = true; _floodMeta.upgradedLabel = `Near ${wlabel}`; }
-      if (reasonEl) {
-        reasonEl.innerHTML = `<strong>Proximity to ${wlabel}</strong> — within 150 m. No official flood zone mapped, but rivers and canals can overflow during heavy precipitation and drainage failures. Informal flood exposure applies.`;
-        reasonEl.style.display = 'block';
+      if (_floodMeta) {
+        _floodMeta.upgradedByWaterway = true;
+        _floodMeta.upgradedLabel = `Near ${wlabel}`;
       }
     } else {
-      // Has official zone + waterway nearby — append waterway note to the reason line
+      // Has official zone + waterway nearby — append waterway as secondary cause line.
+      // Use _floodMeta.causeSub (the original cause text) so repeated calls never accumulate.
+      const existingLabel = chip.querySelector('span[style*="display:block"]');
+      const labelText = existingLabel ? existingLabel.textContent : chip.textContent.replace('ⓘ','').trim();
       const baseCause = _floodMeta?.causeSub ?? '';
-      if (reasonEl && reasonEl.style.display !== 'none') {
-        const existing = reasonEl.innerHTML;
-        reasonEl.innerHTML = existing + ` <span style="color:var(--accent);font-weight:600">${wlabel} detected within 150 m</span> — likely a direct source of the mapped risk.`;
-      }
+      const causeText = (baseCause ? baseCause + ' · ' : '') + `${wlabel} nearby`;
+      chip.innerHTML = '<span class="ac2-rc-dot"></span><span style="flex:1;min-width:0">'
+        + `<span style="display:block">${labelText}</span>`
+        + `<span class="ac2-rc-sub">${causeText}</span>`
+        + '</span>'
+        + '<span style="opacity:0.5;font-size:0.72rem;margin-left:0.4rem;flex-shrink:0">ⓘ</span>';
     }
   } catch(e) { /* silent */ }
 }
@@ -5748,45 +5482,31 @@ async function _fetchPermits(lng, lat) {
   const el = document.getElementById('ac2-permits-body');
   if (!el) return;
 
-  // openpermits.brussels covers all 19 BCR communes (700k+ records, no public API)
-  // opendata.brussels.be only has data for Ville de Bruxelles (NIS 21004)
-  const nis = selectedBuilding?.properties?.niscode;
-  const isVBX = !nis || String(nis) === '21004'; // Ville de Bruxelles
-
-  const OPENPERMITS_LINK = '<div class="ac2-src-note" style="margin-top:0.5rem">'
-    + '<a href="https://openpermits.brussels/" target="_blank" rel="noopener" style="color:var(--accent)">All BCR permits → openpermits.brussels ↗</a>'
-    + '</div>';
-
   const BASE = 'https://opendata.brussels.be/api/explore/v2.1/catalog/datasets/permis-urbanisme-delivres-vbx/records';
 
-  if (!isVBX) {
-    // Other 18 communes: no open dataset available — link to openpermits.brussels
-    el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">'
-      + 'Open permit data not published for this commune.</div>' + OPENPERMITS_LINK;
-    return;
-  }
-
   try {
-    // Opendatasoft ODSQL v2.1: within_distance(field, geom\'POINT(lon lat)\', radius+unit)
-    // order_by omitted — field name varies per dataset and causes HTTP 400 if wrong
-    const where = `within_distance(geo_point_2d,geom'POINT(${lng.toFixed(6)} ${lat.toFixed(6)})',50m)`;
+    // Opendatasoft ODSQL v2.1: distance(field, geom'POINT(lon lat)', radius_m)
+    // Note: 'within_distance' and unit suffix '50m' are NOT valid in v2.1
+    const where = `distance(geo_point_2d,geom'POINT(${lng.toFixed(6)} ${lat.toFixed(6)})',50)`;
     const r = await fetch(BASE + '?where=' + encodeURIComponent(where) + '&limit=5',
                           { signal: AbortSignal.timeout(9000) });
 
     if (!r.ok) {
+      // Surface the actual API error message for debugging
       const errText = await r.text().catch(() => '');
       console.warn('[Permits] HTTP', r.status, errText.slice(0, 400));
-      throw new Error('HTTP ' + r.status);
+      throw new Error('HTTP ' + r.status + ': ' + errText.slice(0, 120));
     }
 
     const data = await r.json();
     const recs = data.results || [];
+
+    // Log actual field names on first hit — useful for verifying field name guesses
     if (recs.length) console.log('[Permits] fields:', Object.keys(recs[0]));
 
     if (!recs.length) {
       el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">No permits found within 50 m.</div>'
-        + '<div class="ac2-src-note">opendata.brussels · Ville de Bruxelles</div>'
-        + OPENPERMITS_LINK;
+        + '<div class="ac2-src-note">opendata.brussels · Urban permits register</div>';
       return;
     }
 
@@ -5801,16 +5521,14 @@ async function _fetchPermits(lng, lat) {
         + '<div class="ac2-permit-meta">' + (date || '—') + (stat ? ' · ' + stat : '') + '</div>'
         + '</div>';
     }).join('');
-    el.innerHTML = items
-      + '<div class="ac2-src-note">opendata.brussels · Urban permits within 50 m</div>'
-      + OPENPERMITS_LINK;
+    el.innerHTML = items + '<div class="ac2-src-note">opendata.brussels · Urban permits within 50 m</div>';
 
   } catch(e) {
     console.warn('[Permits] failed:', e.message);
     el.innerHTML = '<div style="font-size:0.7rem;color:var(--text-dim);padding:0.1rem 0">'
       + 'Permits data unavailable. '
-      + '<a href="https://opendata.brussels.be/explore/dataset/permis-urbanisme-delivres-vbx/" target="_blank" style="color:var(--accent)">Browse permits ↗</a></div>'
-      + OPENPERMITS_LINK;
+      + '<a href="https://opendata.brussels.be/explore/dataset/permis-urbanisme-delivres-vbx/" target="_blank" style="color:var(--accent)">Browse permits ↗</a>'
+      + '</div>';
   }
 }
 
@@ -6112,38 +5830,6 @@ function reposition3DPulseRings() {
   });
 }
 
-// DOM-based commune name labels for 3D view — always above the WebGL canvas.
-// Built once, repositioned on every map move.
-function rebuild3DCommuneLabels() {
-  const overlay = document.getElementById('dt-commune-label-overlay');
-  if (!overlay || !mlMap || !GEOJSON) return;
-  overlay.innerHTML = '';
-  dt3DCommLabelWraps = [];
-  GEOJSON.features.forEach(f => {
-    const name = f.properties.naam || f.properties.nameDut || f.properties.name;
-    if (!name) return;
-    let [lng, lat] = computeCentroid(f);
-    const pt = mlMap.project([lng, lat]);
-    const el = document.createElement('div');
-    el.className = 'commune-label-2d';
-    el.style.cssText = 'position:absolute;left:' + pt.x + 'px;top:' + pt.y + 'px;';
-    el.textContent = name;
-    el.dataset.lng = lng;
-    el.dataset.lat = lat;
-    overlay.appendChild(el);
-    dt3DCommLabelWraps.push(el);
-  });
-}
-
-function reposition3DCommuneLabels() {
-  if (!mlMap || !dt3DCommLabelWraps.length) return;
-  dt3DCommLabelWraps.forEach(el => {
-    const pt = mlMap.project([parseFloat(el.dataset.lng), parseFloat(el.dataset.lat)]);
-    el.style.left = pt.x + 'px';
-    el.style.top  = pt.y + 'px';
-  });
-}
-
 // =====================================================================
 // PANEL COLLAPSE TOGGLES
 // =====================================================================
@@ -6213,599 +5899,6 @@ function toggleRightPanel() {
   rightCollapsed = !rightCollapsed;
   document.body.classList.toggle('right-collapsed', rightCollapsed);
   _resizeMapsFor(450);
-}
-
-// =====================================================================
-// PERMITS LAYER — 3D building coloring + commune permit list
-// =====================================================================
-
-let PERMITS_DATA = null;
-let permitsActive = false;
-let permitsOverlayLayer = null;  // Leaflet 2D commune polygon overlay
-let _permitBldIndex     = null;  // niscode → [{st, num, cat, rawAddr, communeName}]
-let _permitMarkers      = [];    // MapLibre Marker objects for unmatched permits
-let _activePermitMarker = null;  // currently open permit popup marker
-let _permitCatFilter    = null;  // null = all | 'completed' | 'active' | 'upcoming'
-let _permitYearFilter   = null;  // null = all | '2024' etc (filed/submitted year)
-
-fetch('data/brussels-permits.json')
-  .then(r => r.json())
-  .then(data => { PERMITS_DATA = data; })
-  .catch(() => console.warn('Permits data unavailable'));
-
-// ── Category logic ────────────────────────────────────────────────────
-// completed = has decision date  |  active = dossier complete, no decision
-// upcoming  = submitted only     |  null = no usable date
-
-// Bug-fixed categorisation: status string is primary, dates are fallback.
-// "instruction" permits often have no complete/decision date yet but ARE active.
-function _permitCat(p) {
-  const st = (p.status || '').toLowerCase().trim();
-  if (st === 'refused' || st === 'refusé' || st === 'refusée') return null; // refused → no colour
-  // appeal = under legal challenge → always active, even if a decision date exists
-  if (st === 'appeal') return 'active';
-  if (p.decision || st === 'delivered' || st === 'accordé' || st === 'accordée' || st === 'délivré')
-    return 'completed';
-  if (p.complete || st === 'instruction' || st === 'en instruction' || st === 'en cours')
-    return 'active';
-  if (p.submitted)
-    return 'upcoming';
-  return null;
-}
-
-const PERMIT_CAT_COLOR  = { completed: '#4ade80', active: '#a855f7', upcoming: '#facc15' };
-const PERMIT_CAT_LABEL  = { completed: 'Completed', active: 'Active', upcoming: 'Upcoming' };
-const _PCAT_PRIO        = { completed: 3, active: 2, upcoming: 1 };
-
-// ── Address normalisation ─────────────────────────────────────────────
-// Do NOT replace hyphens — they separate house-number ranges ("8-14").
-
-function _normAddr(s) {
-  return (s || '').toLowerCase()
-    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')  // strip accents
-    .replace(/[,\.\/\(\)]/g, ' ')                      // punctuation → space (keep -)
-    .replace(/\s+/g, ' ').trim();
-}
-
-// Split Belgian address (number at end) into {st, num}.
-// Uses greedy match so "Rue 1 Mai 15" → st="rue 1 mai", num="15" (not "rue", num="1").
-// num may be a range string like "8-14" or have a letter suffix like "8A".
-function _splitAddr(norm) {
-  const m = norm.match(/^(.*)\s+(\d[\d\-a-z]*)$/);
-  return m ? { st: m[1].trim(), num: m[2] } : { st: norm, num: '' };
-}
-
-// Return true if building number bNum falls within permit number/range pNum.
-function _numMatches(bNum, pNum) {
-  if (!pNum) return true;                        // permit has no house number → match whole street (street-level permit)
-  if (!bNum) return false;                       // permit needs a number but building has none → no match (avoids entire streets being colored)
-  if (bNum === pNum)  return true;               // exact match
-  const bN = parseInt(bNum, 10);
-  if (isNaN(bN))     return bNum === pNum;
-  const rm = pNum.match(/^(\d+)-(\d+)[a-z]*$/i); // range like "8-14" or "9-11A"
-  if (rm)            return bN >= parseInt(rm[1], 10) && bN <= parseInt(rm[2], 10);
-  return parseInt(pNum, 10) === bN;              // compare as integers (handles "08" vs "8")
-}
-
-// ── Permit address index: niscode → [{st, num, cat}] ─────────────────
-
-function _buildPermitBldIndex() {
-  if (!PERMITS_DATA || !GEOJSON) { _permitBldIndex = null; return; }
-  _permitBldIndex = {};
-  for (const feat of GEOJSON.features) {
-    const nis    = String(feat.properties.niscode);
-    const nameFr = feat.properties.nameFr || feat.properties.name || feat.properties.naam;
-    const perms  = (nameFr && PERMITS_DATA.byCommune[nameFr]) || [];
-    _permitBldIndex[nis] = perms
-      .map(p => { const a = _splitAddr(_normAddr(p.address)); return { st: a.st, num: a.num, cat: _permitCat(p), rawAddr: p.address, communeName: nameFr, lat: p.lat ?? null, lng: p.lng ?? null }; })
-      .filter(x => x.st && x.cat);
-  }
-}
-
-// Best permit category colour for a building.
-// street = OSM full address string, nisStr = commune niscode string.
-// Brussels OSM streets are bilingual: "Rue Picard - Picardstraat 3"
-// Permits use a single language (usually French). We generate candidates
-// from both the French part and the Dutch part so either can match.
-function _buildingPermitColor(street, nisStr) {
-  if (!_permitBldIndex || !street || !nisStr) return null;
-  const entries = _permitBldIndex[nisStr];
-  if (!entries || !entries.length) return null;
-
-  const norm    = _normAddr(street);
-  const biSep   = norm.indexOf(' - ');
-  const candidates = [];
-
-  if (biSep !== -1) {
-    // e.g. "rue picard - picardstraat 3"
-    const frPart  = norm.slice(0, biSep).trim();   // "rue picard"
-    const nlPart  = norm.slice(biSep + 3).trim();  // "picardstraat 3"
-    const nlSplit = _splitAddr(nlPart);
-    candidates.push({ st: frPart,       num: nlSplit.num }); // French name + trailing number
-    candidates.push(nlSplit);                                  // Dutch  name + trailing number
-    candidates.push(_splitAddr(norm));                         // full string fallback
-  } else {
-    candidates.push(_splitAddr(norm));
-  }
-
-  let bestPrio = 0, bestCat = null;
-  for (const { st: bSt, num: bNum } of candidates) {
-    if (!bSt) continue;
-    for (const e of entries) {
-      if (e.st !== bSt) continue;
-      if (!_numMatches(bNum, e.num)) continue;
-      const p = _PCAT_PRIO[e.cat] || 0;
-      if (p > bestPrio) { bestPrio = p; bestCat = e.cat; }
-    }
-  }
-  return bestCat ? PERMIT_CAT_COLOR[bestCat] : null;
-}
-
-// ── Permit coloring via existing building layers (no new geometry) ───
-// Tags each building feature with _permitColor, then calls setData() on
-// the existing bld-{nis} source and setPaintProperty on the existing
-// 3d-buildings-{nis} layer.  No duplicate layers, no z-fighting.
-
-function _permitColorExpr() {
-  return [
-    'case',
-    ['!=', ['get', '_permitColor'], null],
-    ['get', '_permitColor'],
-    BLD_DEFAULT_COLOR,
-  ];
-}
-
-function _groupBuildingsByNis() {
-  const byNis = {};
-  for (const feat of _osmBuildingsCache.features) {
-    const nis = String(feat.properties.niscode || '');
-    if (nis) (byNis[nis] = byNis[nis] || []).push(feat);
-  }
-  return byNis;
-}
-
-function applyPermitBuildingColors() {
-  if (!mlMap || !_osmBuildingsCache || !_permitBldIndex) return;
-
-  // Tag each building feature with its permit colour (or null)
-  let matched = 0;
-  for (const feat of _osmBuildingsCache.features) {
-    const color = _buildingPermitColor(
-      feat.properties.street, String(feat.properties.niscode || ''));
-    if (color) { feat.properties._permitColor = color; matched++; }
-    else        { feat.properties._permitColor = null; }
-  }
-  console.log('[Permits] buildings with permit colour:', matched);
-
-  // Push updated feature data + data-driven paint to each existing source/layer
-  const byNis = _groupBuildingsByNis();
-  const expr   = _permitColorExpr();
-  for (const [nis, feats] of Object.entries(byNis)) {
-    const srcId = `bld-${nis}`;
-    const lyrId = `3d-buildings-${nis}`;
-    if (!mlMap.getSource(srcId) || !mlMap.getLayer(lyrId)) continue;
-    mlMap.getSource(srcId).setData({ type: 'FeatureCollection', features: feats });
-    mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', expr);
-  }
-}
-
-function clearPermitBuildingColors() {
-  if (!mlMap || !_osmBuildingsCache) return;
-
-  // Strip permit colour tags
-  for (const feat of _osmBuildingsCache.features) {
-    delete feat.properties._permitColor;
-  }
-
-  // Update sources + reset paint to default height-based gradient
-  const byNis = _groupBuildingsByNis();
-  for (const [nis, feats] of Object.entries(byNis)) {
-    const srcId = `bld-${nis}`;
-    const lyrId = `3d-buildings-${nis}`;
-    if (!mlMap.getSource(srcId) || !mlMap.getLayer(lyrId)) continue;
-    mlMap.getSource(srcId).setData({ type: 'FeatureCollection', features: feats });
-    mlMap.setPaintProperty(lyrId, 'fill-extrusion-color', BLD_DEFAULT_COLOR);
-  }
-}
-
-// ── Geo-pins for all geocoded permits ────────────────────────────────
-// Markers are MapLibre DOM elements, always rendered above the 3D canvas.
-// Visibility is controlled by commune selection and Show All Buildings.
-
-function _buildAllPermitMarkers() {
-  clearPermitGeoMarkers();
-  if (!mlMap || !PERMITS_DATA || !GEOJSON) return;
-
-  // Build communeName (French) → niscode lookup
-  const nameToNis = {};
-  for (const f of GEOJSON.features) {
-    const fr = f.properties.nameFr || f.properties.name || f.properties.naam;
-    if (fr) nameToNis[fr] = String(f.properties.niscode);
-  }
-
-  // Collect all valid permit entries first, then sort so completed renders first
-  // (active/upcoming added last → sit on top in DOM z-order)
-  const entries = [];
-  for (const [communeName, perms] of Object.entries(PERMITS_DATA.byCommune)) {
-    const nis = nameToNis[communeName];
-    if (!nis) continue;
-    for (const p of perms) {
-      if (p.lat == null || p.lng == null) continue;
-      const cat = _permitCat(p);
-      if (!cat) continue;  // skip refused
-      entries.push({ p, cat, nis, communeName });
-    }
-  }
-  // completed first (z-order bottom), active/upcoming last (z-order top)
-  const catOrder = { completed: 0, active: 1, upcoming: 2 };
-  entries.sort((a, b) => (catOrder[a.cat] || 0) - (catOrder[b.cat] || 0));
-
-  for (const { p, cat, nis, communeName } of entries) {
-    const color = PERMIT_CAT_COLOR[cat] || '#94a3b8';
-    const el = document.createElement('div');
-    el.className = 'permit-geo-pin';
-    el.dataset.cat = cat;
-    el.style.setProperty('--pin-color', color);
-    // Active/upcoming markers get higher z-index so they're never buried
-    if (cat === 'active')   el.style.zIndex = '10';
-    if (cat === 'upcoming') el.style.zIndex = '20';
-
-    const fmtDate = d => d ? d.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1') : '—';
-    const fmtAmt  = v => (v != null && v !== '') ? '€' + Number(v).toLocaleString('fr-BE') : '—';
-    const popup = new maplibregl.Popup({ offset: [0, -18], closeButton: false, maxWidth: '300px', className: 'permit-popup' })
-      .setHTML(`<div class="permit-popup-inner">
-        <div class="permit-popup-header">
-          <span class="permit-popup-badge" style="background:${color}22;color:${color};border-color:${color}55">${PERMIT_CAT_LABEL[cat]}</span>
-          <button class="permit-popup-close" aria-label="Close">✕</button>
-        </div>
-        <div class="permit-popup-address">${_escHtml(p.address)}</div>
-        <div class="permit-popup-commune">${_escHtml(communeName)}${p.ref ? ` · <span class="permit-popup-ref">${_escHtml(p.ref)}</span>` : ''}</div>
-        ${(p.descriptionEn || p.description) ? `<div class="permit-popup-desc">${_escHtml(p.descriptionEn || p.description)}</div>` : ''}
-        <div class="permit-popup-grid">
-          <div class="permit-popup-kv"><span class="permit-popup-k">Filed</span><span class="permit-popup-v">${fmtDate(p.submitted)}</span></div>
-          <div class="permit-popup-kv"><span class="permit-popup-k">Complete</span><span class="permit-popup-v">${fmtDate(p.complete)}</span></div>
-          <div class="permit-popup-kv"><span class="permit-popup-k">Decision</span><span class="permit-popup-v">${fmtDate(p.decision)}</span></div>
-          <div class="permit-popup-kv"><span class="permit-popup-k">Charges</span><span class="permit-popup-v">${fmtAmt(p.charges)}</span></div>
-          ${p.authority ? `<div class="permit-popup-kv permit-popup-kv--full"><span class="permit-popup-k">Authority</span><span class="permit-popup-v">${_escHtml(p.authority)}</span></div>` : ''}
-        </div>
-      </div>`);
-
-    // Wire close button after popup renders into DOM
-    popup.on('open', () => {
-      const btn = popup.getElement()?.querySelector('.permit-popup-close');
-      if (btn) btn.addEventListener('click', () => popup.remove());
-    });
-
-    // Create marker but don't add to map yet — visibility handled separately
-    const marker = new maplibregl.Marker({ element: el, anchor: 'bottom' })
-      .setLngLat([p.lng, p.lat])
-      .setPopup(popup);
-
-    const filedYear = p.submitted ? p.submitted.slice(0, 4) : null;
-    _permitMarkers.push({ marker, nis, cat, year: filedYear, ref: p.ref || '', lat: p.lat, lng: p.lng });
-  }
-
-  _updatePermitMarkerVisibility();
-}
-
-// Show/hide markers based on selected commune and Show All Buildings state.
-// Called on: permits toggle, commune selection change, Show All Buildings toggle.
-function _updatePermitMarkerVisibility() {
-  if (!permitsActive || !mlMap) {
-    _permitMarkers.forEach(({ marker }) => marker.remove());
-    return;
-  }
-  _permitMarkers.forEach(({ marker, cat, year }) => {
-    const catOk  = !_permitCatFilter  || cat  === _permitCatFilter;
-    const yearOk = !_permitYearFilter || year === _permitYearFilter;
-    if (catOk && yearOk) marker.addTo(mlMap);
-    else marker.remove();
-  });
-}
-
-function clearPermitGeoMarkers() {
-  _permitMarkers.forEach(({ marker }) => marker.remove());
-  _permitMarkers = [];
-}
-
-// ── Toggle ────────────────────────────────────────────────────────────
-
-function renderPermitsFilterBar() {
-  const bar = document.getElementById('permits-filter-bar');
-  if (!bar) return;
-  if (!permitsActive || !PERMITS_DATA) { bar.style.display = 'none'; return; }
-
-  const yearSet = new Set();
-  Object.values(PERMITS_DATA.byCommune).flat().forEach(p => {
-    if (p.submitted) yearSet.add(p.submitted.slice(0, 4));
-  });
-  const years = [...yearSet].sort();
-
-  // Preserve year strip scroll position across re-renders
-  const prevScroll = document.getElementById('pf-year-chips')?.scrollLeft ?? 0;
-
-  bar.style.display = 'flex';
-  bar.innerHTML = `
-    <div class="pf-row">
-      <span class="pf-label">Status</span>
-      <div class="pf-chips" id="pf-cat-chips">
-        <button class="pf-chip${!_permitCatFilter ? ' pf-chip--active' : ''}" data-cat="">All</button>
-        <button class="pf-chip${_permitCatFilter === 'completed' ? ' pf-chip--active' : ''}" data-cat="completed">Completed</button>
-        <button class="pf-chip${_permitCatFilter === 'active'    ? ' pf-chip--active' : ''}" data-cat="active">Active</button>
-        <button class="pf-chip${_permitCatFilter === 'upcoming'  ? ' pf-chip--active' : ''}" data-cat="upcoming">Upcoming</button>
-      </div>
-    </div>
-    <div class="pf-row pf-row--year">
-      <span class="pf-label">Filed</span>
-      <div class="pf-year-wrap">
-        <div class="pf-chips pf-chips--year" id="pf-year-chips">
-          <button class="pf-chip${!_permitYearFilter ? ' pf-chip--active' : ''}" data-year="">All</button>
-          ${years.map(y => `<button class="pf-chip${_permitYearFilter === y ? ' pf-chip--active' : ''}" data-year="${y}">${y}</button>`).join('')}
-        </div>
-      </div>
-    </div>`;
-
-  // Restore scroll position immediately (before paint)
-  const yearChips = document.getElementById('pf-year-chips');
-  if (yearChips) yearChips.scrollLeft = prevScroll;
-
-  // Category filter clicks
-  bar.querySelectorAll('#pf-cat-chips .pf-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.cat || null;
-      _permitCatFilter = (_permitCatFilter === val && val !== null) ? null : val;
-      renderPermitsFilterBar();
-      _updatePermitMarkerVisibility();
-      renderPermitsPane(selectedDistrict);
-    });
-  });
-
-  // Year filter clicks — preserve scroll position
-  bar.querySelectorAll('#pf-year-chips .pf-chip').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const val = btn.dataset.year || null;
-      _permitYearFilter = (_permitYearFilter === val && val !== null) ? null : val;
-      renderPermitsFilterBar();
-      _updatePermitMarkerVisibility();
-      renderPermitsPane(selectedDistrict);
-    });
-  });
-
-  // Hover-to-scroll via mousemove on the strip itself — no overlay divs blocking clicks
-  let _scrollRaf = null;
-  const EDGE = 36; // px from each edge that triggers scrolling
-  const stopScroll = () => {
-    if (_scrollRaf) { cancelAnimationFrame(_scrollRaf); _scrollRaf = null; }
-  };
-  if (yearChips) {
-    yearChips.addEventListener('mousemove', e => {
-      const rect = yearChips.getBoundingClientRect();
-      const x    = e.clientX - rect.left;
-      const w    = rect.width;
-      stopScroll();
-      if (x < EDGE) {
-        const speed = 1.5 * (1 - x / EDGE); // faster closer to edge
-        const scroll = () => { yearChips.scrollLeft -= speed; _scrollRaf = requestAnimationFrame(scroll); };
-        _scrollRaf = requestAnimationFrame(scroll);
-      } else if (x > w - EDGE) {
-        const speed = 1.5 * ((x - (w - EDGE)) / EDGE);
-        const scroll = () => { yearChips.scrollLeft += speed; _scrollRaf = requestAnimationFrame(scroll); };
-        _scrollRaf = requestAnimationFrame(scroll);
-      }
-    });
-    yearChips.addEventListener('mouseleave', stopScroll);
-  }
-}
-
-function togglePermits() {
-  permitsActive = !permitsActive;
-  const btn = document.getElementById('permits-map-btn');
-  if (btn) btn.classList.toggle('active', permitsActive);
-
-  if (permitsActive) {
-    _permitCatFilter  = null;
-    _permitYearFilter = null;
-    renderPermitsOverlay();
-    if (mlMap) _buildAllPermitMarkers();
-    switchTab('permits');
-    renderPermitsFilterBar();
-  } else {
-    clearPermitsOverlay();
-    clearPermitBuildingColors();
-    clearPermitGeoMarkers();
-    const bar = document.getElementById('permits-filter-bar');
-    if (bar) bar.style.display = 'none';
-    switchTab('district');
-  }
-}
-
-// ── Leaflet 2D commune overlay (visible when 2D map is shown) ─────────
-
-function renderPermitsOverlay() {
-  clearPermitsOverlay();
-  if (!PERMITS_DATA || !geojsonLayer) return;
-  const layers = [];
-  geojsonLayer.eachLayer(layer => {
-    const props = layer.feature.properties;
-    const cname = props.nameFr || props.name || props.naam;
-    if (!cname || !PERMITS_DATA.byCommune[cname]) return;
-    const count = PERMITS_DATA.byCommune[cname].length;
-    const poly = L.geoJSON(layer.feature, {
-      style: { fillColor: '#a855f7', fillOpacity: 0.28, color: '#c084fc', weight: 2.5, opacity: 0.9 },
-      interactive: true,
-    });
-    poly.on('mouseover', () => poly.setStyle({ fillOpacity: 0.48, color: '#e9d5ff', weight: 3 }));
-    poly.on('mouseout',  () => poly.setStyle({ fillOpacity: 0.28, color: '#c084fc', weight: 2.5 }));
-    poly.on('click', () => { selectDistrict(props.niscode); switchTab('permits'); });
-    poly.bindTooltip(`<div style="font-family:var(--sans);font-size:0.8rem;padding:0.1rem 0.2rem"><strong>${cname}</strong><br><span style="color:#c084fc">${count} permit${count!==1?'s':''}</span></div>`, { sticky: true, opacity: 0.95 });
-    layers.push(poly);
-  });
-  permitsOverlayLayer = L.layerGroup(layers).addTo(map);
-}
-
-function clearPermitsOverlay() {
-  if (permitsOverlayLayer) { map.removeLayer(permitsOverlayLayer); permitsOverlayLayer = null; }
-}
-
-// ── Fly camera to a permit and open its popup ─────────────────────────
-
-function _flyToPermit(lat, lng, ref) {
-  if (lat == null || lng == null) return;
-
-  // Close any previously opened permit popup
-  if (_activePermitMarker) {
-    const prev = _activePermitMarker.getPopup();
-    if (prev && prev.isOpen()) _activePermitMarker.togglePopup();
-    _activePermitMarker = null;
-  }
-
-  if (mlMap) {
-    // 3D MapLibre — fly smoothly then open popup
-    mlMap.flyTo({
-      center: [lng, lat],
-      zoom: Math.max(mlMap.getZoom(), 16),
-      pitch: 58,
-      bearing: mlMap.getBearing(),
-      speed: 0.75,
-      curve: 1.3,
-      essential: true,
-    });
-    mlMap.once('moveend', () => {
-      const entry = _permitMarkers.find(m => m.ref === ref && m.lat === lat && m.lng === lng);
-      if (!entry) return;
-      // Ensure marker is on map even if filtered out temporarily
-      entry.marker.addTo(mlMap);
-      const popup = entry.marker.getPopup();
-      if (popup && !popup.isOpen()) entry.marker.togglePopup();
-      _activePermitMarker = entry.marker;
-    });
-  } else if (typeof map !== 'undefined' && map) {
-    // 2D Leaflet fallback — pan to location
-    map.flyTo([lat, lng], Math.max(map.getZoom(), 16), { animate: true, duration: 1 });
-  }
-}
-
-// ── Right-panel permit list ───────────────────────────────────────────
-
-function renderPermitsPane(niscode) {
-  const container = document.getElementById('permits-pane-content');
-  if (!container) return;
-
-  if (!permitsActive) {
-    container.innerHTML = '<div class="permits-pane-empty">Enable the Permits layer on the map<br>to view permits.</div>';
-    return;
-  }
-  if (!PERMITS_DATA) {
-    container.innerHTML = '<div class="permits-pane-empty">Loading permit data\u2026</div>';
-    return;
-  }
-
-  const fmtDate = d => d ? d.replace(/^(\d{4})-(\d{2})-(\d{2})$/, '$3/$2/$1') : null;
-  const bgMap = { '#4ade80': 'rgba(74,222,128,0.12)', '#a855f7': 'rgba(168,85,247,0.12)', '#facc15': 'rgba(250,204,21,0.12)' };
-  const bdMap = { '#4ade80': 'rgba(74,222,128,0.35)', '#a855f7': 'rgba(168,85,247,0.35)', '#facc15': 'rgba(250,204,21,0.35)' };
-
-  const card = p => {
-    const cat  = _permitCat(p);
-    const col  = cat ? PERMIT_CAT_COLOR[cat] : '#94a3b8';
-    const stBg = bgMap[col] || 'rgba(148,163,184,0.08)';
-    const stBd = bdMap[col] || 'rgba(148,163,184,0.25)';
-    const lbl  = cat ? PERMIT_CAT_LABEL[cat] : (p.status || 'Unknown');
-    const desc = p.descriptionEn || p.description || '';
-    const metaParts = [
-      fmtDate(p.submitted) ? `Filed: ${fmtDate(p.submitted)}` : '',
-      fmtDate(p.complete)  ? `Complete: ${fmtDate(p.complete)}` : '',
-      fmtDate(p.decision)  ? `Decision: ${fmtDate(p.decision)}` : '',
-      p.charges != null    ? `\u20ac${Number(p.charges).toLocaleString('en')}` : '',
-      p.authority          ? p.authority : '',
-    ].filter(Boolean).join(' \u00b7 ');
-    const hasCoords = p.lat != null && p.lng != null;
-    return `<div class="permit-card${hasCoords ? ' permit-card--flyable' : ''}"
-      data-ref="${_escHtml(p.ref || '')}"
-      data-lat="${p.lat ?? ''}"
-      data-lng="${p.lng ?? ''}">
-      <div class="permit-card-ref">${_escHtml(p.ref || '')}</div>
-      <div class="permit-card-addr">${_escHtml(p.address)}</div>
-      <span class="permit-card-status" style="background:${stBg};color:${col};border-color:${stBd}">${lbl}</span>
-      ${desc ? `<div class="permit-card-desc">${_escHtml(desc)}</div>` : ''}
-      ${metaParts ? `<div class="permit-card-meta">${_escHtml(metaParts)}</div>` : ''}
-      ${hasCoords ? `<div class="permit-card-fly-hint">Click to zoom on map ↗</div>` : ''}
-    </div>`;
-  };
-
-  const applyFilter = arr => arr.filter(p => {
-    const cat  = _permitCat(p);
-    const year = p.submitted ? p.submitted.slice(0, 4) : null;
-    return (!_permitCatFilter || cat === _permitCatFilter) &&
-           (!_permitYearFilter || year === _permitYearFilter);
-  });
-
-  // ── Single commune view ───────────────────────────────────────────────
-  if (niscode) {
-    let communeName = null;
-    if (geojsonLayer) {
-      geojsonLayer.eachLayer(layer => {
-        if (!communeName && layer.feature.properties.niscode === niscode) {
-          const p = layer.feature.properties;
-          communeName = p.nameFr || p.name || p.naam;
-        }
-      });
-    }
-    const allPerms = communeName ? (PERMITS_DATA.byCommune[communeName] || []) : [];
-    if (!allPerms.length) {
-      container.innerHTML = `<div class="permits-pane-empty">No permits on record<br>for ${communeName || niscode}.</div>`;
-      return;
-    }
-    const permits = applyFilter(allPerms);
-    const filterNote = permits.length < allPerms.length
-      ? ` <span style="color:var(--text-dim);font-size:0.7rem">(${permits.length} shown)</span>` : '';
-    let html = `<div class="permits-commune-hdr"><span>${_escHtml(communeName)} \u2014 ${allPerms.length} permit${allPerms.length !== 1 ? 's' : ''}${filterNote}</span></div>`;
-    if (!permits.length) {
-      html += `<div class="permits-pane-empty" style="padding:1.2rem">No permits match the current filters.</div>`;
-    } else {
-      const groups = { active: [], upcoming: [], completed: [], other: [] };
-      permits.forEach(p => (groups[_permitCat(p)] || groups.other).push(p));
-      [['active','Active'],['upcoming','Upcoming'],['completed','Completed'],['other','Other']].forEach(([k,lbl]) => {
-        if (!groups[k].length) return;
-        const col = PERMIT_CAT_COLOR[k] || '#94a3b8';
-        html += `<div class="permits-sub-hdr" style="color:${col}">${lbl} (${groups[k].length})</div>` + groups[k].map(card).join('');
-      });
-    }
-    container.innerHTML = html;
-
-  // ── All-communes view ─────────────────────────────────────────────────
-  } else {
-    const allPerms = Object.values(PERMITS_DATA.byCommune).flat();
-    const permits  = applyFilter(allPerms);
-    const filterNote = permits.length < allPerms.length
-      ? ` <span style="color:var(--text-dim);font-size:0.7rem">(${permits.length} shown)</span>` : '';
-    let html = `<div class="permits-commune-hdr"><span>All Communes \u2014 ${allPerms.length} permits${filterNote}</span></div>`;
-    if (!permits.length) {
-      html += `<div class="permits-pane-empty" style="padding:1.2rem">No permits match the current filters.</div>`;
-    } else {
-      // Group by commune for readability
-      const byCommune = {};
-      permits.forEach(p => {
-        const c = p.commune || 'Unknown';
-        (byCommune[c] = byCommune[c] || []).push(p);
-      });
-      Object.entries(byCommune).sort((a,b) => a[0].localeCompare(b[0])).forEach(([cname, cperms]) => {
-        html += `<div class="permits-commune-hdr" style="background:var(--surface3);position:sticky;top:0;z-index:1">
-          <span>${_escHtml(cname)} <span style="color:var(--text-dim);font-size:0.7rem">${cperms.length} permit${cperms.length!==1?'s':''}</span></span>
-        </div>` + cperms.map(card).join('');
-      });
-    }
-    container.innerHTML = html;
-  }
-
-  // Wire click handlers for flyable cards
-  container.querySelectorAll('.permit-card--flyable').forEach(card => {
-    card.addEventListener('click', () => {
-      const lat = parseFloat(card.dataset.lat);
-      const lng = parseFloat(card.dataset.lng);
-      const ref = card.dataset.ref;
-      if (!isNaN(lat) && !isNaN(lng)) _flyToPermit(lat, lng, ref);
-    });
-  });
 }
 
 </script>
